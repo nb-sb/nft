@@ -1,0 +1,36 @@
+package com.nft.trigger.controller;
+
+import com.nft.common.Result;
+import com.nft.domain.nft.model.req.UpdataCollectionReq;
+import com.nft.domain.nft.service.INftSellService;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+
+@RestController
+@AllArgsConstructor
+public class UpdataConllection {
+    private final INftSellService iNftSellService;
+
+
+    /**
+     * @Des 修改藏品信息
+     * @Date 2023/12/22 15:16
+     * @Param 传入藏品id 必传项
+     * @Param 1.如果传入了藏品名称或介绍可以进行对应的修改造作,
+     *        2.如果传入的是藏品状态则修改藏品出售状态
+     *        注意: 1和2不能同时调用,例如修改出售状态的时候无法修改藏品信息,若都传入参数则优先修改藏品信息
+     * @Return
+     */
+    @PostMapping("updataConllection")
+    @ResponseBody
+    public Result updataConllection(@Valid @RequestBody UpdataCollectionReq updataCollectionReq) {
+        //1.验证调用者权限
+        //2.进行更新藏品信息
+        return iNftSellService.updataConllectionInfo(updataCollectionReq);
+    }
+}

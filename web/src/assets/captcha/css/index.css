@@ -1,0 +1,286 @@
+body {
+    overflow-x: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+.bg {
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: url("//minio.tianai.cloud/public/static/captcha/images/bg.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 100px auto 0;
+}
+
+.main {
+    margin-top: 36px;
+    width: 100%;
+    background: linear-gradient(1turn, #f7f9fb 81.66%, #eef0f6 83.84%);
+    box-shadow: 0 8px 36px rgba(28, 56, 112, .2);
+    border-radius: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+    position: relative;
+
+}
+
+.main-footer-right .old-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    border: 35px solid;
+    border-color: #eef0f6 transparent transparent #eef0f6;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.main-footer-right .old-btn:before {
+    width: 45px;
+    height: 45px;
+    content: "进入旧版";
+    position: absolute;
+    top: -29px;
+    left: -33px;
+    color: rgba(50, 65, 117, .75);
+    font-size: 10px;
+}
+
+.header {
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 56px;
+    color: #324175;
+    text-align: center;
+}
+
+.main-header {
+
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.title-li {
+    width: 115px;
+    padding: 64px 0 24px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 20px;
+    font-weight: 600;
+    color: rgba(50, 65, 117, .75);
+}
+
+.title-li:hover {
+    color: #0fbda0;
+}
+
+.title-li-active {
+    color: #0fbda0;
+}
+
+.main-footer {
+    height: 100%;
+    /*display: flex;*/
+    /*flex-flow: row wrap;*/
+    padding: 32px 0;
+    /*justify-content: space-around;*/
+    text-align: center;
+}
+
+.main-footer-left {
+    width: 378px;
+    float: left;
+    height: 378px;
+    background: url("http://minio.tianai.cloud/public/qun2.jpg") no-repeat;
+    background-size: contain;
+}
+
+.main-footer-right {
+    float: left;
+    width: 500px;
+    position: relative;
+}
+
+.login-form {
+    width: 400px;
+    height: 100%;
+    box-shadow: 3px 3px 10px #e9ecf4;
+    border-radius: 8px;
+    background-color: #fff;
+    /*display: flex;*/
+    /*flex-flow: column wrap;*/
+    box-sizing: border-box;
+    padding: 45px;
+    position: relative;
+}
+
+.kuang {
+    height: 50px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin: 20px auto;
+    color: #ccc;
+    line-height: 50px;
+    text-align: left;
+}
+
+.kuang-left {
+
+    border-right: 1px solid #ccc;
+    text-align: center;
+    width: 100px;
+    display: inline-block;
+}
+
+.login-form-title {
+    text-align: center;
+    font-size: 18px;
+    color: rgba(50, 65, 117, .75);
+    font-weight: 600;
+}
+
+#login-btn {
+    margin: 0 auto;
+    width: 200px;
+    height: 50px;
+    background-color: #4BC065;
+    color: #fff;
+    line-height: 50px;
+    text-align: center;
+    border-radius: 6px;
+
+}
+
+#login-btn:hover {
+    cursor: pointer;
+}
+
+#captcha-div {
+    position: absolute;
+    left: calc((400 - 100%) / 2);
+    top: 20px;
+}
+
+.main-footer2 {
+    overflow: hidden;
+    margin: 0 auto;
+    display: inline-block;
+
+}
+
+.main-header a {
+    text-decoration: none;
+    color: rgba(50, 65, 117, .75);
+}
+
+@media screen and (max-width: 500px) {
+    .header {
+        font-size: 20px;
+    }
+
+    .title-li {
+        padding: 15px 0 15px;
+        line-height: 15px;
+        font-size: 15px;
+    }
+
+    .contact-block {
+        width: 90% !important;
+    }
+}
+
+
+/*------------*/
+.contact-parent {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    display: none;
+}
+
+.contact-block {
+    width: 930px;
+    height: 700px;
+    margin: 50px auto 0;
+    /*position: absolute;*/
+    /*top: 50px;*/
+
+    /*display: none;*/
+    box-shadow: 0 0.3px 0.7px rgb(0 0 0 / 13%), 0 0.9px 1.7px rgb(0 0 0 / 18%), 0 1.8px 3.5px rgb(0 0 0 / 22%), 0 3.7px 7.3px rgb(0 0 0 / 28%), 0 10px 20px rgb(0 0 0 / 40%);
+    backdrop-filter: blur(20px);
+    transition: 0.5s ease;
+    color: rgba(50, 65, 117, .75);
+}
+
+.contact-block:hover {
+    box-shadow: 0 0.7px 1px rgb(0 0 0 / 16%), 0 1.7px 2.6px rgb(0 0 0 / 22%), 0 3.5px 5.3px rgb(0 0 0 / 28%), 0 7.3px 11px rgb(0 0 0 / 35%), 0 20px 30px rgb(0 0 0 / 50%);
+}
+
+.contact-block .contact-close {
+    display: inline-block;
+    float: right;
+    position: relative;
+    right: 11px;
+}
+
+.contact-block .contact-close:hover {
+    cursor: pointer
+}
+
+.contact-block ul {
+    width: 100%;
+    height: 100%;
+}
+
+.contact-block .top {
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    letter-spacing: 2px;
+    background: rgba(233, 233, 233, .5);
+}
+
+.contact-block .bottom {
+    box-sizing: border-box;
+    height: calc(100% - 40px);
+    background: rgb(233, 233, 233);
+    text-align: left;
+    padding: 20px 50px;
+}
+
+.contact-block .bottom {
+    line-height: 25px;
+    font-size: 15px;
+    font-weight: 500;
+    overflow-y: scroll;
+}

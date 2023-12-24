@@ -1,0 +1,25 @@
+server:
+  port: 8081
+test:
+  name: "oknb"
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+mybatis-plus:
+  configuration:
+    log-impl: 'org.apache.ibatis.logging.stdout.StdOutImpl '
+
+videoPath: c:\Users\3500079813\Pictures\Saved Pictures\
+emial:
+  pswd: doceuobsmrycchid
+  from: bws.66@qq.com
+email:
+  from: bws.66@qq.com
+  pswd: doceuobsmrycchid
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: 123456
+    url: jdbc:mysql://localhost:3306/nft?characterEncoding=utf-8&userSSL=false
+    username: root
