@@ -16,7 +16,7 @@ import com.nft.domain.nft.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.service.INftSellService;
 import com.nft.domain.support.ipfs.IpfsService;
-import com.nft.domain.support.redis.RedisUtil;
+import com.nft.common.Redis.RedisUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

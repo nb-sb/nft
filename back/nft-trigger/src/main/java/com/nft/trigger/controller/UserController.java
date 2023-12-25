@@ -4,14 +4,13 @@ import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.SendEmail;
-import com.nft.domain.support.redis.RedisUtil;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;

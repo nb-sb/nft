@@ -3,7 +3,7 @@ package com.nft.domain.user.service.impl;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
-import com.nft.domain.support.redis.RedisUtil;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserVo;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

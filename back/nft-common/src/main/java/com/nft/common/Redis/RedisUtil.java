@@ -1,4 +1,4 @@
-package com.nft.domain.support.redis;
+package com.nft.common.Redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundListOperations;

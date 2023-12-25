@@ -4,7 +4,7 @@ package com.nft.trigger.controller;
 
 import com.nft.common.SendEmail;
 import com.nft.domain.support.ipfs.IpfsService;
-import com.nft.domain.support.redis.RedisUtil;
+import com.nft.common.Redis.RedisUtil;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;

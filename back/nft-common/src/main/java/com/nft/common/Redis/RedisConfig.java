@@ -1,4 +1,4 @@
-package com.nft.common;
+package com.nft.common.Redis;
 
 import akka.dispatch.CachingConfig;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

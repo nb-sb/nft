@@ -8,7 +8,7 @@ import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.service.INftSelectService;
-import com.nft.domain.support.redis.RedisUtil;
+import com.nft.common.Redis.RedisUtil;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
