@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 13/12/2023 15:16:48
+ Date: 26/12/2023 11:42:25
 */
 
 SET NAMES utf8mb4;
@@ -56,6 +56,22 @@ CREATE TABLE `nft_relationships`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Table structure for order_info
+-- ----------------------------
+DROP TABLE IF EXISTS `order_info`;
+CREATE TABLE `order_info`  (
+  `order_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '订单id',
+  `product_id` int NULL DEFAULT NULL,
+  `product_img` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `product_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `product_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '产品价格',
+  `seckill_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '秒杀价格',
+  `status` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
+  `pay_date` time NULL DEFAULT NULL COMMENT '支付时间',
+  PRIMARY KEY (`order_no`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for owner_ship
 -- ----------------------------
 DROP TABLE IF EXISTS `owner_ship`;
@@ -77,7 +93,7 @@ CREATE TABLE `owner_ship`  (
 DROP TABLE IF EXISTS `sell_info`;
 CREATE TABLE `sell_info`  (
   `id` int NOT NULL AUTO_INCREMENT,
-  `unique_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '提交的缓存表的对应的id',
+  `unique_id` int NULL DEFAULT NULL COMMENT '提交的缓存表的对应的id',
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash',
   `amount` int NULL DEFAULT NULL COMMENT '发行量',
   `remain` int NULL DEFAULT NULL COMMENT '剩余数量',
@@ -86,7 +102,7 @@ CREATE TABLE `sell_info`  (
   `ipfs_hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'ipfs中的hash',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for submit_cache
@@ -102,11 +118,11 @@ CREATE TABLE `submit_cache`  (
   `author_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 所属id',
   `author_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 区块链账户地址',
   `price` decimal(10, 2) NULL DEFAULT NULL COMMENT '售价',
-  `status` int NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1 为审核不通过，2为审核成功',
+  `status` int NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1是通过，2是拒绝',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `author_address`(`author_address` ASC) USING BTREE,
   CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_detal
