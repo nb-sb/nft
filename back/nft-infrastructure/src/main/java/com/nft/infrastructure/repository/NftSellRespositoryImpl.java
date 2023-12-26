@@ -19,24 +19,21 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.infrastructure.dao.NftRelationshipsMapper;
 import com.nft.infrastructure.dao.SellInfoMapper;
 import com.nft.infrastructure.dao.SubmitCacheMapper;
-import com.nft.infrastructure.fisco.model.bo.SellStroageCatRemainInputBO;
 import com.nft.infrastructure.fisco.model.bo.SellStroageCreateSellInputBO;
-import com.nft.infrastructure.fisco.model.bo.SellStroageExistSellInputBO;
 import com.nft.infrastructure.fisco.service.SellStroageService;
 import com.nft.infrastructure.po.SellInfo;
 import com.nft.infrastructure.po.SubmitCache;
 import com.nft.infrastructure.util.ElasticSearchUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.transaction.model.dto.CallResponse;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 
-@Service
+@Repository
 @Log4j2
 @AllArgsConstructor
 public class NftSellRespositoryImpl implements INftSellRespository {
@@ -45,8 +42,8 @@ public class NftSellRespositoryImpl implements INftSellRespository {
     private final SubmitCacheMapper submitCacheMapper;
     private final SellInfoMapper sellInfoMapper;
     private final NftRelationshipsMapper nftRelationshipsMapper;
-    private final NftRelationshipImpl nftRelationship;
-    private final NftMetasImpl nftMetas;
+    private final INftRelationshipImpl nftRelationship;
+    private final INftMetasImpl nftMetas;
     private final SellStroageService sellStroageService;
     private final ElasticSearchUtils esUtils;
 
@@ -58,6 +55,9 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         LoginReq loginReq = new LoginReq();
         loginReq.setUsername(username).setPassword(pass);
         UserVo userVo = userInfoRepository.selectOne(loginReq);
+        if (userVo == null) {
+            return new NftRes("401", "用户token错误请从新登录");
+        }
         SubmitCache submitCache = BeanCopyUtils.convertTo(sellReq, SubmitCache::new);
         submitCache.setStatus(0).setAuthorId(String.valueOf(userVo.getId()))
                 .setAuthorAddress(userVo.getAddress());
@@ -157,7 +157,14 @@ public class NftSellRespositoryImpl implements INftSellRespository {
     @Override
     public SubCacheVo selectSubSellById(Integer id) {
         SubmitCache submitCache = submitCacheMapper.selectById(id);
-        return BeanCopyUtils.convertTo(submitCache, SubCacheVo::new);
+        if (submitCache != null) {
+            return BeanCopyUtils.convertTo(submitCache, SubCacheVo::new);
+        }
+        return null;
+    }
+
+    public SellInfo selectSellInfoById(Integer id) {
+        return sellInfoMapper.selectById(id);
     }
 
     @Override
@@ -165,7 +172,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         SellInfo sellInfo = sellInfoMapper.selectById(id);
         ConllectionInfoVo conllectionInfoVo;
         if (sellInfo == null) {
-            return new ConllectionInfoVo();
+            return null;
         }
         SubmitCache submitCache = submitCacheMapper.selectById(sellInfo.getUniqueId());
         if (submitCache != null) {
@@ -174,12 +181,9 @@ public class NftSellRespositoryImpl implements INftSellRespository {
                     .setPresent(submitCache.getPresent())
                     .setName(submitCache.getName())
                     .setPrice(submitCache.getPrice());
-        }else {
-            conllectionInfoVo = new ConllectionInfoVo();
+            return conllectionInfoVo;
         }
-
-        return conllectionInfoVo;
-
+        return null;
     }
 
 
@@ -235,6 +239,26 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         submitCache.setId(sellInfo.getUniqueId());
         int update = submitCacheMapper.updateById(submitCache);
         return update >0;
+    }
+
+    @Override
+    public boolean decreaseSellStocks(Integer id, Integer number) {
+
+        SellInfo sellInfo1 = selectSellInfoById(id);
+        if (sellInfo1 == null) {
+            log.error("商品id不存在");
+            return false;
+        }
+        Integer remain = sellInfo1.getRemain();
+        SellInfo sellInfo = new SellInfo();
+        sellInfo.setRemain(remain - 1);
+        UpdateWrapper<SellInfo> sellInfoUpdateWrapper = new UpdateWrapper<>();
+        sellInfoUpdateWrapper.set("id", id);
+        int update = sellInfoMapper.update(sellInfo, sellInfoUpdateWrapper);
+        if (update > 0) {
+            return true;
+        }
+        return false;
     }
 
 

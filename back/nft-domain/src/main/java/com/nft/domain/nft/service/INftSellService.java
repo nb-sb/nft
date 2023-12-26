@@ -1,16 +1,13 @@
 package com.nft.domain.nft.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.AuditRes;
 import com.nft.domain.nft.model.res.NftRes;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public interface INftSellService {
 
@@ -33,8 +30,10 @@ public interface INftSellService {
     boolean addSellByFISCO(String hash,Integer id);
 
     //购买藏品
-    void purchaseConllection();
+    Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID);
 
+    //支付订单
+    void payOrder();
 
 
 

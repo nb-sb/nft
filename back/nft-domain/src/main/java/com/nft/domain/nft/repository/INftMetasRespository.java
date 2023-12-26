@@ -1,6 +1,6 @@
 package com.nft.domain.nft.repository;
 
-public interface NftMetasRespository {
+public interface INftMetasRespository {
 
     //修改分类数量
     boolean incr(Integer mid, Integer amount);

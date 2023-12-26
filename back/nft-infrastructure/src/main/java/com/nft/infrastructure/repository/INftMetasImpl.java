@@ -2,16 +2,15 @@ package com.nft.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.nft.domain.nft.repository.NftMetasRespository;
+import com.nft.domain.nft.repository.INftMetasRespository;
 import com.nft.infrastructure.dao.NftMetasMapper;
-import com.nft.infrastructure.dao.NftRelationshipsMapper;
 import com.nft.infrastructure.po.NftMetas;
-import com.nft.infrastructure.po.NftRelationships;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-@Service
-public class NftMetasImpl implements NftMetasRespository {
+@Repository
+public class INftMetasImpl implements INftMetasRespository {
 
 
     @Autowired

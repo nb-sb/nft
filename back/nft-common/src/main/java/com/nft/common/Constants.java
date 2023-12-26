@@ -19,8 +19,9 @@ public class Constants {
     public static Integer USER = 0; //普通用户权限
 
 
+
     public enum ResponseCode {
-        SUCCESS("0000", "成功"),
+        SUCCESS("1", "成功"),
         UN_ERROR("0001", "未知失败"),
 
         ILLEGAL_PARAMETER("0002", "非法参数"),
@@ -74,8 +75,17 @@ public class Constants {
         private static final String REDIS_COLLECTION = "Conllection_cahe";
         private static final String LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX = "LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX_";
 
+        private static final String REMAINING_STOCK = "REMAINING_STOCK_"; //剩余数量
+
+        private static final String ADD_ORDER = "ADD_ORDER_";//抢购锁 - 添加到订单表中
+
+        private static final String READ_WRITE_LOCK = "READ_WRITE_LOCK_"; //商品的读写锁
+        private static final String ADD_ORDER_BYUSER = "ADD_ORDER_BYUSER_"; //用户锁防止重复提交
+
         //空值，用于空缓存用
         private static final String REDIS_EMPTY_CACHE = "{}";
+
+
         public static String REDIS_COLLECTION(Integer id) {
             return REDIS_COLLECTION + id;
         }
@@ -88,6 +98,19 @@ public class Constants {
         public static String LOCK_TOKEN(Integer stockUsedCount) {
             return LOCK_TOKEN + stockUsedCount;
         }
+        public static String REMAINING_STOCK(Integer stockId) {
+            return REMAINING_STOCK + stockId;
+        }
+        public static String ADD_ORDER(Integer id) {
+            return ADD_ORDER + id;
+        }
+        public static String READ_WRITE_LOCK(Integer id) {
+            return READ_WRITE_LOCK + id;
+        }
+        public static String ADD_ORDER_BYUSER(Integer userid) {
+            return ADD_ORDER_BYUSER + userid;
+        }
+
 
     }
 
@@ -223,6 +246,13 @@ public class Constants {
             this.info = info;
         }
     }
-
+    /**
+     * 订单支付类型
+     */
+    public static final class payType {
+        public static final int ZFB_PAY = 1;
+        public static final int XV_PAY = 2;
+        public static final int WEB_BALANCE_PAY = 3;
+    }
 
 }

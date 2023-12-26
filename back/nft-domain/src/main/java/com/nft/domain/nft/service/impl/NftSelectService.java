@@ -5,18 +5,15 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
 import com.nft.common.Redission.DistributedRedisLock;
+import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.service.INftSelectService;
 import com.nft.common.Redis.RedisUtil;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.utils.StringUtils;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Random;
 @AllArgsConstructor
@@ -24,37 +21,37 @@ import java.util.Random;
 public class NftSelectService implements INftSelectService {
     private  final RedisUtil redisUtil;
     private final INftSellRespository iNftSellRespository;
-    private final ElasticsearchRestTemplate elasticTemplate ;
-    @PostConstruct
-    public void init() {
-        //获取索引对象
-        IndexOperations indexOperations = elasticTemplate.indexOps(ConllectionInfoVo.class);
-        //判断是否存贮索引
-        boolean exists = indexOperations.exists();
-        if (!exists) {
-            //根据这个class对象创建索引
-            try {
-                indexOperations.create();
-                System.out.println("构建索引成功");
-                //获取映射
-                Document mapping = indexOperations.createMapping(ConllectionInfoVo.class);
-                //将映射放入索引
-                indexOperations.putMapping(mapping);
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        }
-    }
+//    private final ElasticsearchRestTemplate elasticTemplate ;
+//    @PostConstruct
+//    public void init() {
+//        //获取索引对象
+//        IndexOperations indexOperations = elasticTemplate.indexOps(ConllectionInfoVo.class);
+//        //判断是否存贮索引
+//        boolean exists = indexOperations.exists();
+//        if (!exists) {
+//            //根据这个class对象创建索引
+//            try {
+//                indexOperations.create();
+//                System.out.println("构建索引成功");
+//                //获取映射
+//                Document mapping = indexOperations.createMapping(ConllectionInfoVo.class);
+//                //将映射放入索引
+//                indexOperations.putMapping(mapping);
+//            } catch (Exception e) {
+//                System.err.println(e);
+//            }
+//        }
+//    }
     @Override
-    public List<ConllectionInfoVo> selectConllectionByPage(Page<ConllectionInfoVo> page) {
+    public GetNftRes selectConllectionByPage(Page<ConllectionInfoVo> page) {
         //todo:
         IPage<ConllectionInfoVo> conllectionInfoVoIPage = iNftSellRespository.selectConllectionByPage(page);
-        return conllectionInfoVoIPage.getRecords();
+        return GetNftRes.success(conllectionInfoVoIPage.getRecords());
     }
 
     @Override
-    public List<ConllectionInfoVo> selectConllectionKindByPage(Page<ConllectionInfoVo> page, Integer mid) {
-        return iNftSellRespository.selectConllectionKindByPage(page, mid).getRecords();
+    public GetNftRes selectConllectionKindByPage(Page<ConllectionInfoVo> page, Integer mid) {
+        return GetNftRes.success(iNftSellRespository.selectConllectionKindByPage(page, mid).getRecords());
     }
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
@@ -72,13 +69,13 @@ public class NftSelectService implements INftSelectService {
     }
     //查询藏品信息
     @Override
-    public ConllectionInfoVo selectConllectionById(Integer id) {
+    public GetNftRes selectConllectionById(Integer id) {
         String reidsKey = Constants.RedisKey.REDIS_COLLECTION(id);
         ConllectionInfoVo conllectionInfoVo ;
         //第一层开始查询缓存，若查不到才开始查询mysql
         conllectionInfoVo = getConllectionCache(reidsKey);
         if (conllectionInfoVo != null) {
-            return conllectionInfoVo;
+            return GetNftRes.success( conllectionInfoVo);
         }
         //三、突发性热点问题DCL（冷门商品爆单,大量请求穿过第一层到第二层开始打到数据上） -->优化锁 ：此锁优化方案 1.串行转并发 2.jvm缓存，实际上无需优化，因为大多数都在第一阶段进行返回内容了
         DistributedRedisLock.acquire(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));
@@ -86,11 +83,11 @@ public class NftSelectService implements INftSelectService {
             //1.在加一层查询缓存，防止所有请求全部打到数据库中，并且有分布式锁的加持，实际上只会查到次数据库就把数据更新到redis中了，优化很大性能
             conllectionInfoVo = getConllectionCache(reidsKey);
             if (conllectionInfoVo != null) {
-                return conllectionInfoVo;
+                return GetNftRes.success( conllectionInfoVo);
             }
             //四、缓存与数据库双写不一致问题
             //1.这里设置读锁,在查询mysql之前设置读锁,然后在updata方法里设置更新锁，这个方法比延时双删要好
-            DistributedRedisLock.acquireReadLock(String.valueOf(id));
+            DistributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             try {
                 conllectionInfoVo = iNftSellRespository.selectConllectionById(id);
                 Random rand = new Random();
@@ -103,9 +100,9 @@ public class NftSelectService implements INftSelectService {
                     //添加redis空缓存
                     redisUtil.set(reidsKey, Constants.RedisKey.REDIS_EMPTY_CACHE(), 60 * 3 + rand.nextInt(900) + 100);
                 }
-                return conllectionInfoVo;
+                return GetNftRes.success( conllectionInfoVo);
             } finally {
-                DistributedRedisLock.releaseReadLock(String.valueOf(id));
+                DistributedRedisLock.releaseReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             }
         } finally {
             DistributedRedisLock.release(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));

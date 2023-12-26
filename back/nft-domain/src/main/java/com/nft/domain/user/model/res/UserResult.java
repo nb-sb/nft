@@ -16,12 +16,4 @@ public class UserResult extends Result {
         super(code, info);
         this.token = token;
     }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

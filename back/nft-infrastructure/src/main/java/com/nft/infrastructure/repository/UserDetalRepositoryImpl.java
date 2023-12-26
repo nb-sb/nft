@@ -1,6 +1,7 @@
 package com.nft.infrastructure.repository;
 
 import com.nft.domain.user.repository.IUserDetalRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @author NBSB
  * @since 2023-12-08
  */
-@Service
+@Repository
 public class UserDetalRepositoryImpl implements IUserDetalRepository {
 
 }

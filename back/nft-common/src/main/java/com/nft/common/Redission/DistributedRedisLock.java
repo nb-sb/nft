@@ -1,5 +1,6 @@
 package com.nft.common.Redission;
 
+import com.nft.common.Constants;
 import lombok.extern.log4j.Log4j2;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
@@ -11,21 +12,18 @@ public class DistributedRedisLock {
 
     //从配置类中获取redisson对象
     private static Redisson redisson = RedissonManager.getRedisson();
-    private static final String LOCK_TITLE = "redisLock_";
-    private static final String READ_WRITE_LOCK = "READ_WRITE_LOCK_";
+
 
     private DistributedRedisLock() {
         // 私有构造方法，避免外部实例化
     }
     //加锁
     public static boolean acquire(String lockName){
-        //声明key对象
-        String key =  lockName;
         //获取锁对象
-        RLock mylock = redisson.getLock(key);
+        RLock mylock = redisson.getLock(lockName);
         try {
             // 加锁，并且设置锁过期时间3秒，防止死锁的产生  uuid+threadId
-            mylock.lock(3, TimeUnit.SECONDS);
+            mylock.lock(5, TimeUnit.SECONDS);
             // 加锁成功
             return true;
         } catch (Exception e) {
@@ -37,10 +35,8 @@ public class DistributedRedisLock {
 
     //锁的释放
     public static void release(String lockName) {
-        //必须是和加锁时的同一个key
-        String key =  lockName;
         //获取所对象
-        RLock mylock = redisson.getLock(key);
+        RLock mylock = redisson.getLock(lockName);
         try {
             // 释放锁（解锁）
             mylock.unlock();
@@ -59,12 +55,11 @@ public class DistributedRedisLock {
 
     //读锁
     public static boolean acquireReadLock(String lockName) {
-        String key = READ_WRITE_LOCK + lockName;
         //获取所对象
-        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+        RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
             RLock rLock = readWriteLock.readLock();
-            rLock.lock(3, TimeUnit.SECONDS);
+            rLock.lock(5, TimeUnit.SECONDS);
             return true;
         } catch (Exception e) {
             // 处理异常，可以记录日志等
@@ -74,9 +69,8 @@ public class DistributedRedisLock {
     }
     //释放读锁
     public static boolean releaseReadLock(String lockName) {
-        String key = READ_WRITE_LOCK + lockName;
         //获取所对象
-        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+        RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
             RLock rLock = readWriteLock.readLock();
             rLock.unlock();
@@ -89,12 +83,11 @@ public class DistributedRedisLock {
     }
     //写锁
     public static boolean acquireWriteLock(String lockName) {
-        String key = READ_WRITE_LOCK + lockName;
         //从配置类中获取redisson对象
-        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+        RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
             RLock rLock = readWriteLock.writeLock();
-            rLock.lock(3, TimeUnit.SECONDS);
+            rLock.lock(5, TimeUnit.SECONDS);
             return true;
         } catch (Exception e) {
             // 处理异常，可以记录日志等
@@ -104,9 +97,8 @@ public class DistributedRedisLock {
     }
     //释放写锁
     public static boolean releaseWriteLock(String lockName) {
-        String key = READ_WRITE_LOCK + lockName;
         //获取所对象
-        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+        RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
             RLock rLock = readWriteLock.readLock();
             rLock.unlock();

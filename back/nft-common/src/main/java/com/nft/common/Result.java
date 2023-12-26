@@ -1,5 +1,8 @@
 package com.nft.common;
 
+import lombok.Data;
+import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +11,7 @@ import java.io.Serializable;
  * @date: 2023/12/7
  * @Copyright：网站：https://nb.sb || git开源地址：https://gitee.com/nb-sb/nft/tree/master
  */
+@Data
 public class Result implements Serializable {
 
     private static final long serialVersionUID = -3826891916021780628L;
@@ -51,20 +55,6 @@ public class Result implements Serializable {
         this.info = info;
     }
 
-    public String getCode() {
-        return code;
-    }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
 
 }

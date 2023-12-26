@@ -9,6 +9,7 @@ import io.ipfs.api.NamedStreamable;
 import io.ipfs.multihash.Multihash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,7 +21,7 @@ import java.util.UUID;
 * @Date: 2023/12/12 14:16
 * @Description: IPFS 方法类
 */
-@Service
+@Repository
 public class IpfsServiceImpl implements IpfsService {
 
     // ipfs 的服务器地址和端口，与yaml文件中的配置对应

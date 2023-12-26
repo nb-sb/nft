@@ -29,7 +29,7 @@ public class UpdataConllection {
     @PostMapping("updataConllection")
     @ResponseBody
     public Result updataConllection(@Valid @RequestBody UpdataCollectionReq updataCollectionReq) {
-        //1.验证调用者权限
+        //todo 1.验证调用者权限
         //2.进行更新藏品信息
         return iNftSellService.updataConllectionInfo(updataCollectionReq);
     }

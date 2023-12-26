@@ -23,6 +23,7 @@ import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.Optional;
  * @author NBSB
  * @since 2023-12-08
  */
-@Service
+@Repository
 @Log4j2
 @AllArgsConstructor
 public class UserInfoRepositoryImpl implements IUserInfoRepository {

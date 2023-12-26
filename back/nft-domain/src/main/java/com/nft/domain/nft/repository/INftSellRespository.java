@@ -33,4 +33,7 @@ public interface INftSellRespository {
     IPage<ConllectionInfoVo> selectConllectionKindByPage(Page<ConllectionInfoVo> page, Integer mid);
 
     boolean updataConllectionInfo(UpdataCollectionReq updataCollectionReq);
+
+    //减少库存
+    boolean decreaseSellStocks(Integer id,Integer number);
 }

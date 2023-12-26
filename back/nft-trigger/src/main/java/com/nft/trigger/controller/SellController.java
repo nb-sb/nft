@@ -3,31 +3,33 @@ package com.nft.trigger.controller;
 
 import com.nft.common.Constants;
 import com.nft.common.Result;
-import com.nft.common.Utils.*;
+import com.nft.common.Utils.FileUtils;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.res.AuditRes;
 import com.nft.domain.nft.model.res.NftRes;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.service.INftSellService;
 import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.yaml.snakeyaml.events.Event;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @RestController
 @Log4j2
 @AllArgsConstructor
+@Validated
 public class SellController {
 
     private final HttpServletRequest httpServletRequest;
@@ -81,11 +83,21 @@ public class SellController {
         return iNftSellService.ReviewCollection(req);
     }
 
-    //购买藏品
-    public void purchaseConllection() {
+    //抢购藏品
+    @PostMapping("addorder")
+    @ResponseBody
+    public Result purchaseConllection(
+            @NotNull(message = "ConllectionID 不能为空")
+            @Min(value = 1,message = "商品id不能小于 0")
+            @RequestParam Integer ConllectionID) {
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
+        return iNftSellService.purchaseConllection(httpServletRequest, ConllectionID);
     }
 
+    //支付藏品订单
+    public void payOrder() {
+
+    }
 
 
 

@@ -9,9 +9,6 @@ import java.io.Serializable;
 @Data
 public class AuditRes extends Result implements Serializable {
 
-    public AuditRes(String code, String info) {
-        super(code, info);
-    }
     public AuditRes() {
         super();
     }
