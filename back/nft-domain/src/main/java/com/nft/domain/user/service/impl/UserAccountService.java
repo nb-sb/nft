@@ -51,7 +51,6 @@ public class UserAccountService implements IUserAccountService {
         UserVo res = iUserInfoRepository.selectOne(loginReq);
         Optional<UserVo> userVo1 = Optional.ofNullable(res);
         if (userVo1.isPresent()) {
-
             return new UserResult("1", "登录成功",tokenUtils.token(loginReq.getUsername(),loginReq.getPassword()));
         }
         return new UserResult("0", "账号或密码错误");

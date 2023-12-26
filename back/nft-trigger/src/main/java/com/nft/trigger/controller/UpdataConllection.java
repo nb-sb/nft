@@ -1,6 +1,8 @@
 package com.nft.trigger.controller;
 
+import com.nft.common.Constants;
 import com.nft.common.Result;
+import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.service.INftSellService;
 import lombok.AllArgsConstructor;
@@ -28,8 +30,9 @@ public class UpdataConllection {
      */
     @PostMapping("updataConllection")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.admin)
     public Result updataConllection(@Valid @RequestBody UpdataCollectionReq updataCollectionReq) {
-        //todo 1.验证调用者权限
+        //1.验证调用者权限
         //2.进行更新藏品信息
         return iNftSellService.updataConllectionInfo(updataCollectionReq);
     }

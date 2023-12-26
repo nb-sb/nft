@@ -5,6 +5,7 @@ import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.SendEmail;
 import com.nft.common.Redis.RedisUtil;
+import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserVo;
@@ -34,15 +35,14 @@ public class UserController {
     @ResponseBody
     public Result test(@Valid @RequestBody LoginReq loginReq) {
 //        登录也需要判断验证码，否则防止被刷登录
-        UserResult res = getVerification(loginReq.getCodeId());
-        if (res != null) return res;
+//        UserResult res = getVerification(loginReq.getCodeId());
+//        if (res != null) return res;
         return iUserAccountService.login(loginReq);
     }
 
     @GetMapping("/register")
     @ResponseBody
     public Result register(@Valid @RequestBody SignReq signReq) {
-        //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
         //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
         UserResult res = getVerification(signReq.getCodeId());
         if (res != null) return res;
@@ -99,14 +99,15 @@ public class UserController {
     }
 
     //    使用分页查询查询所有用户
-    //TODO 管理员功能,需要校验权限为管理员
     @PostMapping("/selectUserPage")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.admin)
     public List<UserVo> selectUserPage(@RequestBody Search search) {
         return iUserAccountService.selectUserPage(search);
     }
 
-    //修改用户信息
+    //todo 修改用户信息
+
     //验证验证码是否验证成功
     private UserResult getVerification(String codeId) {
 //        2.判断验证码是否验证成功，如果没验证成功则返回验证失败

@@ -4,6 +4,7 @@ package com.nft.trigger.controller;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
+import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.res.AuditRes;
@@ -74,18 +75,15 @@ public class SellController {
     //审核藏品, 1.修改藏品状态并将藏品 2.加载至区块链上数据中 3.添加ipfs数据
     @PostMapping("auditSell")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.admin)
     public Result reviewCollection(@Valid @RequestBody ReviewReq req) {
-        //1.判断是否为管理员
-        if (!iUserAccountService.isAdmin(httpServletRequest)) {
-            log.warn("权限错误！！！");
-            return new AuditRes(Constants.SellState.REFUSE.getCode(), Constants.SellState.REFUSE.getInfo());
-        }
         return iNftSellService.ReviewCollection(req);
     }
 
     //抢购藏品
     @PostMapping("addorder")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.regularUser)
     public Result purchaseConllection(
             @NotNull(message = "ConllectionID 不能为空")
             @Min(value = 1,message = "商品id不能小于 0")

@@ -1,5 +1,8 @@
 package com.nft.common;
 
+import cloud.tianai.captcha.generator.impl.StandardIconClickImageCaptchaGenerator;
+import jdk.internal.org.objectweb.asm.commons.StaticInitMerger;
+
 /**
  * @description: 枚举信息定义
  * @author：戏人看戏，微信：whn3500079813
@@ -254,5 +257,12 @@ public class Constants {
         public static final int XV_PAY = 2;
         public static final int WEB_BALANCE_PAY = 3;
     }
-
+    /**
+     * 用户aop验证权限参数
+     */
+    public static final class permiss{
+        public static final int admin = 1;
+        public static final int regularUser = 0;
+        public static final int everyone = 11;
+    }
 }

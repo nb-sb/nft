@@ -87,9 +87,9 @@ public class NftSellService implements INftSellService {
 
     @Override
     public Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID) {
-        //todo 判断是否为用户
         //获取使用token用户id
         Map<String, String> stringStringMap = decodeToken(httpServletRequest);
+        if (stringStringMap ==null) return new Result("401","用户登录错误");
         UserVo user = iUserInfoRepository.selectOne(new LoginReq().setUsername(stringStringMap.get("username"))
                 .setPassword(stringStringMap.get("password")));
         Integer userid = user.getId();
@@ -108,21 +108,17 @@ public class NftSellService implements INftSellService {
                     //查询mysql缓存
                     conllectionInfoVo = iNftSellRespository.selectConllectionById(id);
                     if (conllectionInfoVo == null) {
-                        // TODO: 2023/12/26 返回商品不存在信息
                         return new Result("0","商品不存在");
                     }
                     stock = conllectionInfoVo.getRemain();
                 } else {
                     stock = Integer.valueOf((String) o);
                 }
-                //todo 返回库存不足信息
                 if (stock <= 0) return new Result("0","商品库存不足");
                 //3.减少库存操作
-                //1)purcharseConllection
                 //赋值到redis中
                 redisUtil.set(Constants.RedisKey.REMAINING_STOCK(id), stock - 1);
                 if (!iNftSellRespository.decreaseSellStocks(id, 1)) {
-                    // TODO: 2023/12/26 返回库存减少失败信息
                     log.error("商品库存减少失败");
                     return new Result("0","库存减少失败");
                 }
@@ -139,7 +135,6 @@ public class NftSellService implements INftSellService {
             DistributedRedisLock.release(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         }
         return new Result("1","成功添加至订单，请前往我的订单中查看");
-
     }
 
     @Override
