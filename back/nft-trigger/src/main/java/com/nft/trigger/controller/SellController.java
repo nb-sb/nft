@@ -92,8 +92,12 @@ public class SellController {
         return iNftSellService.purchaseConllection(httpServletRequest, ConllectionID);
     }
 
+
     //支付藏品订单
+    @PostMapping("payConllectionOrder")
+    @ResponseBody
     public void payOrder() {
+        //传入订单id ， 传入支付类型，传入http用于校验用户信息等
 
     }
 

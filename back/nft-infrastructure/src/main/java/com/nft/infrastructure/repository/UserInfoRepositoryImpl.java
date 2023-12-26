@@ -18,6 +18,7 @@ import com.nft.infrastructure.fisco.service.UserStorageService;
 import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.aspectj.weaver.ast.Var;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,6 +123,29 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         }else {
             return false;
         }
+    }
+
+    @Override
+    public UserVo selectUserByid(Integer id) {
+        UserInfo userInfo = userInfoMapper.selectById(id);
+        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo::new);
+        return userVo;
+    }
+
+    @Override
+    public boolean decrementUserBalance(Integer id, BigDecimal balance) {
+        UserInfo userInfo = userInfoMapper.selectById(id);
+        BigDecimal balance1 = userInfo.getBalance(); //当前余额
+        BigDecimal balance2 = balance1.subtract(balance);//减少后的余额
+        //必须减少后的余额大于等于0
+        if(balance2.compareTo(BigDecimal.valueOf(0)) == -1){
+            log.info("余额不足");
+            return false;
+        }
+        userInfo.setBalance(balance2);
+        int i = userInfoMapper.updateById(userInfo);
+        if (i>0) return true;
+        return false;
     }
 
 

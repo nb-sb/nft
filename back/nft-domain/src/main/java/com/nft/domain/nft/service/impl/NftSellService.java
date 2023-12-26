@@ -12,6 +12,7 @@ import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.AuditRes;
 import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
+import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.repository.IOrderInfoRespository;
@@ -26,6 +27,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,11 +37,12 @@ import java.util.Optional;
 @AllArgsConstructor
 public class NftSellService implements INftSellService {
 
-    private  final  INftSellRespository iNftSellRespository;
-    private  final RedisUtil redisUtil;
+    private final INftSellRespository iNftSellRespository;
+    private final RedisUtil redisUtil;
     private final IpfsService ipfsService;
     private final IUserInfoRepository iUserInfoRepository;
     private final IOrderInfoRespository iOrderInfoRespository;
+
     @Override
     public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
         Map<String, String> userMap = decodeToken(httpServletRequest);
@@ -80,16 +83,16 @@ public class NftSellService implements INftSellService {
     }
 
     @Override
-    public boolean addSellByFISCO(String hash,Integer id) {
+    public boolean addSellByFISCO(String hash, Integer id) {
         return iNftSellRespository.addSellByFISCO(hash, id);
     }
 
 
     @Override
-    public Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID) {
+    public Result purchaseConllection(HttpServletRequest httpServletRequest, Integer ConllectionID) {
         //获取使用token用户id
         Map<String, String> stringStringMap = decodeToken(httpServletRequest);
-        if (stringStringMap ==null) return new Result("401","用户登录错误");
+        if (stringStringMap == null) return new Result("401", "用户登录错误");
         UserVo user = iUserInfoRepository.selectOne(new LoginReq().setUsername(stringStringMap.get("username"))
                 .setPassword(stringStringMap.get("password")));
         Integer userid = user.getId();
@@ -108,48 +111,61 @@ public class NftSellService implements INftSellService {
                     //查询mysql缓存
                     conllectionInfoVo = iNftSellRespository.selectConllectionById(id);
                     if (conllectionInfoVo == null) {
-                        return new Result("0","商品不存在");
+                        return new Result("0", "商品不存在");
                     }
                     stock = conllectionInfoVo.getRemain();
                 } else {
                     stock = Integer.valueOf((String) o);
                 }
-                if (stock <= 0) return new Result("0","商品库存不足");
+                if (stock <= 0) return new Result("0", "商品库存不足");
                 //3.减少库存操作
                 //赋值到redis中
                 redisUtil.set(Constants.RedisKey.REMAINING_STOCK(id), stock - 1);
                 if (!iNftSellRespository.decreaseSellStocks(id, 1)) {
                     log.error("商品库存减少失败");
-                    return new Result("0","库存减少失败");
+                    return new Result("0", "库存减少失败");
                 }
                 // 4.将藏品添加至订单中
                 iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid);
                 //1)decrRemain
                 //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
                 redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(id));
-            } finally{
+            } finally {
                 //释放写锁
                 DistributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             }
-        }finally {
+        } finally {
             DistributedRedisLock.release(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         }
-        return new Result("1","成功添加至订单，请前往我的订单中查看");
+        return new Result("1", "成功添加至订单，请前往我的订单中查看");
     }
 
     @Override
     public void payOrder() {
         //传入用户id和订单号和支付方式
+        Integer userid = 1;
+        String orderNumber = "123";
+        Integer paytype = Constants.payType.WEB_BALANCE_PAY;
         // 一.查询订单支付方式
-            //A.如果是网站余额支付
+        //A.如果是网站余额支付
+        if (Constants.payType.WEB_BALANCE_PAY.equals(paytype)) {
             //1)decrement balance
-            //2)set pay_status
+            BigDecimal productPrice = getOrderInfoByNumber(orderNumber).getProductPrice();
+            if (decrementUserBalance(userid,productPrice)) {
+                //如果余额减少成功了的话则会： 
+                //2)set pay_status
                 //如果支付成功则转移藏品 => purcharseConllection()
-            //3)返回支付支付状态
-            //B.如果是支付宝支付
-                //1.请求支付信息，2.展示支付二维码，3.返回回调信息
-    }
+            }
 
+            //3)返回支付支付状态
+        }
+        //1)decrement balance
+        //2)set pay_status
+        //如果支付成功则转移藏品 => purcharseConllection()
+        //3)返回支付支付状态
+        //B.如果是支付宝支付
+        //1.请求支付信息，2.展示支付二维码，3.返回回调信息
+    }
 
 
     @Override
@@ -158,8 +174,8 @@ public class NftSellService implements INftSellService {
         DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
         try {
             //2.更新藏品信息
-                //1)updataConllectionInfo
-            if (updataCollectionReq.getName() !=null || updataCollectionReq.getPresent() !=null) {
+            //1)updataConllectionInfo
+            if (updataCollectionReq.getName() != null || updataCollectionReq.getPresent() != null) {
                 boolean b = iNftSellRespository.updataConllectionInfo(updataCollectionReq);//更新藏品信息
                 return b ? new Result("1", "更新藏品信息成功!") : new Result("0", "更新藏品信息失败!");
             }
@@ -168,7 +184,7 @@ public class NftSellService implements INftSellService {
                 return b ? new Result("1", "更新出售状态成功!") : new Result("0", "更新出售状态失败!");
             }
             return new Result("0", "什么都没执行");
-        } finally{
+        } finally {
             // 3.更新缓存数据
             //1）更新redis和es中数据 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
             String reidsKey = Constants.RedisKey.REDIS_COLLECTION(updataCollectionReq.getId());
@@ -180,29 +196,37 @@ public class NftSellService implements INftSellService {
 
     @Override
     public AuditRes ReviewCollection(ReviewReq req) {
-        //TODO:这里需要写入数据操作，应考虑并发情况（2个管理员同时更新商品）
+        //这里需要写入数据操作，应考虑并发情况（2个管理员同时更新商品）
         // 需要先修改区块链状态在修改mysql状态！！
-        //2.操作审核状态 （1 为不通过 2为通过）
-        AuditRes auditRes = changeSellStatus(req);
-        if (!String.valueOf(Constants.SellState.PASS.getCode()).equals(auditRes.getCode())) {
-            //如果是不通过则这里直接返回参数，无需进行下面操作
-            return auditRes;
+        //这里因为是在审核中，所以不需要使用读写锁，普通的redisson锁即可防止多个管理员同时审核，造成数据库、区块链或ipfs多次上传等情况
+        DistributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
+        try {
+            //2.操作审核状态 （1 为不通过 2为通过）
+            AuditRes auditRes = changeSellStatus(req);
+            if (!String.valueOf(Constants.SellState.PASS.getCode()).equals(auditRes.getCode())) {
+                //如果是不通过则这里直接返回参数，无需进行下面操作
+                return auditRes;
+            }
+            // -- 通过：通过才会加入到出售表，ipfs,区块链数据--
+            //3.添加至ipfs 获得hash
+            String hash = ipfsService.addIpfsById(String.valueOf(req.getId()));
+            System.err.println("hash : " + hash);
+            //4.添加至区块链
+            boolean addFISCO = addSellByFISCO(hash, req.getId());
+            System.out.println(addFISCO);
+            if (!addFISCO) {
+                return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
+            }
+            //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
+            if (!insertSellInfo(req, hash)) {
+                return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
+            }
+            return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
+        } finally {
+            DistributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         }
-        // -- 通过：通过才会加入到出售表，ipfs,区块链数据--
-        //3.添加至ipfs 获得hash
-        String hash = ipfsService.addIpfsById(String.valueOf(req.getId()));
-        System.err.println("hash : "+hash);
-        //4.添加至区块链
-        boolean addFISCO = addSellByFISCO(hash, req.getId());
-        System.out.println(addFISCO);
-        if (!addFISCO) {
-            return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
-        }
-        //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
-        if (!insertSellInfo(req, hash)) {
-            return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
-        }
-        return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
+
+
     }
 
 
@@ -214,18 +238,29 @@ public class NftSellService implements INftSellService {
 
     public void purcharseConllection() {
         //购买成功后更新藏品所有者
-            //1）更新区块链上数据 => transCollectionByFisco()
-            //2）更新mysql上数据
+        //1）更新区块链上数据 => transCollectionByFisco()
+        //2）更新mysql上数据
     }
+
     public void updataConllectionInfo() {
         //传入更新对象，用于更新出售商品数据更新数据
     }
 
+    //使用订单号查询订单信息
+    public OrderInfoVo getOrderInfoByNumber(String OrderNumber) {
+        OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(OrderNumber);
+        return orderInfoVo;
+    }
 
-    public Map<String,String> decodeToken(HttpServletRequest httpServletRequest) {
+    //减少用户余额
+    public boolean decrementUserBalance(Integer id, BigDecimal balance) {
+        return iUserInfoRepository.decrementUserBalance(id, balance);
+    }
+
+    public Map<String, String> decodeToken(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader("token");
         Optional<String> tokenOpt = Optional.ofNullable(token);
-        if (!tokenOpt.isPresent() ) {
+        if (!tokenOpt.isPresent()) {
             System.err.println("token为空");
         }
         try {

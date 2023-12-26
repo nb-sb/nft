@@ -8,6 +8,7 @@ import com.nft.domain.user.model.req.Search;
 import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserVo;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -27,4 +28,9 @@ public interface IUserInfoRepository {
     List<UserVo> selectUserPage(Search search);
 
     boolean chanagePassword(ChanagePwReq chanagePwReq);
+
+    UserVo selectUserByid(Integer id);
+
+    //修改用户余额
+    boolean decrementUserBalance(Integer id, BigDecimal balance);
 }

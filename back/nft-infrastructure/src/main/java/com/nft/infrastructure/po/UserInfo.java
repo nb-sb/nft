@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 
 /**
@@ -30,6 +31,7 @@ public class UserInfo implements Serializable {
 
     private String password;
     private String privatekey;
+    private BigDecimal balance;
     private Integer role;
 
 }

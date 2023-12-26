@@ -85,6 +85,7 @@ public class Constants {
         private static final String READ_WRITE_LOCK = "READ_WRITE_LOCK_"; //商品的读写锁
         private static final String ADD_ORDER_BYUSER = "ADD_ORDER_BYUSER_"; //用户锁防止重复提交
 
+        private static final String ADMIN_UPDATE_LOCK = "ADMIN_UPDATE_LOCK_";//用于管理员更新商品信息的锁，不管是审核还是修改信息都用这把锁前缀
         //空值，用于空缓存用
         private static final String REDIS_EMPTY_CACHE = "{}";
 
@@ -112,6 +113,9 @@ public class Constants {
         }
         public static String ADD_ORDER_BYUSER(Integer userid) {
             return ADD_ORDER_BYUSER + userid;
+        }
+        public static String ADMIN_UPDATE_LOCK(Integer id) {
+            return ADMIN_UPDATE_LOCK + id;
         }
 
 
@@ -253,9 +257,9 @@ public class Constants {
      * 订单支付类型
      */
     public static final class payType {
-        public static final int ZFB_PAY = 1;
-        public static final int XV_PAY = 2;
-        public static final int WEB_BALANCE_PAY = 3;
+        public static final Integer ZFB_PAY = 1;
+        public static final Integer XV_PAY = 2;
+        public static final Integer WEB_BALANCE_PAY = 3;
     }
     /**
      * 用户aop验证权限参数
