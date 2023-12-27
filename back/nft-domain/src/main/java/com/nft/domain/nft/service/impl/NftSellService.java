@@ -25,6 +25,7 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +59,7 @@ public class NftSellService implements INftSellService {
     public AuditRes changeSellStatus(ReviewReq req) {
         //判断修改前后变量结果是否一致，如果修改前后都是同一状态则不修改
         SubCacheVo subCacheVo = iNftSellRespository.selectSubSellById(req.getId());
-        if (!Constants.SellState.DOING.equals(subCacheVo.getStatus())) {
+        if (!Constants.SellState.DOING.getCode().equals(subCacheVo.getStatus())) {
             return new AuditRes(Constants.SellState.NOTDOING.getCode(), Constants.SellState.NOTDOING.getInfo());
         }
         if (subCacheVo.getStatus().equals(req.getStatus())) {
@@ -135,7 +136,7 @@ public class NftSellService implements INftSellService {
     public void payOrder() {
         //传入用户id和订单号和支付方式
         Integer userid = 1;
-        String orderNumber = "123";
+        String orderNumber = "170364815555201023830";
         Integer paytype = Constants.payType.WEB_BALANCE_PAY;
         // 一.查询订单支付方式
         //A.如果是网站余额支付
@@ -147,13 +148,18 @@ public class NftSellService implements INftSellService {
             if (decrementUserBalance(userid,productPrice)) {
                 //如果余额减少成功了的话则会：
                 //2)set pay_status 设置支付状态
-                boolean b = iOrderInfoRespository.updateOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
+                boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
                 if (b) {
-                    UserVo userVo = new UserVo();
+                    UserVo userVo = iUserInfoRepository.selectUserByid(userid);
                     //如果支付成功则转移藏品 => transferConllection()
                     System.out.println(transferConllection(orderInfoVo, userVo));
+                    // TODO: 2023/12/27 加入流水表中
+                } else {
+                    //设置支付状态失败。返回用于余额
                 }
 
+            }else {
+                //return 余额不足
             }
 
             //3)返回支付支付状态
@@ -243,7 +249,7 @@ public class NftSellService implements INftSellService {
         return iOwnerShipRespository.addUserConllectionByFisco(user.getAddress(), conllectionInfoVo.getHash());
         //2）更新mysql上数据
             //更新数据库中用户拥有的藏品
-
+//        iOwnerShipRespository.selectOwnerShipByFisco();
             //更新订单状态为完成
     }
 

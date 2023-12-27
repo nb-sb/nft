@@ -32,7 +32,7 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
                 log.error(response.getReceiptMessages());
                 return false;
             }
-            log.info("出售作品添加到区块链的结果为："+response.getValues());
+            log.info("用户绑定藏品的结果为："+response.getValues());
             JSONArray jsonArray = JSONUtil.parseArray(response.getValues());
             return (boolean) jsonArray.get(0);
         } catch (Exception e) {
