@@ -76,7 +76,20 @@ import "./DetailStorage.sol";
     function selectByHash(string memory hash) public view returns(int , string memory ) {
         return  select(primaryKey,mFields[0],hash);
     }
-
+    //使用用户地址和藏品hash查询内容
+    function selectInfo(address _address , string memory _hash )public view returns(int,string memory,string memory,string memory) {
+        string[] memory a  = new string[](2);
+        string[] memory b  = new string[](2);
+        a[0] = uniKey;
+        a[1] = mFields[0];
+        b[0] = addressToString(_address);
+        b[1] = _hash;
+        Entries entries =   select(primaryKey,a,b);
+        if(entries.size()<=0){
+            return(0,"not found","","");
+        }
+        return(1,entries.get(0).getString("time"),entries.get(0).getString("type"),entries.get(0).getString("digital_collection_id"));
+    }
     // 转赠 -- 只能所属人进行调用  || 保证业务原子性
     function transfer(address target_address, string memory _hash) public returns (bool , string memory ) {
         Table table = openTable();
