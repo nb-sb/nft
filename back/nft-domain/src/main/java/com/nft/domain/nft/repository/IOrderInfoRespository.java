@@ -6,7 +6,10 @@ import com.nft.domain.nft.model.vo.OrderInfoVo;
 public interface IOrderInfoRespository {
 
     //添加订单表
-    void addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid);
+    boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid);
 
     OrderInfoVo selectOrderInfoByNumber(String orderNumber);
+
+    //设置订单支付状态
+    boolean updateOrderStatus(String orderNumber,Integer status);
 }

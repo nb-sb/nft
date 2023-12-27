@@ -262,6 +262,17 @@ public class Constants {
         public static final Integer WEB_BALANCE_PAY = 3;
     }
     /**
+     * 订单支付状态
+     */
+    public static final class payOrderStatus {
+
+        public static final Integer NO_PAY = 1; //未支付
+        public static final Integer PAID = 2; //已经支付
+        public static final Integer FINISH = 3; //订单完成
+        public static final Integer CANCEL = 4; //取消订单
+        public static final Integer REFUN = 5; //退款
+    }
+    /**
      * 用户aop验证权限参数
      */
     public static final class permiss{

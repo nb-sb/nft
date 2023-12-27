@@ -17,7 +17,8 @@ public class INftRelationshipImpl implements INftRelationshipRespository {
     public boolean addMetas(Integer cid , Integer mid) {
         NftRelationships nftRelationships = new NftRelationships();
         nftRelationships.setCid(cid).setMid(mid);
-        nftRelationshipsMapper.insert(nftRelationships);
+        int insert = nftRelationshipsMapper.insert(nftRelationships);
+        if (insert>0) return true;
         return false;
     }
 }

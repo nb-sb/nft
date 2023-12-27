@@ -252,9 +252,8 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         Integer remain = sellInfo1.getRemain();
         SellInfo sellInfo = new SellInfo();
         sellInfo.setRemain(remain - 1);
-        UpdateWrapper<SellInfo> sellInfoUpdateWrapper = new UpdateWrapper<>();
-        sellInfoUpdateWrapper.set("id", id);
-        int update = sellInfoMapper.update(sellInfo, sellInfoUpdateWrapper);
+        sellInfo.setId(sellInfo1.getId());
+        int update = sellInfoMapper.updateById(sellInfo);
         if (update > 0) {
             return true;
         }

@@ -27,9 +27,7 @@ public class INftMetasImpl implements INftMetasRespository {
         UpdateWrapper<NftMetas> nftMetasUpdateWrapper = new UpdateWrapper<>();
         nftMetasUpdateWrapper.eq("mid", mid);
         int update = nftMetasMapper.update(nftMetas, nftMetasUpdateWrapper);
-        if (update > 0) {
-            return true;
-        }
+        if (update > 0) return true;
         return false;
     }
 

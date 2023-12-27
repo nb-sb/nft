@@ -1,7 +1,9 @@
 package com.nft.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
+import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.nft.repository.IOrderInfoRespository;
@@ -17,9 +19,23 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class IOrderInfoImpl implements IOrderInfoRespository {
     private  final OrderInfoMapper orderInfoMapper;
-    @Override
-    public void addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid) {
 
+    @Override
+    public boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid) {
+        OrderInfo orderInfo = new OrderInfo();
+        String s = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
+        System.err.println(s);
+        orderInfo.setUserId(userid)
+                .setOrderNo(s)
+                .setStatus(Constants.payOrderStatus.NO_PAY)
+                .setProductImg(conllectionInfoVo.getPath())
+                .setProductId(conllectionInfoVo.getId())
+                .setProductName(conllectionInfoVo.getName())
+                .setProductPrice(conllectionInfoVo.getPrice())
+                .setSeckillPrice(conllectionInfoVo.getPrice());
+        int insert = orderInfoMapper.insert(orderInfo);
+        if (insert >0) return true;
+        return false;
     }
 
     @Override
@@ -29,5 +45,11 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
         OrderInfo orderInfo = orderInfoMapper.selectOne(orderWrapper);
         OrderInfoVo orderInfoVo = BeanCopyUtils.convertTo(orderInfo, OrderInfoVo ::new);
         return orderInfoVo;
+    }
+
+    @Override
+    public boolean updateOrderStatus(String orderNumber, Integer status) {
+
+        return false;
     }
 }

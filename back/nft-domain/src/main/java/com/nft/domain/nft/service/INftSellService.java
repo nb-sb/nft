@@ -20,14 +20,7 @@ public interface INftSellService {
 
     boolean insertSellInfo(ReviewReq req, String hash);
 
-    //将藏品添加至区块链中
-    /**
-     * @Des 添加出售数据至区块链中
-     * @Date 2023/12/13 19:32
-     * @Param hash 是实际的ipfs hash， id为提交的id
-     * @Return bolean
-     */
-    boolean addSellByFISCO(String hash,Integer id);
+
 
     //购买藏品
     Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID);

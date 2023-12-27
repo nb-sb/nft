@@ -5,6 +5,7 @@ import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
 import com.nft.domain.common.Aop.AuthPermisson;
+import com.nft.domain.nft.model.req.AddOrder;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.res.AuditRes;
@@ -85,11 +86,10 @@ public class SellController {
     @ResponseBody
     @AuthPermisson(Constants.permiss.regularUser)
     public Result purchaseConllection(
-            @NotNull(message = "ConllectionID 不能为空")
-            @Min(value = 1,message = "商品id不能小于 0")
-            @RequestParam Integer ConllectionID) {
+            @Valid
+            @RequestBody AddOrder addOrder) {
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
-        return iNftSellService.purchaseConllection(httpServletRequest, ConllectionID);
+        return iNftSellService.purchaseConllection(httpServletRequest, addOrder.getId());
     }
 
 
@@ -98,7 +98,7 @@ public class SellController {
     @ResponseBody
     public void payOrder() {
         //传入订单id ， 传入支付类型，传入http用于校验用户信息等
-
+        iNftSellService.payOrder();
     }
 
 
