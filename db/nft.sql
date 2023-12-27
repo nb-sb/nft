@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 26/12/2023 11:42:25
+ Date: 27/12/2023 11:37:52
 */
 
 SET NAMES utf8mb4;
@@ -61,12 +61,13 @@ CREATE TABLE `nft_relationships`  (
 DROP TABLE IF EXISTS `order_info`;
 CREATE TABLE `order_info`  (
   `order_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '订单id',
-  `product_id` int NULL DEFAULT NULL,
+  `user_id` int NULL DEFAULT NULL COMMENT '用户id',
+  `product_id` int NULL DEFAULT NULL COMMENT '藏品id',
   `product_img` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `product_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `product_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '产品价格',
   `seckill_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '秒杀价格',
-  `status` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
+  `status` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
   `pay_date` time NULL DEFAULT NULL COMMENT '支付时间',
   PRIMARY KEY (`order_no`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
@@ -122,7 +123,7 @@ CREATE TABLE `submit_cache`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `author_address`(`author_address` ASC) USING BTREE,
   CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_detal
@@ -152,6 +153,7 @@ CREATE TABLE `user_info`  (
   `username` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `password` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `role` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '用户权限，普通用户为0，管理员为1',
+  `balance` decimal(10, 2) UNSIGNED ZEROFILL NOT NULL COMMENT '用户余额',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
