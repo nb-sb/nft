@@ -3,6 +3,7 @@ package com.nft.common.Utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @desc   使用token验证用户是否登录
@@ -67,20 +69,32 @@ public class TokenUtils {
         }
     }
     public static Map<String, String> decodeToken(String token) {
+        Optional<String> tokenOpt = Optional.ofNullable(token);
         try {
-            Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET);
-            JWTVerifier verifier = JWT.require(algorithm).build();
-            DecodedJWT jwt = verifier.verify(token);
+            if (tokenOpt.isPresent()) {
+                try {
+                    Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET);
+                    JWTVerifier verifier = JWT.require(algorithm).build();
+                    DecodedJWT jwt = verifier.verify(token);
 
-            Map<String, String> claims = new HashMap<>();
-            claims.put("username", jwt.getClaim("username").asString());
-            claims.put("password", jwt.getClaim("password").asString());
+                    Map<String, String> claims = new HashMap<>();
+                    claims.put("username", jwt.getClaim("username").asString());
+                    claims.put("password", jwt.getClaim("password").asString());
 
-            return claims;
-        } catch (Exception e) {
-            e.printStackTrace();
+                    return claims;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            } else {
+                log.error("传入token为空");
+                return null;
+            }
+        } catch (JWTDecodeException e) {
+            log.error(e.getMessage());
             return null;
         }
+
     }
 
 //    public static void main(String[] args) {
