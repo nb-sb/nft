@@ -13,10 +13,8 @@ import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.AuditRes;
 import com.nft.domain.nft.model.res.NftRes;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
-import com.nft.domain.nft.model.vo.OrderInfoVo;
-import com.nft.domain.nft.model.vo.SellInfoVo;
-import com.nft.domain.nft.model.vo.SubCacheVo;
+import com.nft.domain.nft.model.vo.*;
+import com.nft.domain.nft.repository.IDetailInfoRespository;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.repository.IOrderInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
@@ -33,6 +31,7 @@ import sun.reflect.generics.tree.VoidDescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +47,7 @@ public class NftSellService implements INftSellService {
     private final IUserInfoRepository iUserInfoRepository;
     private final IOrderInfoRespository iOrderInfoRespository;
     private final IOwnerShipRespository iOwnerShipRespository;
+    private final IDetailInfoRespository iDetailInfoRespository;
 
     @Override
     public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
@@ -167,11 +167,17 @@ public class NftSellService implements INftSellService {
                     //2)set pay_status 设置支付状态
                     boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
                     if (b) {
-                        //如果支付成功则转移藏品 => transferConllection()
-                        transferConllection(orderInfoVo, userVo);
                         //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
-                        return new Result("1", "购买成功！");
-                        // TODO: 2023/12/27 加入mysql流水表中 || 加入区块链流水表中
+                        //如果支付成功则转移藏品 => transferConllection()
+                        DetailInfoVo detailInfoVo1 = transferConllection(orderInfoVo, userVo);
+                        // 加入mysql流水表中 || 加入区块链流水表中
+                        boolean b1 = addDetailInfo(detailInfoVo1);
+                        if (b1) {
+                            //流水表添加成功
+                            return new Result("1", "购买成功！");
+                        } else {
+                            log.error("添加到流水表失败");
+                        }
                     } else {
                         //设置支付状态失败。返回用于余额
                         log.error("支付状态修改失败");
@@ -258,7 +264,7 @@ public class NftSellService implements INftSellService {
     }
 
     //更新藏品所有者
-    public void transferConllection(OrderInfoVo orderInfo,UserVo user) {
+    public DetailInfoVo transferConllection(OrderInfoVo orderInfo,UserVo user) {
         //购买成功后更新藏品所有者
         ConllectionInfoVo conllectionInfoVo = iNftSellRespository.selectConllectionById(orderInfo.getProductId());
         //1）更新区块链上数据 => transCollectionByFisco(用户地址，藏品hash)
@@ -280,9 +286,12 @@ public class NftSellService implements INftSellService {
         }
         //b.添加至mysql中
         AddUserConllection2MysqlReq req = new AddUserConllection2MysqlReq();
-        req.setTime(AddUserConllection2MysqlReq.timestamp2Date(String.valueOf(list.get(1))));
-        req.setType(Integer.valueOf(String.valueOf(list.get(2))));
-        req.setDigital_collection_id(String.valueOf(list.get(3)));
+        Date time = AddUserConllection2MysqlReq.timestamp2Date(String.valueOf(list.get(1)));
+        req.setTime(time);
+        Integer type = Integer.valueOf(String.valueOf(list.get(2)));
+        req.setType(type);
+        String digitalCollectionId = String.valueOf(list.get(3));
+        req.setDigital_collection_id(digitalCollectionId);
         req.setHash(sellInfoVo.getIpfsHash());
         boolean b1 = iOwnerShipRespository.addUserConllection(req, user.getAddress());
         if (b1) {
@@ -292,15 +301,27 @@ public class NftSellService implements INftSellService {
                 log.error("更新订单状态为完成 失败");
                 throw new APIException(Constants.ResponseCode.NO_UPDATE, "更新订单状态为完成执行失败");
             }
+            DetailInfoVo detailInfoVo = new DetailInfoVo();
+            detailInfoVo.setType(type);
+            detailInfoVo.setTransferAddress(sellInfoVo.getAuther());
+            detailInfoVo.setTargetAddress(user.getAddress());
+            detailInfoVo.setTime(time);
+            detailInfoVo.setHash(sellInfoVo.getIpfsHash());
+            detailInfoVo.setDigitalCollectionId(digitalCollectionId);
+            return detailInfoVo;
         } else {
             //添加藏品到用户中失败
             log.error("添加藏品到用户中失败");
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加藏品到用户中失败");
         }
     }
-    //添加流水表信息
-    private void addDetailInfo() {
 
+    //添加流水表信息
+    private boolean addDetailInfo(DetailInfoVo detailInfoVo1) {
+        boolean b = iDetailInfoRespository.addDetailInfo(detailInfoVo1);
+        //添加到区块链流水表中
+        if (b) return iDetailInfoRespository.addDeailInfoByFisco(detailInfoVo1);
+        return false;
     }
 
     //查询用户未支付订单

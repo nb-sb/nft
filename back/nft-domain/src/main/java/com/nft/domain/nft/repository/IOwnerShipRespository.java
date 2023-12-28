@@ -11,6 +11,8 @@ public interface IOwnerShipRespository {
     boolean addUserConllectionByFisco(String address,String hash) ;
 
     List selectOWnerShipInfoByFisco(String address, String hash);
+
+    void selectOWnerShipInfo(String address, String hash);
     //获取用于所属藏品 By address
 
 }

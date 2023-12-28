@@ -87,6 +87,8 @@ public class Constants {
         private static final String READ_WRITE_LOCK = "READ_WRITE_LOCK_"; //商品的读写锁
         private static final String ADD_ORDER_BYUSER = "ADD_ORDER_BYUSER_"; //用户锁防止重复提交
 
+        private static final String PAY_LOCK = "PAY_LOCK_";//支付锁，方式多用户同时支付同一订单
+
         private static final String ADMIN_UPDATE_LOCK = "ADMIN_UPDATE_LOCK_";//用于管理员更新商品信息的锁，不管是审核还是修改信息都用这把锁前缀
         //空值，用于空缓存用
         private static final String REDIS_EMPTY_CACHE = "{}";
@@ -118,6 +120,9 @@ public class Constants {
         }
         public static String ADMIN_UPDATE_LOCK(Integer id) {
             return ADMIN_UPDATE_LOCK + id;
+        }
+        public static String PAY_LOCK(String id) {
+            return PAY_LOCK + id;
         }
 
 

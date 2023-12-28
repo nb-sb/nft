@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@MapperScan("com.nft.infrastructure.dao")
 public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor MybatisPlusInterceptor() {

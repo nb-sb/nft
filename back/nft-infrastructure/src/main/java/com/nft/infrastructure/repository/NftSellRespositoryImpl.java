@@ -38,14 +38,11 @@ import java.math.BigInteger;
 @AllArgsConstructor
 public class NftSellRespositoryImpl implements INftSellRespository {
 
-    private final UserInfoRepositoryImpl userInfoRepository;
     private final SubmitCacheMapper submitCacheMapper;
     private final SellInfoMapper sellInfoMapper;
-    private final NftRelationshipsMapper nftRelationshipsMapper;
     private final INftRelationshipImpl nftRelationship;
     private final INftMetasImpl nftMetas;
     private final SellStroageService sellStroageService;
-    private final ElasticSearchUtils esUtils;
 
     @Override
     @Transactional

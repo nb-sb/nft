@@ -129,7 +129,12 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     @Override
     public UserVo selectUserByid(Integer id) {
         UserInfo userInfo = userInfoMapper.selectById(id);
-        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo::new);
+        UserVo userVo = new UserVo();
+        userVo.setId(userInfo.getId());
+        userVo.setAddress(userInfo.getAddress());
+        userVo.setUsername(userInfo.getUsername());
+        userVo.setPassword(userInfo.getPassword());
+        userVo.setRole(userInfo.getRole());
         return userVo;
     }
 

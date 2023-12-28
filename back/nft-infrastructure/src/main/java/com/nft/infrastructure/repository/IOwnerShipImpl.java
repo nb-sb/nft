@@ -50,7 +50,7 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
                 log.error(response.getReceiptMessages());
                 return false;
             }
-            log.info("用户绑定藏品的结果为："+response.getValues());
+            log.info("用户绑定藏品的结果为："+response.getValues()+"address: "+address+" , hash : "+hash);
             JSONArray jsonArray = JSONUtil.parseArray(response.getValues());
             return (boolean) jsonArray.get(0);
         } catch (Exception e) {
@@ -71,5 +71,10 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
             log.error(e.getMessage());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public void selectOWnerShipInfo(String address, String hash) {
+
     }
 }

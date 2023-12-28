@@ -51,4 +51,8 @@ public class OrderInfo {
      * 支付时间
      */
     private Date payDate;
+    /**
+     * 订单支付时间
+     */
+    private Date initDate;
 }
