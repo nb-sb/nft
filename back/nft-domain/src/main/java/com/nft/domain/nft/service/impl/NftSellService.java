@@ -27,6 +27,7 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.elasticsearch.common.util.concurrent.PrioritizedCallable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,7 +100,11 @@ public class NftSellService implements INftSellService {
 
         //添加一把用户锁防止重复提交
         DistributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
-        // TODO: 2023/12/28 应该判断是否有同一个商品未支付的，如果有则无法提交
+        //判断是否有同一个商品未支付的，如果有则无法提交
+        List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(user.getId(), conllectionId);
+        if (userNoPayOrder.size() > 0) {
+            return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
+        }
         try {
             //1.添加写锁 -- 因为这个会改变出售的商品信息，所以要和查询商品id用同一把锁--这里添加写锁后就可以和查询商品信息的读锁连用
             DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
@@ -142,46 +147,54 @@ public class NftSellService implements INftSellService {
         Integer userid = userVo.getId();
         paytype = Constants.payType.WEB_BALANCE_PAY;
         // TODO: 2023/12/27 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
-         //使用订单号查询订单信息
-        OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
-        if (orderInfoVo == null) {
-            // 返回 订单号不存在
-            return new Result("0", "订单号不存在");
-        }
-        // 一.查询订单支付方式
-        //A.如果是网站余额支付
-        if (Constants.payType.WEB_BALANCE_PAY.equals(paytype)) {
-            //1)decrement balance
-            BigDecimal productPrice = orderInfoVo.getProductPrice();//查询商品价格
-            //减少用于余额
-            if (iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
-                //如果余额减少成功了的话则会：
-                //2)set pay_status 设置支付状态
-                boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
-                if (b) {
-                    //如果支付成功则转移藏品 => transferConllection()
-                    transferConllection(orderInfoVo, userVo);
-                    //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
-                    return new Result("1", "购买成功！");
-                    // TODO: 2023/12/27 加入mysql流水表中 || 加入区块链流水表中
-                } else {
-                    //设置支付状态失败。返回用于余额
-                    log.error("支付状态修改失败");
-                    throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
-                }
-
-            }else {
-                //return 余额不足
-                return new Result("0", "余额不足");
+        DistributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
+        try {
+            //使用订单号查询订单信息
+            OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
+            if (orderInfoVo == null) {
+                // 返回 订单号不存在
+                return new Result("0", "订单号不存在");
             }
-        }
-        return  new Result("0", "支付类型错误");
-        //B.如果是支付宝/微信支付
-        //1.请求支付信息，2.展示支付二维码，3.返回回调信息
-        //1)decrement balance
-        //2)set pay_status
-        //3)返回支付支付状态
+            if (Constants.payOrderStatus.NO_PAY.equals(orderInfoVo.getStatus())) {
+                return new Result("0", "判断订单支付状态已经被修改，无法支付");
+            }
+            // 一.查询订单支付方式
+            //A.如果是网站余额支付
+            if (Constants.payType.WEB_BALANCE_PAY.equals(paytype)) {
+                //1)decrement balance
+                BigDecimal productPrice = orderInfoVo.getProductPrice();//查询商品价格
+                //减少用于余额
+                if (iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
+                    //如果余额减少成功了的话则会：
+                    //2)set pay_status 设置支付状态
+                    boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
+                    if (b) {
+                        //如果支付成功则转移藏品 => transferConllection()
+                        transferConllection(orderInfoVo, userVo);
+                        //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
+                        return new Result("1", "购买成功！");
+                        // TODO: 2023/12/27 加入mysql流水表中 || 加入区块链流水表中
+                    } else {
+                        //设置支付状态失败。返回用于余额
+                        log.error("支付状态修改失败");
+                        throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
+                    }
+
+                }else {
+                    //return 余额不足
+                    return new Result("0", "余额不足");
+                }
+            }
+            //B.如果是支付宝/微信支付
+            //1.请求支付信息，2.展示支付二维码，3.返回回调信息
+            //1)decrement balance
+            //2)set pay_status
+            //3)返回支付支付状态
             //如果支付成功则转移藏品 => transferConllection()
+            return  new Result("0", "支付类型错误");
+        }finally {
+            DistributedRedisLock.releaseReadLock(Constants.RedisKey.PAY_LOCK(orderNumber));
+        }
 
     }
 
@@ -288,7 +301,17 @@ public class NftSellService implements INftSellService {
         //传入更新对象，用于更新出售商品数据更新数据
     }
 
+    //查询用户未支付订单
+    private List<OrderInfoVo> getUserNoPayOrder(Integer userId,Integer collection) {
+        List<OrderInfoVo> orderInfoVo = iOrderInfoRespository.selectOrderInfoByUser(userId, collection, Constants.payOrderStatus.NO_PAY);
+        return orderInfoVo;
+    }
 
+    //查询用户订单状态
+    private Integer getUserOrderStatus(Integer userId, String orderNumber) {
+        Integer integer = iOrderInfoRespository.selectOrderStatusByUser(userId, orderNumber);
+        return integer;
+    }
 
 
 
