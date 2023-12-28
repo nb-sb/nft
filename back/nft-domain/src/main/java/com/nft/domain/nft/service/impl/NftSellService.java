@@ -27,9 +27,9 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.elasticsearch.common.util.concurrent.PrioritizedCallable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.reflect.generics.tree.VoidDescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -151,11 +151,9 @@ public class NftSellService implements INftSellService {
         try {
             //使用订单号查询订单信息
             OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
-            if (orderInfoVo == null) {
-                // 返回 订单号不存在
-                return new Result("0", "订单号不存在");
-            }
-            if (Constants.payOrderStatus.NO_PAY.equals(orderInfoVo.getStatus())) {
+            // 返回 订单号不存在
+            if (orderInfoVo == null) return new Result("0", "订单号不存在");
+            if (!Constants.payOrderStatus.NO_PAY.equals(orderInfoVo.getStatus())) {
                 return new Result("0", "判断订单支付状态已经被修改，无法支付");
             }
             // 一.查询订单支付方式
@@ -259,8 +257,8 @@ public class NftSellService implements INftSellService {
 
     }
 
-
-    public boolean transferConllection(OrderInfoVo orderInfo,UserVo user) {
+    //更新藏品所有者
+    public void transferConllection(OrderInfoVo orderInfo,UserVo user) {
         //购买成功后更新藏品所有者
         ConllectionInfoVo conllectionInfoVo = iNftSellRespository.selectConllectionById(orderInfo.getProductId());
         //1）更新区块链上数据 => transCollectionByFisco(用户地址，藏品hash)
@@ -289,28 +287,30 @@ public class NftSellService implements INftSellService {
         boolean b1 = iOwnerShipRespository.addUserConllection(req, user.getAddress());
         if (b1) {
             //c.更新订单状态为完成
-            return iOrderInfoRespository.setOrderStatus(orderInfo.getOrderNo(), Constants.payOrderStatus.FINISH);
+            boolean b2 = iOrderInfoRespository.setOrderStatus(orderInfo.getOrderNo(), Constants.payOrderStatus.FINISH);
+            if (!b2) {
+                log.error("更新订单状态为完成 失败");
+                throw new APIException(Constants.ResponseCode.NO_UPDATE, "更新订单状态为完成执行失败");
+            }
         } else {
             //添加藏品到用户中失败
             log.error("添加藏品到用户中失败");
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加藏品到用户中失败");
         }
     }
+    //添加流水表信息
+    private void addDetailInfo() {
 
-    public void updataConllectionInfo() {
-        //传入更新对象，用于更新出售商品数据更新数据
     }
 
     //查询用户未支付订单
     private List<OrderInfoVo> getUserNoPayOrder(Integer userId,Integer collection) {
-        List<OrderInfoVo> orderInfoVo = iOrderInfoRespository.selectOrderInfoByUser(userId, collection, Constants.payOrderStatus.NO_PAY);
-        return orderInfoVo;
+        return iOrderInfoRespository.selectOrderInfoByUser(userId, collection, Constants.payOrderStatus.NO_PAY);
     }
 
     //查询用户订单状态
     private Integer getUserOrderStatus(Integer userId, String orderNumber) {
-        Integer integer = iOrderInfoRespository.selectOrderStatusByUser(userId, orderNumber);
-        return integer;
+        return iOrderInfoRespository.selectOrderStatusByUser(userId, orderNumber);
     }
 
 
@@ -322,10 +322,6 @@ public class NftSellService implements INftSellService {
         String pass = userMap.get("password");
         LoginReq loginReq = new LoginReq();
         loginReq.setUsername(username).setPassword(pass);
-        UserVo userVo = iUserInfoRepository.selectOne(loginReq);
-        if (userVo == null) {
-            return null;
-        }
-        return userVo;
+        return iUserInfoRepository.selectOne(loginReq);
     }
 }
