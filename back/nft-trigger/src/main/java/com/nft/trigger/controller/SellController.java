@@ -90,7 +90,6 @@ public class SellController {
     public Result payOrder(
             @NotNull
             @RequestParam String OrderNumber,
-
             Integer paytype
     ) {
         //传入订单id，传入支付类型，传入http用于校验用户信息等

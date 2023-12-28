@@ -1,7 +1,6 @@
 package com.nft.domain.nft.service.impl;
 
 
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
@@ -26,18 +25,15 @@ import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import jdk.nashorn.internal.ir.ReturnNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.management.MemoryUsage;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 @Log4j2
@@ -56,7 +52,9 @@ public class NftSellService implements INftSellService {
     public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
         UserVo userVo = decodeToken(httpServletRequest);
         if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
-        return iNftSellRespository.addSellCheck(sellReq, userVo);
+        boolean res = iNftSellRespository.addSellCheck(sellReq, userVo);
+        if (res) return new NftRes("1", "已经添加到审核中~");
+        return new NftRes("0", "添加审核失败，请联系网站管理员查看");
     }
 
     @Override
@@ -303,7 +301,6 @@ public class NftSellService implements INftSellService {
         loginReq.setUsername(username).setPassword(pass);
         UserVo userVo = iUserInfoRepository.selectOne(loginReq);
         if (userVo == null) {
-//            return new NftRes("401", "用户token错误请从新登录");
             return null;
         }
         return userVo;

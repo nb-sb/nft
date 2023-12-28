@@ -9,11 +9,12 @@ import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
+import com.nft.domain.user.model.vo.UserVo;
 
 import java.util.Map;
 
 public interface INftSellRespository {
-    NftRes addSellCheck(SellReq sellReq, Map<String, String> userMap);
+    boolean addSellCheck(SellReq sellReq, UserVo userVo);
 
     boolean upDateSubStatus(ReviewReq req);//更新提交状态
 

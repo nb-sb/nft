@@ -6,16 +6,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.APIException;
+import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
-import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
-import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.infrastructure.dao.NftRelationshipsMapper;
 import com.nft.infrastructure.dao.SellInfoMapper;
@@ -29,10 +29,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.Map;
 
 @Repository
 @Log4j2
@@ -49,16 +48,8 @@ public class NftSellRespositoryImpl implements INftSellRespository {
     private final ElasticSearchUtils esUtils;
 
     @Override
-    public NftRes addSellCheck(SellReq sellReq, Map<String, String> userMap) {
-
-        String username = userMap.get("username");
-        String pass = userMap.get("password");
-        LoginReq loginReq = new LoginReq();
-        loginReq.setUsername(username).setPassword(pass);
-        UserVo userVo = userInfoRepository.selectOne(loginReq);
-        if (userVo == null) {
-            return new NftRes("401", "用户token错误请从新登录");
-        }
+    @Transactional
+    public boolean addSellCheck(SellReq sellReq, UserVo userVo) {
         SubmitCache submitCache = BeanCopyUtils.convertTo(sellReq, SubmitCache::new);
         submitCache.setStatus(0).setAuthorId(String.valueOf(userVo.getId()))
                 .setAuthorAddress(userVo.getAddress());
@@ -66,25 +57,33 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         submitWrapper.eq("hash", submitCache.getHash());
         SubmitCache submitCache1 = submitCacheMapper.selectOne(submitWrapper);
         if (submitCache1 != null) {
-            log.warn("hash 已经存在 - 无法提交重复的作品！");
-            return new NftRes("0", "hash 已经存在 - 无法提交重复的作品！");
+            log.warn("hash 已经存在 - 无法提交重复的作品！"+submitCache1);
+            return false;
         }
         //查询分类id是否存在
         if (!nftMetas.isExist(sellReq.getMid())) {
             log.warn("分类不存在："+sellReq.getMid());
-            return new NftRes("0", "该分类不存在");
+            return false;
         }
 
         int insert = submitCacheMapper.insert(submitCache);
         submitCache1 = submitCacheMapper.selectOne(submitWrapper);
         if (insert > 0) {
             //添加分类表
-            nftRelationship.addMetas(submitCache1.getId(), sellReq.getMid());
+            boolean b = nftRelationship.addMetas(submitCache1.getId(), sellReq.getMid());
+            if (!b) {
+                log.error("添加至分类表错误!: "+ false);
+                throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加至分类表错误");
+            }
             //修改分类表中分类记录数
-            nftMetas.incr(sellReq.getMid(), 1);
-            return new NftRes("1", "successful!");
+            boolean incr = nftMetas.incr(sellReq.getMid(), 1);
+            if (!incr) {
+                log.error("修改分类表中分类记录数 错误 ！："+ false);
+                throw new APIException(Constants.ResponseCode.NO_UPDATE, "修改分类表中分类记录数错误");
+            }
+            return true;
         }
-        return new NftRes("0", "未知添加错误");
+        return false;
     }
 
     @Override
@@ -94,10 +93,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         SubmitCache submitCache = new SubmitCache();
         submitCache.setStatus(req.getStatus());
         int update = submitCacheMapper.update(submitCache,submitWrapper);
-        if (update>0) {
-            return true;
-        }
-        return false;
+        return update > 0;
     }
 
     @Override
@@ -256,10 +252,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         sellInfo.setRemain(remain - 1);
         sellInfo.setId(sellInfo1.getId());
         int update = sellInfoMapper.updateById(sellInfo);
-        if (update > 0) {
-            return true;
-        }
-        return false;
+        return update > 0;
     }
 
 
