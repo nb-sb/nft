@@ -1,11 +1,8 @@
 package com.nft.domain.nft.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.common.Result;
 import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
-
-import java.util.List;
 
 public interface INftSelectService {
     //查询藏品信息

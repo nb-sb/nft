@@ -4,17 +4,16 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.nft.service.INftSelectService;
-import com.nft.common.Redis.RedisUtil;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
 @AllArgsConstructor
 @Service
@@ -62,8 +61,7 @@ public class NftSelectService implements INftSelectService {
             if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
                 return new ConllectionInfoVo();
             }
-            ConllectionInfoVo conllectionInfoVo = JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
-            return conllectionInfoVo;
+            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
         }
         return null;
     }

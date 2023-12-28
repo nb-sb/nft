@@ -3,6 +3,8 @@ package com.nft.common;
 import cloud.tianai.captcha.generator.impl.StandardIconClickImageCaptchaGenerator;
 import jdk.internal.org.objectweb.asm.commons.StaticInitMerger;
 
+import java.text.SimpleDateFormat;
+
 /**
  * @description: 枚举信息定义
  * @author：戏人看戏，微信：whn3500079813
@@ -21,7 +23,7 @@ public class Constants {
     public static Integer ADMIN = 1; //管理员权限
     public static Integer USER = 0; //普通用户权限
 
-
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public enum ResponseCode {
         SUCCESS("1", "成功"),
@@ -29,7 +31,7 @@ public class Constants {
 
         ILLEGAL_PARAMETER("0002", "非法参数"),
         INDEX_DUP("0003", "主键冲突"),
-        NO_UPDATE("0004", "SQL操作无更新"),
+        NO_UPDATE("0", "SQL操作无更新"),
         USER_EXIST("0","用户名已存在"),
         LOSING_DRAW("D001", "售空无库存"),
         RULE_ERR("D002", "量化人群规则执行失败"),
@@ -279,5 +281,13 @@ public class Constants {
         public static final int admin = 1;
         public static final int regularUser = 0;
         public static final int everyone = 11;
+    }
+    /**
+     * 藏品获得类型
+     */
+    public static final class CollectionOwnerShipType{
+        public static final int transfer = 0; //转增
+        public static final int pay = 1; //购买
+
     }
 }

@@ -53,4 +53,9 @@ public class OwnershipStorageService {
   public TransactionResponse addOwnership(OwnershipStorageAddOwnershipInputBO input) throws Exception {
     return this.txProcessor.sendTransactionAndGetResponse(this.address, ABI, "addOwnership", input.toArgs());
   }
+  public TransactionResponse selectInfo(OwnershipStorageSelectInfoInputBO input) throws Exception {
+    return this.txProcessor.sendTransactionAndGetResponse(this.address, ABI, "selectInfo", input.toArgs());
+  }
+
+
 }

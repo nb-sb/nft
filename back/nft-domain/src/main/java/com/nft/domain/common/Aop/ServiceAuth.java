@@ -51,7 +51,7 @@ public class ServiceAuth {
         AuthPermisson annotation = method.getAnnotation(AuthPermisson.class);
         Integer value = annotation.value();
         //获取注解参数
-        System.out.println(value);
+//        System.out.println(value);
         Map<String, Object> map = null;
         //验证token的逻辑
         if (value.equals(Constants.permiss.everyone)) {

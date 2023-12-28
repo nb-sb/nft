@@ -26,7 +26,7 @@ public interface INftSellService {
     Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID);
 
     //支付订单
-    void payOrder();
+    Result payOrder(HttpServletRequest httpServletRequest,String OrderNumber,Integer paytype);
 
 
 

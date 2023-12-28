@@ -12,6 +12,7 @@ import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
+import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.user.model.req.LoginReq;
@@ -131,6 +132,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         //传入hash 和 发售总数
         sellStroageCreateSellInputBO.set_hash(hash)
                 .setAmount(BigInteger.valueOf(submitCache.getTotal()));
+        System.out.println(sellStroageCreateSellInputBO);
         try {
 //            SellStroageExistSellInputBO sellStroageCatRemainInputBO = new SellStroageExistSellInputBO();
 //            sellStroageCatRemainInputBO.set_hash("hash123");
@@ -162,9 +164,10 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         }
         return null;
     }
-
-    public SellInfo selectSellInfoById(Integer id) {
-        return sellInfoMapper.selectById(id);
+    @Override
+    public SellInfoVo selectSellInfoById(Integer id) {
+        SellInfo sellInfo = sellInfoMapper.selectById(id);
+        return BeanCopyUtils.convertTo(sellInfo, SellInfoVo::new);
     }
 
     @Override
@@ -243,8 +246,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
 
     @Override
     public boolean decreaseSellStocks(Integer id, Integer number) {
-
-        SellInfo sellInfo1 = selectSellInfoById(id);
+        SellInfoVo sellInfo1 = selectSellInfoById(id);
         if (sellInfo1 == null) {
             log.error("商品id不存在");
             return false;

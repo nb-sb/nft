@@ -7,6 +7,7 @@ import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
+import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
 
 import java.util.Map;
@@ -27,6 +28,7 @@ public interface INftSellRespository {
     SubCacheVo selectSubSellById(Integer id);
 
     ConllectionInfoVo selectConllectionById(Integer id);
+    SellInfoVo selectSellInfoById(Integer id);
 
     IPage<ConllectionInfoVo> selectConllectionByPage(Page<ConllectionInfoVo> page);
 

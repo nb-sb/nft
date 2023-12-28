@@ -11,5 +11,7 @@ public interface IOrderInfoRespository {
     OrderInfoVo selectOrderInfoByNumber(String orderNumber);
 
     //设置订单支付状态
-    boolean updateOrderStatus(String orderNumber,Integer status);
+    boolean setPayOrderStatus(String orderNumber, Integer status);
+
+    boolean setOrderStatus(String orderNumber, Integer status);
 }

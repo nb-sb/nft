@@ -74,6 +74,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair();
         userInfo.setAddress(cryptoKeyPair.getAddress());
         userInfo.setPrivatekey(cryptoKeyPair.getHexPrivateKey());
+        userInfo.setBalance(BigDecimal.valueOf(0));
         int res = userInfoMapper.insert(userInfo);
         if (res > 0) {
             UserStorageAddUserInputBO userInputBO = new UserStorageAddUserInputBO();

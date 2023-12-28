@@ -13,7 +13,17 @@
 
 401： 一般是用户token错误，前端进行重新登录就可以了
 
+1、toString()，可能会抛空指针异常
 
+在这种使用方法中，因为java.lang.Object类里已有public方法.toString()，所以java对象都可以调用此方法。但在使用时要注意，必须保证object不是null值，否则将抛出NullPointerException异常。采用这种方法时，通常派生类会覆盖Object里的toString()方法。
+
+2、String.valueOf()，推荐使用，返回字符串“null”
+
+String.valueOf()方法是小编推荐使用的，因为它不会出现空指针异常，而且是静态的方法，直接通过String调用即可，只是有一点需要注意，就是上面提到的，如果为null，String.valueOf()返回结果是字符串“null”。而不是null。
+
+3、(String)强转，不推荐使用
+
+（String）是标准的类型转换，将Object类型转为String类型，使用(String)强转时，最好使用instanceof做一个类型检查，以判断是否可以进行强转，否则容易抛出ClassCastException异常。需要注意的是编写的时候，编译器并不会提示有语法错误，所以这个方法要谨慎的使用。
 ![img.png](img.png)
 
 Copyright：网站： https://nb.sb/ || git开源地址：https://gitee.com/nb-sb/nft

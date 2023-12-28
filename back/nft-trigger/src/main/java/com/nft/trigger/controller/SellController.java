@@ -8,11 +8,7 @@ import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.AddOrder;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
-import com.nft.domain.nft.model.res.AuditRes;
-import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.service.INftSellService;
-import com.nft.domain.support.ipfs.IpfsService;
-import com.nft.domain.user.service.IUserAccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.validation.annotation.Validated;
@@ -22,10 +18,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -36,8 +30,7 @@ public class SellController {
 
     private final HttpServletRequest httpServletRequest;
     private final INftSellService iNftSellService;
-    private final IUserAccountService iUserAccountService;
-    private final IpfsService ipfsService;
+
 
 
     @PostMapping("addsellcheck")
@@ -45,8 +38,7 @@ public class SellController {
     //添加藏品到待审核数据库
     public Object addsellcheck(@Valid @RequestBody SellReq sellReq) {
 
-        NftRes nftRes = iNftSellService.addSellCheck(httpServletRequest, sellReq);
-        return nftRes;
+        return iNftSellService.addSellCheck(httpServletRequest, sellReq);
     }
 
     //上传图片接口
@@ -59,9 +51,8 @@ public class SellController {
             MultipartHttpServletRequest mrequest = (MultipartHttpServletRequest) request;
             //<input type="file" name="photo"/>
             List<MultipartFile> files = mrequest.getFiles("photo");
-            Iterator<MultipartFile> iter = files.iterator();
-            while (iter.hasNext()) {
-                MultipartFile photo = iter.next();        // 取出每一个上传文件
+            // 取出每一个上传文件
+            for (MultipartFile photo : files) {
                 try {
                     result.add(FileUtils.saveFile(photo));        // 保存上传信息
                 } catch (Exception e) {
@@ -94,11 +85,16 @@ public class SellController {
 
 
     //支付藏品订单
-    @PostMapping("payConllectionOrder")
+    @GetMapping("payConllectionOrder")
     @ResponseBody
-    public void payOrder() {
-        //传入订单id ， 传入支付类型，传入http用于校验用户信息等
-        iNftSellService.payOrder();
+    public Result payOrder(
+            @NotNull
+            @RequestParam String OrderNumber,
+
+            Integer paytype
+    ) {
+        //传入订单id，传入支付类型，传入http用于校验用户信息等
+        return iNftSellService.payOrder(httpServletRequest, OrderNumber, paytype);
     }
 
 

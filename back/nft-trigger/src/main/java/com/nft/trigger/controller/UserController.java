@@ -44,8 +44,8 @@ public class UserController {
     @ResponseBody
     public Result register(@Valid @RequestBody SignReq signReq) {
         //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
-        UserResult res = getVerification(signReq.getCodeId());
-        if (res != null) return res;
+//        UserResult res = getVerification(signReq.getCodeId());
+//        if (res != null) return res;
         return iUserAccountService.register(signReq);
     }
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码

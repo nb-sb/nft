@@ -1,6 +1,7 @@
 package com.nft.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.common.Utils.OrderNumberUtil;
@@ -13,6 +14,9 @@ import com.nft.infrastructure.po.OrderInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Repository
 @Log4j2
@@ -46,10 +50,33 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
         OrderInfoVo orderInfoVo = BeanCopyUtils.convertTo(orderInfo, OrderInfoVo ::new);
         return orderInfoVo;
     }
+//    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    @Override
+    public boolean setPayOrderStatus(String orderNumber, Integer status) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(status);
+        try {
+            String data = Constants.DATE_FORMAT.format(new Date());
+            Date parse = Constants.DATE_FORMAT.parse(data);
+            orderInfo.setPayDate(parse);
+        } catch (Exception e) {
+            log.error(e);
+        }
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNumber);
+        int update = orderInfoMapper.update(orderInfo, wrapper);
+        if (update>0) return true;
+        return false;
+    }
 
     @Override
-    public boolean updateOrderStatus(String orderNumber, Integer status) {
-
+    public boolean setOrderStatus(String orderNumber, Integer status) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(status);
+        UpdateWrapper<OrderInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("order_no", orderNumber);
+        int update = orderInfoMapper.update(orderInfo, updateWrapper);
+        if (update>0) return true;
         return false;
     }
 }

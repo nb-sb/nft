@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @SpringBootApplication
 @ComponentScan("com.nft.*")
-@MapperScan("com.nft.infrastructure.dao")
 public class AppApplication  {
 
     public static void main(String[] args) {

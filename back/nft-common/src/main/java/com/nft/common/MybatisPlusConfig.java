@@ -4,14 +4,18 @@ package com.nft.common;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /*
-* 用于分页查询
+* 用于分页查询和事务管理
 * */
 
 @Configuration
+@EnableTransactionManagement
+@MapperScan("com.nft.infrastructure.dao")
 public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor MybatisPlusInterceptor() {

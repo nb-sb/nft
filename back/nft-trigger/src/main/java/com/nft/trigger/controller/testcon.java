@@ -1,15 +1,21 @@
 package com.nft.trigger.controller;
 
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
+import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.infrastructure.fisco.service.OwnershipStorageService;
 import com.nft.infrastructure.fisco.service.SellStroageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 
 @RestController
@@ -19,6 +25,9 @@ public class testcon {
     OwnershipStorageService ownershipStorageService;
     @Autowired
     SellStroageService sellStroageService;
+
+    @Autowired
+    IOwnerShipRespository iOwnerShipRespository;
 
     @GetMapping("test123")
     public Object test() throws Exception {
@@ -63,6 +72,18 @@ public class testcon {
     @GetMapping("alltest")
     @AuthPermisson(Constants.permiss.everyone)
     public Object alltest() {
+        return null;
+
+    }
+    @GetMapping("testselect2")
+    @AuthPermisson(Constants.permiss.everyone)
+    public Object testselect2() {
+        long l = System.currentTimeMillis();
+        List list = iOwnerShipRespository.selectOWnerShipInfoByFisco("0x1a22da7eb6367365094e16cc21cf56d7ccb2128c", "ae8d2c8c-d05c-40e8-b3c0-27e6c707d531");
+        long ll = System.currentTimeMillis();
+        System.out.println("耗时"+(ll-l));
+        System.out.println(list);
+        System.out.println(list.get(0));
         return null;
 
     }
