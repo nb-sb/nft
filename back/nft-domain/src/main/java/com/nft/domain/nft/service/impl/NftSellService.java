@@ -162,31 +162,28 @@ public class NftSellService implements INftSellService {
                 //1)decrement balance
                 BigDecimal productPrice = orderInfoVo.getProductPrice();//查询商品价格
                 //减少用于余额
-                if (iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
-                    //如果余额减少成功了的话则会：
-                    //2)set pay_status 设置支付状态
-                    boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
-                    if (b) {
-                        //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
-                        //如果支付成功则转移藏品 => transferConllection()
-                        DetailInfoVo detailInfoVo1 = transferConllection(orderInfoVo, userVo);
-                        // 加入mysql流水表中 || 加入区块链流水表中
-                        boolean b1 = addDetailInfo(detailInfoVo1);
-                        if (b1) {
-                            //流水表添加成功
-                            return new Result("1", "购买成功！");
-                        } else {
-                            log.error("添加到流水表失败");
-                        }
-                    } else {
-                        //设置支付状态失败。返回用于余额
-                        log.error("支付状态修改失败");
-                        throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
-                    }
-
-                }else {
+                if (!iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
                     //return 余额不足
                     return new Result("0", "余额不足");
+                }
+                //如果余额减少成功了的话则会：
+                //2)set pay_status 设置支付状态
+                boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
+                if (!b) {
+                    //设置支付状态失败。返回用于余额
+                    log.error("支付状态修改失败");
+                    throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
+                }
+                //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
+                //如果支付成功则转移藏品 => transferConllection()
+                DetailInfoVo detailInfoVo1 = transferConllection(orderInfoVo, userVo);
+                // 加入mysql流水表中 || 加入区块链流水表中
+                boolean b1 = addDetailInfo(detailInfoVo1);
+                if (b1) {
+                    //流水表添加成功
+                    return new Result("1", "购买成功！");
+                } else {
+                    log.error("添加到流水表失败");
                 }
             }
             //B.如果是支付宝/微信支付
