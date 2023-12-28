@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 28/12/2023 11:12:58
+ Date: 28/12/2023 19:39:40
 */
 
 SET NAMES utf8mb4;
@@ -26,7 +26,7 @@ CREATE TABLE `detail_info`  (
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash',
   `transfer_address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '转移方用户地址',
   `target_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '接受方用户地址',
-  `type` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '0 表示转增，1表示购买 ||用于藏品来源显示',
+  `type` int NULL DEFAULT NULL COMMENT '0 表示转增，1表示购买 ||用于藏品来源显示',
   `time` datetime NULL DEFAULT NULL COMMENT '时间',
   `digital_collection_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号\r\n例如 1#5000 或 51#5000 等也就是id和总数进行拼接',
   PRIMARY KEY (`id`) USING BTREE
@@ -68,6 +68,7 @@ CREATE TABLE `order_info`  (
   `product_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '产品价格',
   `seckill_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '秒杀价格',
   `status` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
+  `init_date` datetime NULL DEFAULT NULL COMMENT '订单创建事件',
   `pay_date` datetime NULL DEFAULT NULL COMMENT '支付时间'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
