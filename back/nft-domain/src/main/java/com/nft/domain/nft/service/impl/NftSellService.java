@@ -146,7 +146,7 @@ public class NftSellService implements INftSellService {
         if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
         Integer userid = userVo.getId();
         paytype = Constants.payType.WEB_BALANCE_PAY;
-        // TODO: 2023/12/27 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
+        // 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
         DistributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
         try {
             //使用订单号查询订单信息
