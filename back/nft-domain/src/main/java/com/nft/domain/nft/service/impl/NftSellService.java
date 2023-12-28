@@ -26,12 +26,14 @@ import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
+import jdk.nashorn.internal.ir.ReturnNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.management.MemoryUsage;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +54,9 @@ public class NftSellService implements INftSellService {
 
     @Override
     public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
-        Map<String, String> userMap = decodeToken(httpServletRequest);
-        if (userMap == null) {
-            return new NftRes("401", "token validate failed");
-        }
-        return iNftSellRespository.addSellCheck(sellReq, userMap);
+        UserVo userVo = decodeToken(httpServletRequest);
+        if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
+        return iNftSellRespository.addSellCheck(sellReq, userVo);
     }
 
     @Override
@@ -94,10 +94,8 @@ public class NftSellService implements INftSellService {
     @Override
     public Result purchaseConllection(HttpServletRequest httpServletRequest, Integer conllectionId) {
         //获取使用token用户id
-        Map<String, String> stringStringMap = decodeToken(httpServletRequest);
-        if (stringStringMap == null) return new Result("401", "用户登录错误");
-        UserVo user = iUserInfoRepository.selectOne(new LoginReq().setUsername(stringStringMap.get("username"))
-                .setPassword(stringStringMap.get("password")));
+        UserVo user = decodeToken(httpServletRequest);
+        if (user == null) return new Result("401", "用户登录错误");
         Integer userid = user.getId();
         Integer stock ;
 
@@ -141,11 +139,9 @@ public class NftSellService implements INftSellService {
     @Transactional
     public Result payOrder(HttpServletRequest httpServletRequest,String orderNumber,Integer paytype) {
         //传入用户id和订单号和支付方式
-        Map<String, String> userMap = decodeToken(httpServletRequest);
-        if (userMap == null) return new Result("401", "token验证错误");
-        UserVo userVo1 = iUserInfoRepository.selectOne(new LoginReq().setUsername(userMap.get("username"))
-                .setPassword(userMap.get("password")));
-        Integer userid = userVo1.getId();
+        UserVo userVo = decodeToken(httpServletRequest);
+        if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
+        Integer userid = userVo.getId();
         paytype = Constants.payType.WEB_BALANCE_PAY;
         // TODO: 2023/12/27 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
          //使用订单号查询订单信息
@@ -165,7 +161,6 @@ public class NftSellService implements INftSellService {
                 //2)set pay_status 设置支付状态
                 boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
                 if (b) {
-                    UserVo userVo = iUserInfoRepository.selectUserByid(userid);
                     //如果支付成功则转移藏品 => transferConllection()
                     transferConllection(orderInfoVo, userVo);
                     //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
@@ -299,9 +294,18 @@ public class NftSellService implements INftSellService {
 
 
 
-    public Map<String, String> decodeToken(HttpServletRequest httpServletRequest) {
+    public UserVo  decodeToken(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader("token");
         Map<String, String> userMap = TokenUtils.decodeToken(token);
-        return userMap;
+        String username = userMap.get("username");
+        String pass = userMap.get("password");
+        LoginReq loginReq = new LoginReq();
+        loginReq.setUsername(username).setPassword(pass);
+        UserVo userVo = iUserInfoRepository.selectOne(loginReq);
+        if (userVo == null) {
+//            return new NftRes("401", "用户token错误请从新登录");
+            return null;
+        }
+        return userVo;
     }
 }
