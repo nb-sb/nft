@@ -35,15 +35,16 @@ public class SellController {
 
     @PostMapping("addsellcheck")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.everyone)
     //添加藏品到待审核数据库
-    public Object addsellcheck(@Valid @RequestBody SellReq sellReq) {
-
+    public Result addsellcheck(@Valid @RequestBody SellReq sellReq) {
         return iNftSellService.addSellCheck(httpServletRequest, sellReq);
     }
 
     //上传图片接口
     @PostMapping("/upfile")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.everyone)
     public Object upfile(HttpServletRequest request) {
         List<String> result = new ArrayList<>();
         //多个文件上传  就只是简单的多文件上传保存在本地的磁盘
@@ -87,6 +88,7 @@ public class SellController {
     //支付藏品订单
     @GetMapping("payConllectionOrder")
     @ResponseBody
+    @AuthPermisson()
     public Result payOrder(
             @NotNull
             @RequestParam String OrderNumber,
@@ -96,27 +98,5 @@ public class SellController {
         return iNftSellService.payOrder(httpServletRequest, OrderNumber, paytype);
     }
 
-
-
-
-    //管理员 - 添加分类
-    public void addSort() {
-        //1.判断是否为管理员/是否有权限
-        //2.判断分类是否存在
-        //3.判断分类缩写是否存在
-
-    }
-    //管理员 - 查看分类
-    public void selectSortByPage() {
-
-    }
-    //管理员 - 修改分类名
-    public void changeSortName() {
-
-    }
-    //管理员 - 删除分类
-    public void deleteSort() {
-
-    }
 
 }

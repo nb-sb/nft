@@ -6,6 +6,7 @@ import com.nft.common.Constants;
 import com.nft.common.SendEmail;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.common.Aop.AuthPermisson;
+import com.nft.domain.support.Search;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.res.UserResult;
@@ -15,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
@@ -92,7 +92,7 @@ public class UserController {
 
     }
 
-    //修改密码 -- 1.待优化返回接口2.应使用token拿到用户名
+    //修改密码
     @PostMapping("/chanagePassword")
     @ResponseBody
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {

@@ -1,12 +1,12 @@
 package com.nft.domain.user.service.impl;
 
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.nft.model.res.NftRes;
+import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
@@ -14,13 +14,11 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
-import org.elasticsearch.index.seqno.RetentionLeaseInvalidRetainingSeqNoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 

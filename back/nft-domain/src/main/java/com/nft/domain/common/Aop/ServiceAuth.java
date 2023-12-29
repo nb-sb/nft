@@ -55,7 +55,7 @@ public class ServiceAuth {
         Map<String, Object> map = null;
         //验证token的逻辑
         if (value.equals(Constants.permiss.everyone)) {
-            return pjp.proceed();
+            map = isExist(token);
         } else if (value.equals(Constants.permiss.admin)) {
             map = IsAdmin(token);
         } else if (value.equals(Constants.permiss.regularUser)) {
@@ -116,6 +116,33 @@ public class ServiceAuth {
         if (userVo.getRole() != 0) {
             map.put("code", "401");
             map.put("data", "身份验证失败，只有普通用户才有权限调用");
+            return map;
+        }
+        map.put("code", "1");
+        map.put("data", "成功");
+        return map;
+    }
+    private Map<String,Object> isExist (String token) {
+        // System.out.println(token);
+        HashMap<String, Object> map = new HashMap<>();
+        if (token == null) {
+            map.put("code", "401");
+            map.put("data", "未登录");
+            return map;
+        }
+        if (!TokenUtils.verify(token)) {
+            map.put("code", "401");
+            map.put("data", "身份验证失败");
+            return map;
+        }
+        Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
+        String username = stringStringMap.get("username");
+        String password = stringStringMap.get("password");
+        UserVo userVo = iUserInfoRepository.selectOne(new LoginReq().setUsername(username).setPassword(password));
+        // System.out.println(userPo1.getRole());
+        if (userVo== null) {
+            map.put("code", "401");
+            map.put("data", "身份验证失败，用户不存在");
             return map;
         }
         map.put("code", "1");

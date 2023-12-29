@@ -1,4 +1,4 @@
-package com.nft.domain.user.model.req;
+package com.nft.domain.support;
 
 
 import lombok.Data;
