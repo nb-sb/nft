@@ -26,4 +26,8 @@ String.valueOf()方法是小编推荐使用的，因为它不会出现空指针�
 （String）是标准的类型转换，将Object类型转为String类型，使用(String)强转时，最好使用instanceof做一个类型检查，以判断是否可以进行强转，否则容易抛出ClassCastException异常。需要注意的是编写的时候，编译器并不会提示有语法错误，所以这个方法要谨慎的使用。
 ![img.png](img.png)
 
+待完成功能：
+用户需要进行实名认证并通过才能进行购买藏品
+
+
 Copyright：网站： https://nb.sb/ || git开源地址：https://gitee.com/nb-sb/nft

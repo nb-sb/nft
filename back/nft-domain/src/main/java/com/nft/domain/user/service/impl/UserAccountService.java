@@ -88,8 +88,7 @@ public class UserAccountService implements IUserAccountService {
      */
     @Override
     public Result chanagePassword(HttpServletRequest httpServletRequest,ChanagePwReq chanagePwReq) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne == null) return new NftRes("401", "用户token错误请从新登录");
+
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();
             //1.判断验证类型是邮箱验证还是旧密码修改
@@ -117,6 +116,8 @@ public class UserAccountService implements IUserAccountService {
             if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
                 return new Result("0", "不能使用近期使用过的密码!");
             }
+            UserVo userOne = token2User.getUserOne(httpServletRequest);
+            if (userOne == null) return new NftRes("401", "用户token错误请从新登录");
             //判断旧密码是否正确
             LoginReq loginReq = new LoginReq();
             loginReq.setUsername(userOne.getUsername());
@@ -176,6 +177,11 @@ public class UserAccountService implements IUserAccountService {
         userInfoVo.setBalance(userOne.getBalance());
         redisUtil.set(Constants.RedisKey.USER_INFO(userOne.getId()), JSONUtil.toJsonStr(userInfoVo));
         return userInfoVo;
+    }
+
+    @Override
+    public boolean submitRealNameAuth() {
+        return false;
     }
 
     private UserInfoVo getUserDetailByRedis(String key) {

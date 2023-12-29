@@ -36,7 +36,6 @@ public class UserController {
     private final Token2User token2User;
 
 
-
     @GetMapping("/login")
     @ResponseBody
     public Result test(@Valid @RequestBody LoginReq loginReq) {
@@ -54,10 +53,11 @@ public class UserController {
 //        if (res != null) return res;
         return iUserAccountService.register(signReq);
     }
+
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码
     @PostMapping("/getcode")
     @ResponseBody
-    public Result getcode(@Valid @RequestBody GetCodeType getCodeType)  {
+    public Result getcode(@Valid @RequestBody GetCodeType getCodeType) {
         //获取验证码时需要进行滑动验证码验证等操作,防止脚本消息刷接口
         UserResult res = getVerification(getCodeType.getCodeId());
         if (res != null) return res;
@@ -65,7 +65,7 @@ public class UserController {
         if (Constants.Get_Code_iphone.equals(getCodeType.getType())) {
             //如果是手机号类型 验证手机是否正确
             if (!CheckUtils.isMobile(name)) {
-                return new Result("0","手机号错误");
+                return new Result("0", "手机号错误");
             }
             //1.调用发送验证码方法
             int code = (int) (Math.random() * 50000);//模拟获取验证码操作
@@ -73,24 +73,24 @@ public class UserController {
             //2.记录到redis中设置60秒 key: name value: code
             //3.返回成功或失败消息
             return new Result("0", String.valueOf(redisUtil.set(name, code, 60)));
-        } else if(Constants.Get_Code_email.equals(getCodeType.getType())) {
+        } else if (Constants.Get_Code_email.equals(getCodeType.getType())) {
             //如果是邮箱类型 验证邮箱类型
             if (!CheckUtils.isEmail(name)) {
-                return new Result("0","邮箱类型错误");
+                return new Result("0", "邮箱类型错误");
             }
             //1.调用发送验证码方法
             int code = (int) (Math.random() * 50000);//模拟获取验证码操作
             boolean b = sendEmail.sentSimpleMail("您的NFT修改密码的验证码", "您的NFT修改密码的验证码为: " + code, name);
             if (!b) {
                 log.error("邮箱发送验证码时出错 :" + false);
-                return new Result("0","未知错误-请联系管理员查看日志");
+                return new Result("0", "未知错误-请联系管理员查看日志");
             }
             //2.记录到redis中设置60秒 key: name value: code
             //3.返回成功或失败消息
             return new Result("1", String.valueOf(redisUtil.set(name, code, 60)));
         } else {
-            log.error("类型错误!"+getCodeType.getType());
-            return new Result("0","获取验证码类型错误");
+            log.error("类型错误!" + getCodeType.getType());
+            return new Result("0", "获取验证码类型错误");
         }
 
     }
@@ -99,7 +99,7 @@ public class UserController {
     @PostMapping("/chanagePassword")
     @ResponseBody
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
-        return iUserAccountService.chanagePassword(httpServletRequest,chanagePwReq);
+        return iUserAccountService.chanagePassword(httpServletRequest, chanagePwReq);
     }
 
     //    使用分页查询查询所有用户
@@ -116,11 +116,16 @@ public class UserController {
     @ResponseBody
     public Result getOwnerInfo() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne==null) return new SelectRes("0","用户信息错误","");
+        if (userOne == null) return new SelectRes("0", "用户信息错误", "");
         UserInfoVo userInfoVo = iUserAccountService.selectUserDetail(userOne);
-        return new SelectRes("1","success",userInfoVo);
+        return new SelectRes("1", "success", userInfoVo);
     }
-    // TODO: 2023/12/29 认证信息
+
+    // TODO: 2023/12/29 提交实名认证信息
+    public void submitRealNameAuth() {
+
+    }
+    // TODO: 2023/12/29 审核实名认证信息
 
     //todo 修改用户信息
 

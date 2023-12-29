@@ -34,4 +34,6 @@ public interface IUserAccountService {
     boolean isAdmin(HttpServletRequest httpServletRequest);
 
     UserInfoVo selectUserDetail(UserVo userVo);
+
+    boolean submitRealNameAuth();
 }
