@@ -18,11 +18,14 @@ public class NftTransferService implements INftTransferService {
     private final INftSellRespository iNftSellRespository;
     private final RedisUtil redisUtil;
     private final IpfsService ipfsService;
-    private final IUserInfoRepository iUserInfoRepository;
+        private final IUserInfoRepository iUserInfoRepository;
     private final IOrderInfoRespository iOrderInfoRespository;
     private final IOwnerShipRespository iOwnerShipRespository;
     @Override
     public void transferCollection() {
-
+        //验证是否是自己的藏品
+        //更新数据库中所属数据
+        //调用区块链中转移方法
+        iNftSellRespository.transferCollection("","","");
     }
 }

@@ -17,14 +17,12 @@ import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.user.model.vo.UserVo;
-import com.nft.infrastructure.dao.NftRelationshipsMapper;
 import com.nft.infrastructure.dao.SellInfoMapper;
 import com.nft.infrastructure.dao.SubmitCacheMapper;
 import com.nft.infrastructure.fisco.model.bo.SellStroageCreateSellInputBO;
 import com.nft.infrastructure.fisco.service.SellStroageService;
 import com.nft.infrastructure.po.SellInfo;
 import com.nft.infrastructure.po.SubmitCache;
-import com.nft.infrastructure.util.ElasticSearchUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
@@ -250,6 +248,18 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         sellInfo.setId(sellInfo1.getId());
         int update = sellInfoMapper.updateById(sellInfo);
         return update > 0;
+    }
+    /**
+     * @Des 转移藏品的方法
+     * @Date 2023/12/29 8:58
+     * @Param fromAddress 转移者地址
+     * @Param toAddress 接受者地址
+     * @Param id 该藏品所属用户表中的id
+     * @Return
+     */
+    @Override
+    public void transferCollection(String fromAddress, String toAddress, String id) {
+
     }
 
 

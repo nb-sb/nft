@@ -1,5 +1,6 @@
 package com.nft.domain.user.service;
 
+import com.nft.common.Result;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.req.Search;
@@ -20,7 +21,7 @@ public interface IUserAccountService {
     UserResult retrievePassword(LoginReq loginReq);
 
     //修改密码
-    Object chanagePassword(ChanagePwReq chanagePwReq);
+    Result chanagePassword(HttpServletRequest httpServletRequest,ChanagePwReq chanagePwReq);
 
 
     //使用分页查询用户信息

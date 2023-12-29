@@ -7,6 +7,7 @@ import com.nft.common.SendEmail;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.user.model.req.*;
+import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.IUserAccountService;
@@ -15,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ public class UserController {
     private final IUserAccountService iUserAccountService;
     private final RedisUtil redisUtil;
     private final SendEmail sendEmail;
+    private final HttpServletRequest httpServletRequest;
 
 
 
@@ -74,15 +77,14 @@ public class UserController {
             }
             //1.调用发送验证码方法
             int code = (int) (Math.random() * 50000);//模拟获取验证码操作
-            try {
-                sendEmail.sentSimpleMail("您的NFT修改密码的验证码", "您的NFT修改密码的验证码为: " + code, name);
-            } catch (MessagingException e) {
-                log.error("邮箱发送验证码时出错 :"+e);
+            boolean b = sendEmail.sentSimpleMail("您的NFT修改密码的验证码", "您的NFT修改密码的验证码为: " + code, name);
+            if (!b) {
+                log.error("邮箱发送验证码时出错 :" + false);
                 return new Result("0","未知错误-请联系管理员查看日志");
             }
             //2.记录到redis中设置60秒 key: name value: code
             //3.返回成功或失败消息
-            return new Result("0", String.valueOf(redisUtil.set(name, code, 60)));
+            return new Result("1", String.valueOf(redisUtil.set(name, code, 60)));
         } else {
             log.error("类型错误!"+getCodeType.getType());
             return new Result("0","获取验证码类型错误");
@@ -93,17 +95,17 @@ public class UserController {
     //修改密码 -- 1.待优化返回接口2.应使用token拿到用户名
     @PostMapping("/chanagePassword")
     @ResponseBody
-    public Object chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
-        Object o = iUserAccountService.chanagePassword(chanagePwReq);
-        return o;
+    public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
+        return iUserAccountService.chanagePassword(httpServletRequest,chanagePwReq);
     }
 
     //    使用分页查询查询所有用户
     @PostMapping("/selectUserPage")
     @ResponseBody
     @AuthPermisson(Constants.permiss.admin)
-    public List<UserVo> selectUserPage(@RequestBody Search search) {
-        return iUserAccountService.selectUserPage(search);
+    public Result selectUserPage(@RequestBody Search search) {
+        List<UserVo> userVos = iUserAccountService.selectUserPage(search);
+        return new SelectRes("1", "success", userVos);
     }
 
     //todo 修改用户信息

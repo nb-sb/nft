@@ -4,13 +4,13 @@ import com.nft.common.SendEmail;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
+import com.nft.app.AppApplication;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 
 
 @Log4j2
-@SpringBootTest
+@SpringBootTest(classes = AppApplication.class)
 public class Test123 {
     @Test
     public void ee() {
@@ -27,6 +27,7 @@ public class Test123 {
 
     @Test
     public void email() throws MessagingException {
-        sendEmail.sentSimpleMail("123","456","3500079813@qq.com");
+        boolean b = sendEmail.sentSimpleMail("123", "456", "3500079813@qq.com");
+        System.out.println(b);
     }
 }

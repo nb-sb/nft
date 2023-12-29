@@ -39,4 +39,10 @@ public interface INftSellRespository {
 
     //减少库存
     boolean decreaseSellStocks(Integer id,Integer number);
+
+
+
+    //转移藏品
+    void transferCollection(String fromAddress ,String toAddress,String id);
+
 }

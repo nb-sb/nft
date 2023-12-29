@@ -20,6 +20,7 @@ import com.nft.domain.nft.repository.IOrderInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.service.INftSellService;
 import com.nft.domain.support.ipfs.IpfsService;
+import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -27,7 +28,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.reflect.generics.tree.VoidDescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -48,10 +48,11 @@ public class NftSellService implements INftSellService {
     private final IOrderInfoRespository iOrderInfoRespository;
     private final IOwnerShipRespository iOwnerShipRespository;
     private final IDetailInfoRespository iDetailInfoRespository;
+    private final Token2User token2User;
 
     @Override
     public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
-        UserVo userVo = decodeToken(httpServletRequest);
+        UserVo userVo =token2User.getUserOne(httpServletRequest);
         if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
         boolean res = iNftSellRespository.addSellCheck(sellReq, userVo);
         if (res) return new NftRes("1", "已经添加到审核中~");
@@ -93,8 +94,8 @@ public class NftSellService implements INftSellService {
     @Override
     public Result purchaseConllection(HttpServletRequest httpServletRequest, Integer conllectionId) {
         //获取使用token用户id
-        UserVo user = decodeToken(httpServletRequest);
-        if (user == null) return new Result("401", "用户登录错误");
+        UserVo user =token2User.getUserOne(httpServletRequest);
+        if (user == null) return new NftRes("401", "用户token错误请从新登录");
         Integer userid = user.getId();
         Integer stock ;
 
@@ -142,7 +143,7 @@ public class NftSellService implements INftSellService {
     @Transactional
     public Result payOrder(HttpServletRequest httpServletRequest,String orderNumber,Integer paytype) {
         //传入用户id和订单号和支付方式
-        UserVo userVo = decodeToken(httpServletRequest);
+        UserVo userVo =token2User.getUserOne(httpServletRequest);
         if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
         Integer userid = userVo.getId();
         paytype = Constants.payType.WEB_BALANCE_PAY;
@@ -332,14 +333,4 @@ public class NftSellService implements INftSellService {
     }
 
 
-
-    public UserVo  decodeToken(HttpServletRequest httpServletRequest) {
-        String token = httpServletRequest.getHeader("token");
-        Map<String, String> userMap = TokenUtils.decodeToken(token);
-        String username = userMap.get("username");
-        String pass = userMap.get("password");
-        LoginReq loginReq = new LoginReq();
-        loginReq.setUsername(username).setPassword(pass);
-        return iUserInfoRepository.selectOne(loginReq);
-    }
 }
