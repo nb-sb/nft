@@ -1,15 +1,18 @@
 package com.nft.domain.user.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.nft.model.res.NftRes;
+import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
+import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.IUserAccountService;
@@ -154,6 +157,31 @@ public class UserAccountService implements IUserAccountService {
         }
         log.warn("不是管理员权限: "+userVo);
         return false;
+    }
+
+    @Override
+    public UserInfoVo selectUserDetail(UserVo userOne) {
+        //查询用户个人信息。由于个人信息基本是不变的所以可以直接存入redis中
+        UserInfoVo userDetailByRedis = getUserDetailByRedis(Constants.RedisKey.USER_INFO(userOne.getId()));
+        if (userDetailByRedis != null) {
+            return userDetailByRedis;
+        }
+        UserInfoVo userInfoVo = iUserInfoRepository.selectUserDetail(userOne.getId());
+        if (userInfoVo == null) {
+            return null;
+        }
+        userInfoVo.setUsername(userOne.getUsername());
+        userInfoVo.setPassword("******************");
+        userInfoVo.setRole(userOne.getRole());
+        userInfoVo.setBalance(userOne.getBalance());
+        redisUtil.set(Constants.RedisKey.USER_INFO(userOne.getId()), JSONUtil.toJsonStr(userInfoVo));
+        return userInfoVo;
+    }
+
+    private UserInfoVo getUserDetailByRedis(String key) {
+        String userInfoStr = redisUtil.getStr(key);
+        UserInfoVo bean = JSONUtil.toBean(userInfoStr, UserInfoVo.class);
+        return bean;
     }
 
 }

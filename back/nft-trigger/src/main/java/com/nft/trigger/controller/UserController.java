@@ -7,9 +7,11 @@ import com.nft.common.SendEmail;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.support.Search;
+import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.res.UserResult;
+import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,7 @@ public class UserController {
     private final RedisUtil redisUtil;
     private final SendEmail sendEmail;
     private final HttpServletRequest httpServletRequest;
+    private final Token2User token2User;
 
 
 
@@ -108,8 +111,20 @@ public class UserController {
         return new SelectRes("1", "success", userVos);
     }
 
+    //查询用户自己的个人信息
+    @PostMapping("/getOwnerInfo")
+    @ResponseBody
+    public Result getOwnerInfo() {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne==null) return new SelectRes("0","用户信息错误","");
+        UserInfoVo userInfoVo = iUserAccountService.selectUserDetail(userOne);
+        return new SelectRes("1","success",userInfoVo);
+    }
+    // TODO: 2023/12/29 认证信息
+
     //todo 修改用户信息
 
+    //todo 添加头像等
     //验证验证码是否验证成功
     private UserResult getVerification(String codeId) {
 //        2.判断验证码是否验证成功，如果没验证成功则返回验证失败
@@ -122,4 +137,5 @@ public class UserController {
         redisUtil.del(codeId);
         return null;
     }
+
 }

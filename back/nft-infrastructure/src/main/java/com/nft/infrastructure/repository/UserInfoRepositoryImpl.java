@@ -10,11 +10,14 @@ import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.support.Search;
 import com.nft.domain.user.model.req.SignReq;
+import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
+import com.nft.infrastructure.dao.UserDetalMapper;
 import com.nft.infrastructure.dao.UserInfoMapper;
 import com.nft.infrastructure.fisco.model.bo.UserStorageAddUserInputBO;
 import com.nft.infrastructure.fisco.service.UserStorageService;
+import com.nft.infrastructure.po.UserDetal;
 import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +25,9 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.stereotype.Repository;
+import scala.reflect.internal.Trees;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,6 +48,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
 
     private final UserInfoMapper userInfoMapper;
     private final UserStorageService userStorageService;
+    private final UserDetalMapper userDetalMapper;
     @Override
     public UserVo selectOne(LoginReq loginReq) {
         UserInfo userInfo = selectOne(loginReq.getUsername(), loginReq.getPassword());
@@ -149,6 +155,20 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         int i = userInfoMapper.updateById(userInfo);
         if (i>0) return true;
         return false;
+    }
+
+    @Override
+    public UserInfoVo selectUserDetail(Integer forid) {
+        QueryWrapper<UserDetal> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("for_id", forid);
+        UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
+        if (userDetal == null) return null;
+        UserInfoVo userInfoVo = new UserInfoVo();
+        userInfoVo.setId(userDetal.getId());
+        userInfoVo.setAddress(userDetal.getAddress());
+        userInfoVo.setCardId(userDetal.getCardid());
+        userInfoVo.setPhoneNumber(userDetal.getPhoneNumber());
+        return userInfoVo;
     }
 
 

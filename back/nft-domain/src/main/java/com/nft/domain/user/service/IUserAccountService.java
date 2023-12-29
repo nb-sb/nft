@@ -6,6 +6,7 @@ import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.support.Search;
 import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.res.UserResult;
+import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,4 +33,5 @@ public interface IUserAccountService {
 
     boolean isAdmin(HttpServletRequest httpServletRequest);
 
+    UserInfoVo selectUserDetail(UserVo userVo);
 }

@@ -6,6 +6,7 @@ import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.support.Search;
 import com.nft.domain.user.model.req.SignReq;
+import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 
 import java.math.BigDecimal;
@@ -33,4 +34,6 @@ public interface IUserInfoRepository {
 
     //修改用户余额
     boolean decrementUserBalance(Integer id, BigDecimal balance);
+
+    UserInfoVo selectUserDetail(Integer forid);
 }
