@@ -84,6 +84,7 @@ public class TokenUtils {
                     return claims;
                 } catch (Exception e) {
                     e.printStackTrace();
+                    log.error(e.getMessage());
                     return null;
                 }
             } else {

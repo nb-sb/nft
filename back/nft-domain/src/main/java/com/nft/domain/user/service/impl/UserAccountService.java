@@ -12,11 +12,14 @@ import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
+import com.nft.domain.user.model.vo.RealNameAuthVo;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,8 @@ public class UserAccountService implements IUserAccountService {
 
     @Autowired
     IUserInfoRepository iUserInfoRepository;
+    @Autowired
+    IUserDetalRepository iUserDetalRepository;
     @Autowired
     RedisUtil redisUtil;
     @Autowired
@@ -180,8 +185,18 @@ public class UserAccountService implements IUserAccountService {
     }
 
     @Override
-    public boolean submitRealNameAuth() {
-        return false;
+    public Result submitRealNameAuth(HttpServletRequest httpServletRequest,RealNameAuthReq realNameAuthReq) {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne ==null) return new Result("401","用户不存在");
+        realNameAuthReq.setAddress(userOne.getAddress());
+        realNameAuthReq.setForid(userOne.getId());
+        //判断自己是否已经存在了认证信息，存在则无需提交
+        RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(userOne.getId());
+        if (realNameAuthVo != null) {
+            return new Result("0","已经存在一个未审核的提交，请等待！");
+        }
+        if (iUserDetalRepository.submitRealNameAuth(realNameAuthReq))return new Result("1","提交成功");
+        return new Result("0","提交失败");
     }
 
     private UserInfoVo getUserDetailByRedis(String key) {

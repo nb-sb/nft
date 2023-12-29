@@ -299,4 +299,15 @@ public class Constants {
         public static final int pay = 1; //购买
 
     }
+    /**
+     * 实名审核状态
+     */
+    public static final class realNameAuthStatus{
+        public static final int awaiting_audit = 0; //待审核
+        public static final int SUCCESS = 1; //审核成功
+        public static final int REFUND = 0; //审核被驳回
+
+
+
+    }
 }

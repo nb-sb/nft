@@ -5,6 +5,7 @@ import com.nft.common.Constants;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.support.Search;
+import com.nft.domain.user.model.req.RealNameAuthReq;
 import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -36,4 +37,6 @@ public interface IUserInfoRepository {
     boolean decrementUserBalance(Integer id, BigDecimal balance);
 
     UserInfoVo selectUserDetail(Integer forid);
+
+
 }

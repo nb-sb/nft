@@ -121,10 +121,14 @@ public class UserController {
         return new SelectRes("1", "success", userInfoVo);
     }
 
-    // TODO: 2023/12/29 提交实名认证信息
-    public void submitRealNameAuth() {
-
+    //2023/12/29 提交实名认证信息
+    @PostMapping("/submitRealNameAuth")
+    @ResponseBody
+    public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthReq realNameAuthReq) {
+        return iUserAccountService.submitRealNameAuth(httpServletRequest, realNameAuthReq);
     }
+    //用户修改被驳回的认证信息并提交
+
     // TODO: 2023/12/29 审核实名认证信息
 
     //todo 修改用户信息

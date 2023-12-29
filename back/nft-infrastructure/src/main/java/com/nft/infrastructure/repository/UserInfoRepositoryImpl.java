@@ -9,6 +9,7 @@ import com.nft.common.Constants;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.support.Search;
+import com.nft.domain.user.model.req.RealNameAuthReq;
 import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -17,6 +18,7 @@ import com.nft.infrastructure.dao.UserDetalMapper;
 import com.nft.infrastructure.dao.UserInfoMapper;
 import com.nft.infrastructure.fisco.model.bo.UserStorageAddUserInputBO;
 import com.nft.infrastructure.fisco.service.UserStorageService;
+import com.nft.infrastructure.po.DetailInfo;
 import com.nft.infrastructure.po.UserDetal;
 import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
@@ -170,6 +172,8 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         userInfoVo.setPhoneNumber(userDetal.getPhoneNumber());
         return userInfoVo;
     }
+
+
 
 
     //修改密码逻辑，可以用于忘记密码修改和普通的输入原始密码进行修改
