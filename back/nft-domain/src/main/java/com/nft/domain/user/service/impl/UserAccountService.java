@@ -7,7 +7,6 @@ import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.nft.model.res.NftRes;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
@@ -19,7 +18,6 @@ import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,10 +41,10 @@ public class UserAccountService implements IUserAccountService {
     @Override
     public UserResult register(SignReq signReq) {
         if (!CheckUtils.isUserName(signReq.getUsername())) {
-            return new UserResult("0", "用户名不合规(不包含特殊字符6-20位)");
+            return UserResult.error("用户名不合规(不包含特殊字符6-20位)");
         }
         if (!CheckUtils.isPassword(signReq.getPassword())) {
-            return new UserResult("0", "密码不合规(6-16位)");
+            return UserResult.error("密码不合规(6-16位)");
         }
         signReq.setRole(0);
         Constants.ResponseCode responseCode = iUserInfoRepository.register(signReq);
@@ -63,9 +61,10 @@ public class UserAccountService implements IUserAccountService {
         UserVo res = iUserInfoRepository.selectOne(loginReq);
         Optional<UserVo> userVo1 = Optional.ofNullable(res);
         if (userVo1.isPresent()) {
-            return new UserResult("1", "登录成功", TokenUtils.token(loginReq.getUsername(),loginReq.getPassword()));
+            return UserResult.success("登录成功", TokenUtils.token(loginReq.getUsername(), loginReq.getPassword()));
         }
-        return new UserResult("0", "账号或密码错误");
+
+        return UserResult.error("账号或密码错误");
     }
 
     @Override
@@ -105,13 +104,13 @@ public class UserAccountService implements IUserAccountService {
                 //如果是使用邮箱验证的话
                 key = chanagePwReq.getEmail();
                 if (!code.equals(redisUtil.get(key))) {
-                    return new Result("0", "邮箱验证码不正确-验证失败");
+                    return UserResult.error("邮箱验证码不正确-验证失败");
                 }
             } else {
                 //使用手机号验证码验证
                 key = chanagePwReq.getPhone();
                 if (!code.equals(redisUtil.get(key))) {
-                    return new Result("0", "手机号验证码不正确-验证失败");
+                    return UserResult.error("手机号验证码不正确-验证失败");
                 }
             }
             //到这里实际上判断验证码的逻辑已经结束,可以将redis中验证码进行删除
@@ -119,10 +118,10 @@ public class UserAccountService implements IUserAccountService {
         }else {
             //使用旧密码修改
             if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
-                return new Result("0", "不能使用近期使用过的密码!");
+                return UserResult.error("不能使用近期使用过的密码!");
             }
             UserVo userOne = token2User.getUserOne(httpServletRequest);
-            if (userOne == null) return new NftRes("401", "用户token错误请从新登录");
+            if (userOne == null) return Result.userNotFinded();
             //判断旧密码是否正确
             LoginReq loginReq = new LoginReq();
             loginReq.setUsername(userOne.getUsername());
@@ -130,15 +129,15 @@ public class UserAccountService implements IUserAccountService {
             loginReq.setPassword(chanagePwReq.getOldpassword());
             UserVo userVo = iUserInfoRepository.selectOne(loginReq);
             if (userVo == null) {
-                return new Result("0", "旧密码不正确-验证失败");
+                return UserResult.error("旧密码不正确-验证失败");
             }
         }
         // 修改密码操作
         boolean b = iUserInfoRepository.chanagePassword(chanagePwReq);
         if (b) {
-            return new Result("1", "修改成功!");
+            return Result.success("修改成功!");
         }
-        return new Result("0", "未知错误");
+        return UserResult.error("未知错误");
     }
 
     @Override
@@ -180,23 +179,39 @@ public class UserAccountService implements IUserAccountService {
         userInfoVo.setPassword("******************");
         userInfoVo.setRole(userOne.getRole());
         userInfoVo.setBalance(userOne.getBalance());
-        redisUtil.set(Constants.RedisKey.USER_INFO(userOne.getId()), JSONUtil.toJsonStr(userInfoVo));
+        redisUtil.set(Constants.RedisKey.USER_INFO(userOne.getId()), JSONUtil.toJsonStr(userInfoVo),60*30);
         return userInfoVo;
     }
 
     @Override
     public Result submitRealNameAuth(HttpServletRequest httpServletRequest,RealNameAuthReq realNameAuthReq) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne ==null) return new Result("401","用户不存在");
+        if (userOne ==null) return Result.userNotFinded();
         realNameAuthReq.setAddress(userOne.getAddress());
         realNameAuthReq.setForid(userOne.getId());
         //判断自己是否已经存在了认证信息，存在则无需提交
         RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(userOne.getId());
         if (realNameAuthVo != null) {
-            return new Result("0","已经存在一个未审核的提交，请等待！");
+            return Result.error("有待审核的认证，请等待审核！");
         }
         if (iUserDetalRepository.submitRealNameAuth(realNameAuthReq))return new Result("1","提交成功");
-        return new Result("0","提交失败");
+        return Result.error("提交失败");
+    }
+
+    @Override
+    public Result AuditRealNameAuth(UpdateRealNameAuthStatusReq req) {
+        // TODO: 2023/12/29 判断状态需要为待审核才能进行修改
+        RealNameAuthVo realNameAuthReq = iUserDetalRepository.selectById(req.getId());
+        if (realNameAuthReq == null) {
+            //返回 审核的id不存在
+            return Result.error("审核的id不存在");
+        }
+        if (!Constants.realNameAuthStatus.AWAIT_AUDIT.equals(realNameAuthReq.getStatus())) {
+            //返回 该内容已经被审核
+            return Result.error("该信息已经被审核");
+        }
+        boolean b = iUserDetalRepository.updataStatusById(req);
+        return Result.success("成功");
     }
 
     private UserInfoVo getUserDetailByRedis(String key) {

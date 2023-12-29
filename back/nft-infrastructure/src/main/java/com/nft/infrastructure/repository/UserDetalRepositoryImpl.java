@@ -1,9 +1,11 @@
 package com.nft.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.user.model.req.RealNameAuthReq;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusReq;
 import com.nft.domain.user.model.vo.RealNameAuthVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
@@ -34,7 +36,7 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
         userDetal.setName(realNameAuthReq.getName())
                 .setCardid(realNameAuthReq.getCardId())
                 .setPhoneNumber(realNameAuthReq.getPhoneNumber())
-                .setStatus(Constants.realNameAuthStatus.awaiting_audit)
+                .setStatus(Constants.realNameAuthStatus.AWAIT_AUDIT)
                 .setAddress(realNameAuthReq.getAddress())
                 .setForId(realNameAuthReq.getForid());
         int insert = userDetalMapper.insert(userDetal);
@@ -44,8 +46,35 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
     @Override
     public RealNameAuthVo selectByForId(Integer id) {
         QueryWrapper<UserDetal> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("for_id", id);
         UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
+        if (userDetal == null) {
+            return null;
+        }
         RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);
+        return realNameAuthVo;
+    }
+
+    @Override
+    public boolean updataStatusById(UpdateRealNameAuthStatusReq req) {
+        UserDetal userDetal = new UserDetal();
+        userDetal.setId(req.getId());
+        userDetal.setStatus(req.getStatus());
+        int i = userDetalMapper.updateById(userDetal);
+        return i > 0;
+    }
+
+    @Override
+    public RealNameAuthVo selectById(Integer id) {
+        UserDetal userDetal = userDetalMapper.selectById(id);
+        RealNameAuthVo realNameAuthVo = new RealNameAuthVo();
+        realNameAuthVo.setName(userDetal.getName());
+        realNameAuthVo.setCardId(userDetal.getCardid());
+        realNameAuthVo.setPhoneNumber(userDetal.getPhoneNumber());
+        realNameAuthVo.setAddress(userDetal.getAddress());
+        realNameAuthVo.setForid(userDetal.getForId());
+        realNameAuthVo.setStatus(userDetal.getStatus());
+
         return realNameAuthVo;
     }
 

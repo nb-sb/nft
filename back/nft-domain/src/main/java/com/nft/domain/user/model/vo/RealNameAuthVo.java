@@ -5,4 +5,5 @@ import lombok.Data;
 
 @Data
 public class RealNameAuthVo extends RealNameAuthReq {
+    Integer status;
 }

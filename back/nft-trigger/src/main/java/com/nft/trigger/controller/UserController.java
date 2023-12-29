@@ -59,7 +59,7 @@ public class UserController {
     @ResponseBody
     public Result getcode(@Valid @RequestBody GetCodeType getCodeType) {
         //获取验证码时需要进行滑动验证码验证等操作,防止脚本消息刷接口
-        UserResult res = getVerification(getCodeType.getCodeId());
+        Result res = getVerification(getCodeType.getCodeId());
         if (res != null) return res;
         String name = getCodeType.getName();
         if (Constants.Get_Code_iphone.equals(getCodeType.getType())) {
@@ -108,7 +108,7 @@ public class UserController {
     @AuthPermisson(Constants.permiss.admin)
     public Result selectUserPage(@RequestBody Search search) {
         List<UserVo> userVos = iUserAccountService.selectUserPage(search);
-        return new SelectRes("1", "success", userVos);
+        return SelectRes.success(userVos);
     }
 
     //查询用户自己的个人信息
@@ -116,9 +116,9 @@ public class UserController {
     @ResponseBody
     public Result getOwnerInfo() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne == null) return new SelectRes("0", "用户信息错误", "");
+        if (userOne == null) return Result.userNotFinded();
         UserInfoVo userInfoVo = iUserAccountService.selectUserDetail(userOne);
-        return new SelectRes("1", "success", userInfoVo);
+        return SelectRes.success(userInfoVo);
     }
 
     //2023/12/29 提交实名认证信息
@@ -127,20 +127,24 @@ public class UserController {
     public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthReq realNameAuthReq) {
         return iUserAccountService.submitRealNameAuth(httpServletRequest, realNameAuthReq);
     }
-    //用户修改被驳回的认证信息并提交
+    //todo 用户修改被驳回的认证信息并提交
 
-    // TODO: 2023/12/29 审核实名认证信息
+    // TODO: 2023/12/29 管理员 审核实名认证信息
+    public Result AuditRealNameAuth(@Valid @RequestBody UpdateRealNameAuthStatusReq req) {
+        return iUserAccountService.AuditRealNameAuth(req);
 
+
+    }
     //todo 修改用户信息
 
     //todo 添加头像等
     //验证验证码是否验证成功
-    private UserResult getVerification(String codeId) {
+    private Result getVerification(String codeId) {
 //        2.判断验证码是否验证成功，如果没验证成功则返回验证失败
         Boolean o = (Boolean) Optional.ofNullable(redisUtil.get(codeId)).orElse(false);
         if (!o) {
             redisUtil.del(codeId);
-            return new UserResult("0", "验证码验证失败");
+            return Result.error("验证码验证失败");
         }
 //        3.已经验证成功，删除这个key即可
         redisUtil.del(codeId);

@@ -14,4 +14,10 @@ public class SortRes extends Result {
     public static SortRes success(Object data) {
         return new SortRes("1", "success", data);
     }
+    public static SortRes error(Object data) {
+        return new SortRes("0", "error", data);
+    }
+    public static SortRes error(String info ,Object data) {
+        return new SortRes("0", info, data);
+    }
 }

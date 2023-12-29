@@ -62,7 +62,7 @@ public class ServiceAuth {
             map = IsUser(token);
         }
 
-        if ("401".equals(map.get("code"))) {
+        if (Constants.ResponseCode.USER_NOT_FOUND.getCode().equals(map.get("code"))) {
             return Result.buildResult("401", (String) map.get("data"));
         } else {
             return pjp.proceed();

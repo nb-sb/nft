@@ -35,8 +35,8 @@ public class MetaController {
         //2.判断分类是否存在
         //3.判断分类缩写是否存在
         boolean b = iSortService.addSort(sortReq);
-        if (b) return new SortRes("1","", true);
-        return new SortRes("1","检查’分类名‘或’分类标识符‘是否已经存在", false);
+        if (b) return  SortRes.success( true);
+        return SortRes.error("检查’分类名‘或’分类标识符‘是否已经存在", false);
     }
 
     //查看分类
@@ -44,7 +44,7 @@ public class MetaController {
     @ResponseBody
     public Result selectSortByPage(@Valid @RequestBody Search search) {
         List<SortVo> sortVos = iSortService.selectSortByPage(search);
-        return new SortRes("1", "success", sortVos);
+        return SortRes.success( sortVos);
     }
 
     //管理员 - 修改分类名
@@ -53,8 +53,8 @@ public class MetaController {
     @AuthPermisson(Constants.permiss.admin)
     public Result changeSortName(@Valid @RequestBody UpdateSortReq updateSortReq) {
         boolean b = iSortService.updateCollection(updateSortReq);
-        if (b) return new SortRes("1", "success", true);
-        return new SortRes("0", "error", false);
+        if (b) return SortRes.success( true);
+        return SortRes.error(false);
     }
     //管理员 - 删除分类
     @GetMapping("delSort")
@@ -64,7 +64,7 @@ public class MetaController {
                                @Min(value = 1)
                                @RequestParam Integer mid) {
         boolean b = iSortService.delSortById(mid);
-        if (b) return new SortRes("1", "success", true);
-        return new SortRes("0", "error", false);
+        if (b) return SortRes.success( true);
+        return SortRes.error(false);
     }
 }

@@ -51,9 +51,9 @@ public class NftSellService implements INftSellService {
     private final Token2User token2User;
 
     @Override
-    public NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
+    public Result addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
         UserVo userVo =token2User.getUserOne(httpServletRequest);
-        if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
+        if (userVo == null) return Result.userNotFinded();
         boolean res = iNftSellRespository.addSellCheck(sellReq, userVo);
         if (res) return new NftRes("1", "已经添加到审核中~");
         return new NftRes("0", "添加审核失败，请联系网站管理员查看");
@@ -95,7 +95,7 @@ public class NftSellService implements INftSellService {
     public Result purchaseConllection(HttpServletRequest httpServletRequest, Integer conllectionId) {
         //获取使用token用户id
         UserVo user =token2User.getUserOne(httpServletRequest);
-        if (user == null) return new NftRes("401", "用户token错误请从新登录");
+        if (user == null) return Result.userNotFinded();
         Integer userid = user.getId();
         Integer stock ;
 
@@ -144,7 +144,7 @@ public class NftSellService implements INftSellService {
     public Result payOrder(HttpServletRequest httpServletRequest,String orderNumber,Integer paytype) {
         //传入用户id和订单号和支付方式
         UserVo userVo =token2User.getUserOne(httpServletRequest);
-        if (userVo == null) return new NftRes("401", "用户token错误请从新登录");
+        if (userVo == null) return Result.userNotFinded();
         Integer userid = userVo.getId();
         paytype = Constants.payType.WEB_BALANCE_PAY;
         // 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
@@ -153,9 +153,9 @@ public class NftSellService implements INftSellService {
             //使用订单号查询订单信息
             OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
             // 返回 订单号不存在
-            if (orderInfoVo == null) return new Result("0", "订单号不存在");
+            if (orderInfoVo == null) return Result.error("订单号不存在");
             if (!Constants.payOrderStatus.NO_PAY.equals(orderInfoVo.getStatus())) {
-                return new Result("0", "判断订单支付状态已经被修改，无法支付");
+                return Result.error("判断订单支付状态已经被修改，无法支付");
             }
             // 一.查询订单支付方式
             //A.如果是网站余额支付
@@ -165,7 +165,7 @@ public class NftSellService implements INftSellService {
                 //减少用于余额
                 if (!iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
                     //return 余额不足
-                    return new Result("0", "余额不足");
+                    return Result.error("余额不足");
                 }
                 //如果余额减少成功了的话则会：
                 //2)set pay_status 设置支付状态
@@ -182,7 +182,7 @@ public class NftSellService implements INftSellService {
                 boolean b1 = addDetailInfo(detailInfoVo1);
                 if (b1) {
                     //流水表添加成功
-                    return new Result("1", "购买成功！");
+                    return Result.success("购买成功！");
                 } else {
                     log.error("添加到流水表失败");
                 }
@@ -193,7 +193,7 @@ public class NftSellService implements INftSellService {
             //2)set pay_status
             //3)返回支付支付状态
             //如果支付成功则转移藏品 => transferConllection()
-            return  new Result("0", "支付类型错误");
+            return Result.error("支付类型错误");
         }finally {
             DistributedRedisLock.releaseReadLock(Constants.RedisKey.PAY_LOCK(orderNumber));
         }
@@ -210,13 +210,13 @@ public class NftSellService implements INftSellService {
             //1)updataConllectionInfo
             if (updataCollectionReq.getName() != null || updataCollectionReq.getPresent() != null) {
                 boolean b = iNftSellRespository.updataConllectionInfo(updataCollectionReq);//更新藏品信息
-                return b ? new Result("1", "更新藏品信息成功!") : new Result("0", "更新藏品信息失败!");
+                return b ? Result.success("更新藏品信息成功!") : Result.error("更新藏品信息失败!");
             }
             if (updataCollectionReq.getStatus() != null) {
                 boolean b = iNftSellRespository.updataSellStatus(updataCollectionReq);// 如果有状态的话则会更新出售表中状态
-                return b ? new Result("1", "更新出售状态成功!") : new Result("0", "更新出售状态失败!");
+                return b ? Result.success("更新出售状态成功!") : Result.error("更新出售状态失败!");
             }
-            return new Result("0", "什么都没执行");
+            return Result.error("什么都没执行");
         } finally {
             // 3.更新缓存数据
             //1）更新redis和es中数据 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改

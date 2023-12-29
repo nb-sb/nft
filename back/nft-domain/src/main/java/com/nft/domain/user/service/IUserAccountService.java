@@ -1,11 +1,8 @@
 package com.nft.domain.user.service;
 
 import com.nft.common.Result;
-import com.nft.domain.user.model.req.ChanagePwReq;
-import com.nft.domain.user.model.req.LoginReq;
+import com.nft.domain.user.model.req.*;
 import com.nft.domain.support.Search;
-import com.nft.domain.user.model.req.RealNameAuthReq;
-import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -37,4 +34,6 @@ public interface IUserAccountService {
     UserInfoVo selectUserDetail(UserVo userVo);
 
     Result submitRealNameAuth(HttpServletRequest httpServletRequest,RealNameAuthReq realNameAuthReq);
+
+    Result AuditRealNameAuth(UpdateRealNameAuthStatusReq req);
 }

@@ -1,5 +1,6 @@
 package com.nft.domain.nft.model.res;
 
+import com.nft.common.Constants;
 import com.nft.common.Result;
 import lombok.Data;
 
@@ -12,6 +13,6 @@ public class GetNftRes extends Result {
     }
 
     public static GetNftRes success(Object data) {
-        return new GetNftRes("1", "success", data);
+        return new GetNftRes(Constants.ResponseCode.SUCCESS.getCode(), Constants.ResponseCode.SUCCESS.getInfo(), data);
     }
 }

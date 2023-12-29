@@ -1,7 +1,6 @@
 package com.nft.common;
 
 import lombok.Data;
-import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
 
 import java.io.Serializable;
 
@@ -54,7 +53,14 @@ public class Result implements Serializable {
         this.code = code;
         this.info = info;
     }
-
-
+    public static Result error(String info) {
+        return new Result(Constants.ResponseCode.ERROR.getCode(), info);
+    }
+    public static Result success(String info) {
+        return new Result(Constants.ResponseCode.SUCCESS.getCode(), info);
+    }
+    public static Result userNotFinded() {
+        return new Result(Constants.ResponseCode.USER_NOT_FOUND.getCode(), Constants.ResponseCode.USER_NOT_FOUND.getInfo());
+    }
 
 }

@@ -18,4 +18,13 @@ public class UserResult extends Result {
         super(code, info);
         this.token = token;
     }
+    public static UserResult success(String data) {
+        return new UserResult("1", "success", data);
+    }
+    public static UserResult success(String info,String data) {
+        return new UserResult("1", info, data);
+    }
+    public static UserResult error(String info) {
+        return new UserResult("0", info);
+    }
 }

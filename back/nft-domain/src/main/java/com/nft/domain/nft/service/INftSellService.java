@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface INftSellService {
 
     //添加到审核列表中
-    NftRes addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq);
+    Result addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq);
 
     //审核藏品，修改藏品状态
     AuditRes changeSellStatus(ReviewReq req);

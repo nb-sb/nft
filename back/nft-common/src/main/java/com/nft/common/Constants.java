@@ -27,6 +27,8 @@ public class Constants {
 
     public enum ResponseCode {
         SUCCESS("1", "成功"),
+        ERROR("0", "失败"),
+        USER_NOT_FOUND("401", "用户不存在"),
         UN_ERROR("0001", "未知失败"),
 
         ILLEGAL_PARAMETER("0002", "非法参数"),
@@ -295,17 +297,17 @@ public class Constants {
      * 藏品获得类型
      */
     public static final class CollectionOwnerShipType{
-        public static final int transfer = 0; //转增
-        public static final int pay = 1; //购买
+        public static final Integer transfer = 0; //转增
+        public static final Integer pay = 1; //购买
 
     }
     /**
      * 实名审核状态
      */
     public static final class realNameAuthStatus{
-        public static final int awaiting_audit = 0; //待审核
-        public static final int SUCCESS = 1; //审核成功
-        public static final int REFUND = 0; //审核被驳回
+        public static final Integer AWAIT_AUDIT = 0; //待审核
+        public static final Integer SUCCESS = 1; //审核成功
+        public static final Integer REFUND = 0; //审核被驳回
 
 
 
