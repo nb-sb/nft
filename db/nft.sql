@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 28/12/2023 19:39:40
+ Date: 29/12/2023 08:51:16
 */
 
 SET NAMES utf8mb4;
@@ -68,7 +68,7 @@ CREATE TABLE `order_info`  (
   `product_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '产品价格',
   `seckill_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '秒杀价格',
   `status` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
-  `init_date` datetime NULL DEFAULT NULL COMMENT '订单创建事件',
+  `init_date` datetime NULL DEFAULT NULL COMMENT '订单创建时间',
   `pay_date` datetime NULL DEFAULT NULL COMMENT '支付时间'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
