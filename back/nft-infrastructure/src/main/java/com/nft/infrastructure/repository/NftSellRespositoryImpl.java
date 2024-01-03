@@ -14,7 +14,7 @@ import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
-import com.nft.domain.nft.model.vo.SubCacheVo;
+import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.nft.repository.INftSellRespository;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.infrastructure.dao.SellInfoMapper;
@@ -38,67 +38,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
 
     private final SubmitCacheMapper submitCacheMapper;
     private final SellInfoMapper sellInfoMapper;
-    private final INftRelationshipImpl nftRelationship;
-    private final INftMetasImpl nftMetas;
     private final SellStroageService sellStroageService;
-
-    @Override
-    @Transactional
-    public boolean addSellCheck(SellReq sellReq, UserVo userVo) {
-        SubmitCache submitCache = BeanCopyUtils.convertTo(sellReq, SubmitCache::new);
-        submitCache.setStatus(0).setAuthorId(String.valueOf(userVo.getId()))
-                .setAuthorAddress(userVo.getAddress());
-        QueryWrapper<SubmitCache> submitWrapper = new QueryWrapper<>();
-        submitWrapper.eq("hash", submitCache.getHash());
-        SubmitCache submitCache1 = submitCacheMapper.selectOne(submitWrapper);
-        if (submitCache1 != null) {
-            log.warn("hash 已经存在 - 无法提交重复的作品！"+submitCache1);
-            return false;
-        }
-        //查询分类id是否存在
-        if (!nftMetas.isExist(sellReq.getMid())) {
-            log.warn("分类不存在："+sellReq.getMid());
-            return false;
-        }
-
-        int insert = submitCacheMapper.insert(submitCache);
-        submitCache1 = submitCacheMapper.selectOne(submitWrapper);
-        if (insert > 0) {
-            //添加分类表
-            boolean b = nftRelationship.addMetas(submitCache1.getId(), sellReq.getMid());
-            if (!b) {
-                log.error("添加至分类表错误!: "+ false);
-                throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加至分类表错误");
-            }
-            //修改分类表中分类记录数
-            boolean incr = nftMetas.incr(sellReq.getMid(), 1);
-            if (!incr) {
-                log.error("修改分类表中分类记录数 错误 ！："+ false);
-                throw new APIException(Constants.ResponseCode.NO_UPDATE, "修改分类表中分类记录数错误");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean upDateSubStatus(ReviewReq req) {
-        UpdateWrapper<SubmitCache> submitWrapper = new UpdateWrapper<>();
-        submitWrapper.eq("id", req.getId());
-        SubmitCache submitCache = new SubmitCache();
-        submitCache.setStatus(req.getStatus());
-        int update = submitCacheMapper.update(submitCache,submitWrapper);
-        return update > 0;
-    }
-
-    @Override
-    public boolean updataSellStatus(UpdataCollectionReq updataCollectionReq) {
-        SellInfo sellInfo = new SellInfo().setStatus(updataCollectionReq.getStatus());
-        UpdateWrapper<SellInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("id", updataCollectionReq.getId());
-        int update = sellInfoMapper.update(sellInfo, updateWrapper);
-        return update > 0;
-    }
 
     @Override
     public boolean insertSellInfo(Integer id, String hash) {
@@ -147,14 +87,7 @@ public class NftSellRespositoryImpl implements INftSellRespository {
 
     }
 
-    @Override
-    public SubCacheVo selectSubSellById(Integer id) {
-        SubmitCache submitCache = submitCacheMapper.selectById(id);
-        if (submitCache != null) {
-            return BeanCopyUtils.convertTo(submitCache, SubCacheVo::new);
-        }
-        return null;
-    }
+
     @Override
     public SellInfoVo selectSellInfoById(Integer id) {
         SellInfo sellInfo = sellInfoMapper.selectById(id);
@@ -249,18 +182,9 @@ public class NftSellRespositoryImpl implements INftSellRespository {
         int update = sellInfoMapper.updateById(sellInfo);
         return update > 0;
     }
-    /**
-     * @Des 转移藏品的方法
-     * @Date 2023/12/29 8:58
-     * @Param fromAddress 转移者地址
-     * @Param toAddress 接受者地址
-     * @Param id 该藏品所属用户表中的id
-     * @Return
-     */
-    @Override
-    public void transferCollection(String fromAddress, String toAddress, String id) {
 
-    }
+
+
 
 
 }

@@ -1,11 +1,13 @@
 package com.nft.domain.nft.model.vo;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
+@Accessors(chain = true)
 public class DetailInfoVo {
 
     //藏品hash

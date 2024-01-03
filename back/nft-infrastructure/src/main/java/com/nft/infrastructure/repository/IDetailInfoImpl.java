@@ -47,7 +47,7 @@ public class IDetailInfoImpl implements IDetailInfoRespository {
                 log.error(res.getReceiptMessages());
                 return false;
             }
-            log.info("添加到区块链流水表错误："+res.getValues()+" detailInfoVo : "+detailInfoVo);
+            log.info("添加到区块链流水表信息："+res.getValues()+" detailInfoVo : "+detailInfoVo);
             JSONArray jsonArray = JSONUtil.parseArray(res.getValues());
             return (boolean) jsonArray.get(0);
         }catch (Exception e){

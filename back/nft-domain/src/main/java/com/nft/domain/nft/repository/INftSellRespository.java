@@ -5,20 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
-import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
-import com.nft.domain.nft.model.vo.SubCacheVo;
+import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.user.model.vo.UserVo;
 
-import java.util.Map;
-
 public interface INftSellRespository {
-    boolean addSellCheck(SellReq sellReq, UserVo userVo);
-
-    boolean upDateSubStatus(ReviewReq req);//更新提交状态
-
-    boolean updataSellStatus(UpdataCollectionReq updataCollectionReq);//更新出售状态
 
 
     boolean insertSellInfo(Integer id, String hash);
@@ -26,7 +18,7 @@ public interface INftSellRespository {
     boolean addSellByFISCO(String hash,Integer id);
 
 
-    SubCacheVo selectSubSellById(Integer id);
+
 
     ConllectionInfoVo selectConllectionById(Integer id);
     SellInfoVo selectSellInfoById(Integer id);
@@ -42,7 +34,6 @@ public interface INftSellRespository {
 
 
 
-    //转移藏品
-    void transferCollection(String fromAddress ,String toAddress,String id);
+
 
 }

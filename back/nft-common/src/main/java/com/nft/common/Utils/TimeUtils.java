@@ -36,5 +36,14 @@ public class TimeUtils {
         }
         return null;
     }
+    public static String Date2Str(Date time){
+        try {
+            String format = DATE_FORMAT.format(time);
+            return format;
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+        return null;
+    }
 
 }

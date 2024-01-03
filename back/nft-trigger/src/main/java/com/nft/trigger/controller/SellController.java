@@ -4,6 +4,7 @@ package com.nft.trigger.controller;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
+import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.AddOrder;
 import com.nft.domain.nft.model.req.ReviewReq;
@@ -30,6 +31,7 @@ public class SellController {
 
     private final HttpServletRequest httpServletRequest;
     private final INftSellService iNftSellService;
+    private final INftSubmitService iNftSubmitService;
 
 
 
@@ -38,7 +40,7 @@ public class SellController {
     @AuthPermisson(Constants.permiss.everyone)
     //添加藏品到待审核数据库
     public Result addsellcheck(@Valid @RequestBody SellReq sellReq) {
-        return iNftSellService.addSellCheck(httpServletRequest, sellReq);
+        return iNftSubmitService.addSellCheck(httpServletRequest, sellReq);
     }
 
     //上传图片接口

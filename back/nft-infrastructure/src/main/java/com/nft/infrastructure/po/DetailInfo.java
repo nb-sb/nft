@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -37,7 +38,7 @@ public class DetailInfo implements Serializable {
     private Integer type;
 
 //    @ApiModelProperty(value = "时间")
-    private LocalDateTime time;
+    private Date time;
 
 //    @ApiModelProperty(value = "数字藏品编号	例如 1#5000 或 51#5000 等也就是id和总数进行拼接")
     private String digitalCollectionId;

@@ -1,4 +1,4 @@
-package com.nft.domain.nft.model.vo;
+package com.nft.domain.apply.model.vo;
 
 import lombok.Data;
 

@@ -6,7 +6,9 @@ import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
-import com.nft.common.Utils.TokenUtils;
+import com.nft.domain.apply.model.vo.SubCacheVo;
+import com.nft.domain.apply.repository.ISubmitCacheRespository;
+import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
@@ -21,7 +23,6 @@ import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.service.INftSellService;
 import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 @Log4j2
@@ -42,6 +42,8 @@ import java.util.Map;
 public class NftSellService implements INftSellService {
 
     private final INftSellRespository iNftSellRespository;
+    private final ISubmitCacheRespository iSubmitCacheRespository;
+    private final INftSubmitService iNftSubmitService;
     private final RedisUtil redisUtil;
     private final IpfsService ipfsService;
     private final IUserInfoRepository iUserInfoRepository;
@@ -50,44 +52,7 @@ public class NftSellService implements INftSellService {
     private final IDetailInfoRespository iDetailInfoRespository;
     private final Token2User token2User;
 
-    @Override
-    public Result addSellCheck(HttpServletRequest httpServletRequest, SellReq sellReq) {
-        UserVo userVo =token2User.getUserOne(httpServletRequest);
-        if (userVo == null) return Result.userNotFinded();
-        boolean res = iNftSellRespository.addSellCheck(sellReq, userVo);
-        if (res) return new NftRes("1", "已经添加到审核中~");
-        return new NftRes("0", "添加审核失败，请联系网站管理员查看");
-    }
 
-    @Override
-    public AuditRes changeSellStatus(ReviewReq req) {
-        //判断修改前后变量结果是否一致，如果修改前后都是同一状态则不修改
-        SubCacheVo subCacheVo = iNftSellRespository.selectSubSellById(req.getId());
-        if (!Constants.SellState.DOING.getCode().equals(subCacheVo.getStatus())) {
-            return new AuditRes(Constants.SellState.NOTDOING.getCode(), Constants.SellState.NOTDOING.getInfo());
-        }
-        if (subCacheVo.getStatus().equals(req.getStatus())) {
-            log.warn("修改前后状态一致！");
-            return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
-        }
-        if (Constants.SellState.REFUSE.getCode().equals(req.getStatus())) {
-            //如果是不同意的话这里可以直接修改审核结果然后返回到controller中
-            iNftSellRespository.upDateSubStatus(req);
-            return new AuditRes(Constants.SellState.REFUSE.getCode(), Constants.SellState.REFUSE.getInfo());
-        }
-        if (Constants.SellState.PASS.getCode().equals(req.getStatus())) {
-            return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
-        }
-        return new AuditRes(Constants.SellState.REFUSE.getCode(), Constants.SellState.REFUSE.getInfo());
-    }
-
-
-    @Override
-    public boolean insertSellInfo(ReviewReq req, String hash) {
-        boolean b = iNftSellRespository.upDateSubStatus(req); //修改提交表
-        boolean b1 = iNftSellRespository.insertSellInfo(req.getId(), hash); //增加出售表
-        return b && b1;
-    }
 
 
 
@@ -213,7 +178,7 @@ public class NftSellService implements INftSellService {
                 return b ? Result.success("更新藏品信息成功!") : Result.error("更新藏品信息失败!");
             }
             if (updataCollectionReq.getStatus() != null) {
-                boolean b = iNftSellRespository.updataSellStatus(updataCollectionReq);// 如果有状态的话则会更新出售表中状态
+                boolean b = iSubmitCacheRespository.updataSellStatus(updataCollectionReq);// 如果有状态的话则会更新出售表中状态
                 return b ? Result.success("更新出售状态成功!") : Result.error("更新出售状态失败!");
             }
             return Result.error("什么都没执行");
@@ -234,7 +199,7 @@ public class NftSellService implements INftSellService {
         DistributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         try {
             //2.操作审核状态 （1 为不通过 2为通过）
-            AuditRes auditRes = changeSellStatus(req);
+            AuditRes auditRes = iNftSubmitService.changeSellStatus(req);
             if (!String.valueOf(Constants.SellState.PASS.getCode()).equals(auditRes.getCode())) {
                 //如果是不通过则这里直接返回参数，无需进行下面操作
                 return auditRes;
@@ -250,7 +215,7 @@ public class NftSellService implements INftSellService {
                 return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
             }
             //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
-            if (!insertSellInfo(req, hash)) {
+            if (!iNftSubmitService.insertSellInfo(req, hash)) {
                 return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
             }
             return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
