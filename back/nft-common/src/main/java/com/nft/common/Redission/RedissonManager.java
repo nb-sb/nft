@@ -3,10 +3,7 @@ package com.nft.common.Redission;
 
 import org.redisson.Redisson;
 import org.redisson.config.Config;
-import org.springframework.beans.factory.annotation.Value;
-
 public class RedissonManager {
-
     private static Config config = new Config();
     //声明redisso对象
     private static Redisson redisson = null;

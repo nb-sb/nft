@@ -28,6 +28,16 @@
             <artifactId>nft-infrastructure</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <!--AMQP依赖，包含RabbitMQ-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <!--引入消息转换器-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
 

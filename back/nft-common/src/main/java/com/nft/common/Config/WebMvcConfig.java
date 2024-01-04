@@ -1,4 +1,4 @@
-package com.nft.common;
+package com.nft.common.Config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

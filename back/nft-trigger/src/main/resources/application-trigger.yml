@@ -1,0 +1,24 @@
+spring:
+  rabbitmq:
+    host: 47.117.169.254 # rabbitMQ的ip地址
+    port: 5672 # 端口
+    username: hmall
+    password: 123
+    virtual-host: hmall
+    listener:
+      simple:
+        prefetch: 1
+        #这里就是使用预取一次只能取一个，提高性能，让性能低的需要处理完才能接受下一个，不影响其他的使用
+        acknowledge-mode: auto #确认机制
+        #如果确认机制使用none的时候，等监听到这个消息后就算后面发生异常了也会把消息删除了，如果使用auto则是如果遇到异常自动再次从新发送消息，如果一直异常可能会一直抛出异常
+        retry:
+          enabled: true #开启重试机制
+
+    connection-timeout: 1s #设置mq超时时间
+    template:
+      retry:
+        initial-interval: 1000ms #失败后的初始等待时间
+        multiplier: 1 #下载失败hou等待时长倍数
+        max-attempts: 3 #最大重试次数
+        enabled: true # 开启重试机制
+#        stateless: true #true 无状态 false有状态。如果业务中包含事务，这里改为false

@@ -90,7 +90,8 @@ contract SellStroage  is AbstractBean , typeUtils {
         int res = exist(_hash);
         return res==0 ? true : false;
     }
-
+    // todo 查询藏品信息
+    
     function splitString(string memory _value) internal pure returns (string[] memory) {
         LibStrings.slice memory s = _value.toSlice();
         LibStrings.slice memory delim = ",".toSlice();

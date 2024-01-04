@@ -1,4 +1,4 @@
-package com.nft.common;
+package com.nft.common.Config;
 
 
 import com.baomidou.mybatisplus.annotation.DbType;

@@ -29,5 +29,6 @@ String.valueOf()方法是小编推荐使用的，因为它不会出现空指针�
 待完成功能：
 用户需要进行实名认证并通过才能进行购买藏品
 
+使用mq每隔30分钟检查订单是否支付，未支付则直接取消订单并退回剩余数量
 
 Copyright：网站： https://nb.sb/ || git开源地址：https://gitee.com/nb-sb/nft

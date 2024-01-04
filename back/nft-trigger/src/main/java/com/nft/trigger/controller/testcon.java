@@ -4,8 +4,11 @@ package com.nft.trigger.controller;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.nft.common.APIException;
 import com.nft.common.Constants;
+import com.nft.common.ErrorCode;
 import com.nft.common.Result;
+import com.nft.common.exception.BusinessException;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.user.model.res.UserResult;
@@ -49,7 +52,7 @@ public class testcon {
 //        CallResponse callResponse = ownershipStorageService.selectByUserAddr(ownershipStorageSelectByUserAddrInputBO);
 //        System.out.println(callResponse.getValues());
 //        return callResponse.getValues();
-        return null;
+        throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码获取失败");
     }
 
     @GetMapping("test1234")
