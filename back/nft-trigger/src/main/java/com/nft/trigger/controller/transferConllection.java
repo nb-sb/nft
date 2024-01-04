@@ -1,5 +1,6 @@
 package com.nft.trigger.controller;
 
+import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.TransferReq;
 import com.nft.domain.nft.service.INftTransferService;
@@ -24,11 +25,7 @@ public class transferConllection {
     @PostMapping("transferConllection")
     @ResponseBody
     @AuthPermisson
-    void transfer(@Valid @RequestBody TransferReq transferReq) {
-        //验证藏品是否是自己的
-        //检查转移用户地址是否存在
-        //修改藏品所属用户地址等
-        //调用区块链中转移方法
-        iNftTransferService.transferCollection(transferReq, httpServletRequest);
+    public Result transfer(@Valid @RequestBody TransferReq transferReq) {
+        return iNftTransferService.transferCollection(transferReq, httpServletRequest);
     }
 }

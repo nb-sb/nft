@@ -13,14 +13,14 @@ public interface IOwnerShipRespository {
 
     List selectOWnerShipInfoByFisco(String address, String hash);
 
-    void selectOWnerShipInfo(String address, String hash);
+    OwnerShipVo selectOWnerShipInfo(String address, String hash);
 
     OwnerShipVo getMyConllection(Integer id, String fromAddress);
 
     //转移藏品
     boolean transferCollection(String fromAddress ,String toAddress,Integer id);
     //转移藏品
-    boolean transferCollectionByFisco(String privatekey ,String toAddress,Integer id);
+    boolean transferCollectionByFisco(String privatekey ,String hash,String toAddress,Integer id);
     //获取用于所属藏品 By address
 
 }

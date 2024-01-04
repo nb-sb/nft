@@ -81,8 +81,12 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
     }
 
     @Override
-    public void selectOWnerShipInfo(String address, String hash) {
-
+    public OwnerShipVo selectOWnerShipInfo(String address, String hash) {
+        QueryWrapper<OwnerShip> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("address", address).eq("hash", hash);
+        OwnerShip ownerShip = ownerShipMapper.selectOne(queryWrapper);
+        OwnerShipVo ownerShipVo = BeanCopyUtils.convertTo(ownerShip, OwnerShipVo::new);
+        return ownerShipVo;
     }
 
     @Override
@@ -120,11 +124,11 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
 
 
     @Override
-    public boolean transferCollectionByFisco(String privatekey, String toAddress, Integer id) {
+    public boolean transferCollectionByFisco(String privatekey, String hash,String toAddress, Integer id) {
         // TODO: 2024/1/3 设置调用者
 
         OwnershipStorageTransferInputBO inputBO = new OwnershipStorageTransferInputBO();
-        inputBO.set_hash("hashcnmcnmcnm");
+        inputBO.set_hash(hash);
         inputBO.setTarget_address(toAddress);
         try {
             TransactionResponse res = ownershipStorageService.transfer(inputBO, privatekey);

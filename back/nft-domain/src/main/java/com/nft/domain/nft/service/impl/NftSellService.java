@@ -71,6 +71,12 @@ public class NftSellService implements INftSellService {
         if (userNoPayOrder.size() > 0) {
             return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
         }
+        //已拥有的hash不能再次购买
+        SellInfoVo sellInfoVo = iNftSellRespository.selectSellInfoById(conllectionId);
+        OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(user.getAddress(), sellInfoVo.getIpfsHash());
+        if (ownerShipVo != null) {
+            return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
+        }
         try {
             //1.添加写锁 -- 因为这个会改变出售的商品信息，所以要和查询商品id用同一把锁--这里添加写锁后就可以和查询商品信息的读锁连用
             DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
