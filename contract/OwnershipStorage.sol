@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 import "./AbstractBean.sol";
 import "./typeUtils.sol";
-import "./SellStroage.sol";
+import "./LibStrings.sol";
 import "./DetailStorage.sol";
 /**
  * @title 存贮当前用户的藏品所属权，这里存贮的是拥有者
@@ -41,7 +41,6 @@ import "./DetailStorage.sol";
     string constant TRANSFORM = "0"; //转赠藏品
     string constant PURCHASE = "1"; //购买藏品
     string constant primaryKey = "ownership";
-
     // 购买藏品 || 同一个用户可以有多个数字藏品 || 保证业务原子性
     function addOwnership(
         address _address,
@@ -53,7 +52,7 @@ import "./DetailStorage.sol";
             return (false,"There's no more goods.");
         }
         int256 total =  sellStroage.catTotal(_hash);
-        string memory digital_collection_id = LibStringUtil.strConcat3(uintToString(uint256(total-remain+1)), "#",uintToString(uint256(total)));
+        string memory digital_collection_id = LibStringUtil.strConcat3(uintToString(uint256(total-remain)+1), "#",uintToString(uint256(total)));
         string[] memory fields = new string[](4);
         fields[0] = _hash;
         fields[1] = uintToString(now);
@@ -92,9 +91,13 @@ import "./DetailStorage.sol";
     }
     // 转赠 -- 只能所属人进行调用  || 保证业务原子性
     function transfer(address target_address, string memory _hash) public returns (bool , string memory ) {
+        if(msg.sender == target_address){
+            return (false,"You can't transfer it to yourself.");
+        }
         Table table = openTable();
         Condition condition =  table.newCondition();
         condition.EQ(uniKey,addressToString(msg.sender));
+        condition.EQ(mFields[0],_hash);
         Entries entries = table.select(primaryKey, condition);
         // 如果查询不到 或 该藏品不属于你则直接返回这个错误
         if(entries.size() == 0){
