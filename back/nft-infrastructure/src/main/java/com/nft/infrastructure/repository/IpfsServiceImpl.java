@@ -106,8 +106,18 @@ public class IpfsServiceImpl implements IpfsService {
         SubmitCache submitCache = submitCacheMapper.selectById(id);
         //获取path路径
         String path = submitCache.getPath();
-        //进行ipfs存贮
-        System.out.println(path);
+        File directory = new File("");//参数为空
+        String courseFile = null;
+        try {
+            courseFile = directory.getCanonicalPath();
+            path = courseFile + "\\imgs\\";
+            String s = uploadToIpfs(path);
+            //进行ipfs存贮
+            System.out.println("ipfs hash : "+s);
+            return s;
+        } catch (Exception e) {
+            System.err.println(e);
+        }
         return UUID.randomUUID().toString();
     }
 }
