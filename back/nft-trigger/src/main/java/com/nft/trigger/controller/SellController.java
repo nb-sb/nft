@@ -83,7 +83,7 @@ public class SellController {
             @Valid
             @RequestBody AddOrder addOrder) {
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
-        return iNftSellService.purchaseConllection(httpServletRequest, addOrder.getId());
+        return iNftSellService.addConllectionOrder(httpServletRequest, addOrder.getId());
     }
 
 

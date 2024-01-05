@@ -28,12 +28,11 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
     private  final OrderInfoMapper orderInfoMapper;
 
     @Override
-    public boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid) {
+    public boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid,String orderNo) {
         OrderInfo orderInfo = new OrderInfo();
-        String s = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
-        System.err.println(s);
+
         orderInfo.setUserId(userid)
-                .setOrderNo(s)
+                .setOrderNo(orderNo)
                 .setStatus(Constants.payOrderStatus.NO_PAY)
                 .setProductImg(conllectionInfoVo.getPath())
                 .setProductId(conllectionInfoVo.getId())
@@ -85,6 +84,14 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
         int update = orderInfoMapper.update(orderInfo, updateWrapper);
         if (update>0) return true;
         return false;
+    }
+
+    @Override
+    public Integer getOrderStatus(String orderNumber) {
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("order_no", orderNumber);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(queryWrapper);
+        return orderInfo.getStatus();
     }
 
     @Override

@@ -4,7 +4,7 @@ spring:
     port: 5672 # 端口
     username: hmall
     password: 123
-    virtual-host: hmall
+    virtual-host: /hmall
     listener:
       simple:
         prefetch: 1
@@ -21,4 +21,5 @@ spring:
         multiplier: 1 #下载失败hou等待时长倍数
         max-attempts: 3 #最大重试次数
         enabled: true # 开启重试机制
+      mandatory: false
 #        stateless: true #true 无状态 false有状态。如果业务中包含事务，这里改为false

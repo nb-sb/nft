@@ -2,17 +2,15 @@ package com.nft.domain.nft.service;
 
 import com.nft.common.Result;
 import com.nft.domain.nft.model.req.ReviewReq;
-import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.res.AuditRes;
-import com.nft.domain.nft.model.res.NftRes;
 
 import javax.servlet.http.HttpServletRequest;
 
 public interface INftSellService {
 
     //购买藏品
-    Result purchaseConllection(HttpServletRequest httpServletRequest,Integer ConllectionID);
+    Result addConllectionOrder(HttpServletRequest httpServletRequest, Integer ConllectionID);
 
     //支付订单
     Result payOrder(HttpServletRequest httpServletRequest,String OrderNumber,Integer paytype);

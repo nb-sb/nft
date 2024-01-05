@@ -10,7 +10,7 @@ import java.util.List;
 public interface IOrderInfoRespository {
 
     //添加订单表
-    boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid);
+    boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid,String OrderNo);
 
     OrderInfoVo selectOrderInfoByNumber(String orderNumber);
 
@@ -25,5 +25,7 @@ public interface IOrderInfoRespository {
 
     boolean setOrderStatus(String orderNumber, Integer status);
 
+    //查询订单状态
+    Integer getOrderStatus(String orderNumber);
     Integer selectOrderStatusByUser(Integer userId, String orderNumber);
 }

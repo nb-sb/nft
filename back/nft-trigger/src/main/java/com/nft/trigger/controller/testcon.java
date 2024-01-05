@@ -52,7 +52,8 @@ public class testcon {
 //        CallResponse callResponse = ownershipStorageService.selectByUserAddr(ownershipStorageSelectByUserAddrInputBO);
 //        System.out.println(callResponse.getValues());
 //        return callResponse.getValues();
-        throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码获取失败");
+//        throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码获取失败");
+        throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
     }
 
     @GetMapping("test1234")

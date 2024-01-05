@@ -6,9 +6,11 @@ import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
+import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.apply.service.INftSubmitService;
+import com.nft.domain.common.mq.MqOperations;
 import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.SellReq;
@@ -51,13 +53,15 @@ public class NftSellService implements INftSellService {
     private final IOwnerShipRespository iOwnerShipRespository;
     private final IDetailInfoRespository iDetailInfoRespository;
     private final Token2User token2User;
+    private final MqOperations mqOperations;
 
 
 
 
 
     @Override
-    public Result purchaseConllection(HttpServletRequest httpServletRequest, Integer conllectionId) {
+    @Transactional
+    public Result addConllectionOrder(HttpServletRequest httpServletRequest, Integer conllectionId) {
         //获取使用token用户id
         UserVo user =token2User.getUserOne(httpServletRequest);
         if (user == null) return Result.userNotFinded();
@@ -83,7 +87,7 @@ public class NftSellService implements INftSellService {
             try {
                 //2.查询剩余库存
                 ConllectionInfoVo conllectionInfoVo ;
-                //查询mysql缓存
+                //查询mysql
                 conllectionInfoVo = iNftSellRespository.selectConllectionById(conllectionId);
                 if (conllectionInfoVo == null) {
                     return new Result("0", "商品不存在");
@@ -96,10 +100,16 @@ public class NftSellService implements INftSellService {
                     return new Result("0", "库存减少失败");
                 }
                 // 4.将藏品添加至订单中
-                iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid);
+                String orderNo = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
+                boolean b = iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid,orderNo);
+                if (!b) {
+                    throw new APIException(Constants.ResponseCode.NO_UPDATE, "藏品添加至订单失败");
+                }
                 //1)decrRemain
                 //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
                 redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(conllectionId));
+                // 5.发送mq请求，半小时后检查订单状态
+                mqOperations.SendCheckMessage(orderNo);
             } finally {
                 //释放写锁
                 DistributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
