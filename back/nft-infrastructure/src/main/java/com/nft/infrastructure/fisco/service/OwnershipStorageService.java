@@ -47,8 +47,8 @@ public class OwnershipStorageService {
    * 加载用户账户切换业务
    */
   private TransactionResponse getTransactionResponse(String key, String funcName, List<Object> params) throws Exception {
-    String configFile = sdkUtils.configFile;
-    System.out.println("configFile: "+configFile);
+//    String configFile = sdkUtils.configFile;
+//    System.out.println("configFile: "+configFile);
     client = sdkUtils.sdk.getClient(Integer.valueOf("1"));
     client.getCryptoSuite().createKeyPair(key);
     CryptoKeyPair cryptoKeyPair = client.getCryptoSuite().getCryptoKeyPair();

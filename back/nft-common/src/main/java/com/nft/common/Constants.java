@@ -1,8 +1,5 @@
 package com.nft.common;
 
-import cloud.tianai.captcha.generator.impl.StandardIconClickImageCaptchaGenerator;
-import jdk.internal.org.objectweb.asm.commons.StaticInitMerger;
-
 import java.text.SimpleDateFormat;
 
 /**
