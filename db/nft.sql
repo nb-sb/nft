@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 29/12/2023 16:08:45
+ Date: 06/01/2024 23:34:07
 */
 
 SET NAMES utf8mb4;
@@ -26,11 +26,11 @@ CREATE TABLE `detail_info`  (
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash',
   `transfer_address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '转移方用户地址',
   `target_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '接受方用户地址',
-  `type` int NULL DEFAULT NULL COMMENT '0 表示转增，1表示购买 ||用于藏品来源显示',
+  `type` tinyint NULL DEFAULT NULL COMMENT '0 表示转增，1表示购买 ||用于藏品来源显示',
   `time` datetime NULL DEFAULT NULL COMMENT '时间',
   `digital_collection_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号\r\n例如 1#5000 或 51#5000 等也就是id和总数进行拼接',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for nft_metas
@@ -42,7 +42,7 @@ CREATE TABLE `nft_metas`  (
   `conllection_slug` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品分类代号',
   `count` int NULL DEFAULT NULL COMMENT '该分类下藏品总数',
   PRIMARY KEY (`mid`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for nft_relationships
@@ -50,7 +50,7 @@ CREATE TABLE `nft_metas`  (
 DROP TABLE IF EXISTS `nft_relationships`;
 CREATE TABLE `nft_relationships`  (
   `cid` int NOT NULL COMMENT '藏品id',
-  `mid` int NOT NULL COMMENT '分类id',
+  `mid` smallint NOT NULL COMMENT '分类id',
   PRIMARY KEY (`cid`) USING BTREE,
   INDEX `mid`(`mid` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
@@ -67,9 +67,10 @@ CREATE TABLE `order_info`  (
   `product_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `product_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '产品价格',
   `seckill_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '秒杀价格',
-  `status` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
+  `status` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
   `init_date` datetime NULL DEFAULT NULL COMMENT '订单创建时间',
-  `pay_date` datetime NULL DEFAULT NULL COMMENT '支付时间'
+  `pay_date` datetime NULL DEFAULT NULL COMMENT '支付时间',
+  PRIMARY KEY (`order_no`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -81,12 +82,12 @@ CREATE TABLE `owner_ship`  (
   `address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '所属用户地址',
   `time` datetime NULL DEFAULT NULL COMMENT '获得时间',
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品hash',
-  `type` int NULL DEFAULT NULL COMMENT '获得类型 type ||  0 表示转增，1表示购买',
+  `type` tinyint(1) NULL DEFAULT NULL COMMENT '获得类型 type ||  0 表示转增，1表示购买',
   `digital_collection_id` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE,
   CONSTRAINT `hash` FOREIGN KEY (`hash`) REFERENCES `sell_info` (`ipfs_hash`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for sell_info
@@ -99,12 +100,12 @@ CREATE TABLE `sell_info`  (
   `amount` int NULL DEFAULT NULL COMMENT '发行量',
   `remain` int NULL DEFAULT NULL COMMENT '剩余数量',
   `auther` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品作者地址',
-  `status` int NULL DEFAULT NULL COMMENT '# 1 为正常 ，  0 为闭售',
+  `status` tinyint(1) NULL DEFAULT NULL COMMENT '# 1 为正常 ，  0 为闭售',
   `ipfs_hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'ipfs中的hash',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE,
   INDEX `ipfs_hash`(`ipfs_hash` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for submit_cache
@@ -120,11 +121,11 @@ CREATE TABLE `submit_cache`  (
   `author_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 所属id',
   `author_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 区块链账户地址',
   `price` decimal(10, 2) NULL DEFAULT NULL COMMENT '售价',
-  `status` int NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1是通过，2是拒绝',
+  `status` tinyint(1) NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1是通过，2是拒绝',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `author_address`(`author_address` ASC) USING BTREE,
   CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_detal
@@ -137,13 +138,13 @@ CREATE TABLE `user_detal`  (
   `address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '用户区块链地址',
   `cardid` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '身份证',
   `phone_number` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '手机号',
-  `status` int(1) UNSIGNED ZEROFILL NOT NULL COMMENT '用户信息审核状态：0为待审核，1 为审核成功，2为审核退回需要重新提交',
+  `status` tinyint(1) UNSIGNED ZEROFILL NOT NULL COMMENT '用户信息审核状态：0为待审核，1 为审核成功，2为审核退回需要重新提交',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `for_id`(`for_id` ASC) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE,
   CONSTRAINT `address` FOREIGN KEY (`address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `for_id` FOREIGN KEY (`for_id`) REFERENCES `user_info` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_info
@@ -155,7 +156,7 @@ CREATE TABLE `user_info`  (
   `privatekey` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '私钥',
   `username` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `password` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `role` int(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '用户权限，普通用户为0，管理员为1',
+  `role` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '用户权限，普通用户为0，管理员为1',
   `balance` decimal(10, 2) UNSIGNED ZEROFILL NOT NULL COMMENT '用户余额',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE
