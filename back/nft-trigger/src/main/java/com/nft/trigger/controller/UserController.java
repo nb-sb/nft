@@ -1,17 +1,15 @@
 package com.nft.trigger.controller;
 
+import com.nft.common.Constants;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
-import com.nft.common.Constants;
-import com.nft.common.SendEmail;
-import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.email.SendEmailService;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.SelectRes;
-import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.IUserAccountService;
@@ -33,7 +31,6 @@ public class UserController {
 
     private final IUserAccountService iUserAccountService;
     private final RedisUtil redisUtil;
-    private final SendEmail sendEmail;
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
     private final SendEmailService sendEmailService;

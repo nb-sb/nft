@@ -1,5 +1,6 @@
 package com.nft.infrastructure.po;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,6 +13,7 @@ public class OrderInfo {
     /**
      * 订单id
      */
+    @TableId
     private String orderNo;
     /**
      * 用户id

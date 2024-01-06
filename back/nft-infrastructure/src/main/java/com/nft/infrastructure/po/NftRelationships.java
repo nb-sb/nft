@@ -1,6 +1,8 @@
 package com.nft.infrastructure.po;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,10 +21,10 @@ public class NftRelationships implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-//    @ApiModelProperty(value = "藏品id")
+    @TableId
     private Integer cid;
 
-//    @ApiModelProperty(value = "分类id")
+
     private Integer mid;
 
 

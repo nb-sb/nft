@@ -5,7 +5,6 @@ import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.TransferReq;
 import com.nft.domain.nft.service.INftTransferService;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
