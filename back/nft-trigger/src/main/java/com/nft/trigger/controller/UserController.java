@@ -6,6 +6,7 @@ import com.nft.common.Constants;
 import com.nft.common.SendEmail;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.common.Aop.AuthPermisson;
+import com.nft.domain.email.SendEmailService;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
 @Log4j2
 @AllArgsConstructor
@@ -34,6 +36,7 @@ public class UserController {
     private final SendEmail sendEmail;
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
+    private final SendEmailService sendEmailService;
 
 
     @GetMapping("/login")
@@ -59,8 +62,8 @@ public class UserController {
     @ResponseBody
     public Result getcode(@Valid @RequestBody GetCodeType getCodeType) {
         //获取验证码时需要进行滑动验证码验证等操作,防止脚本消息刷接口
-        Result res = getVerification(getCodeType.getCodeId());
-        if (res != null) return res;
+//        Result res = getVerification(getCodeType.getCodeId());
+//        if (res != null) return res;
         String name = getCodeType.getName();
         if (Constants.Get_Code_iphone.equals(getCodeType.getType())) {
             //如果是手机号类型 验证手机是否正确
@@ -70,9 +73,9 @@ public class UserController {
             //1.调用发送验证码方法
             int code = (int) (Math.random() * 50000);//模拟获取验证码操作
             //todo: 调用发送逻辑
-            //2.记录到redis中设置60秒 key: name value: code
+            //2.记录到redis中设置5分钟 key: name value: code
             //3.返回成功或失败消息
-            return new Result("0", String.valueOf(redisUtil.set(name, code, 60)));
+            return new Result("0", String.valueOf(redisUtil.set(name, code, Constants.RedisKey.MINUTE_5)));
         } else if (Constants.Get_Code_email.equals(getCodeType.getType())) {
             //如果是邮箱类型 验证邮箱类型
             if (!CheckUtils.isEmail(name)) {
@@ -80,14 +83,15 @@ public class UserController {
             }
             //1.调用发送验证码方法
             int code = (int) (Math.random() * 50000);//模拟获取验证码操作
-            boolean b = sendEmail.sentSimpleMail("您的NFT修改密码的验证码", "您的NFT修改密码的验证码为: " + code, name);
-            if (!b) {
-                log.error("邮箱发送验证码时出错 :" + false);
+            try {
+                sendEmailService.sendEmailAuthenticat(name, String.valueOf(code));
+            } catch (Exception e) {
+                log.error("邮箱发送验证码时出错 "+e );
                 return new Result("0", "未知错误-请联系管理员查看日志");
             }
-            //2.记录到redis中设置60秒 key: name value: code
+            //2.记录到redis中设置5分钟 key: name value: code
             //3.返回成功或失败消息
-            return new Result("1", String.valueOf(redisUtil.set(name, code, 60)));
+            return new Result("1", String.valueOf(redisUtil.set(name, code, Constants.RedisKey.MINUTE_5)));
         } else {
             log.error("类型错误!" + getCodeType.getType());
             return new Result("0", "获取验证码类型错误");

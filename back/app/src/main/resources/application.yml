@@ -15,7 +15,6 @@ mybatis-plus:
     log-impl: 'org.apache.ibatis.logging.stdout.StdOutImpl '
 
 videoPath: c:\Users\3500079813\Pictures\Saved Pictures\
-
 email:
   from: bws.66@qq.com
   pswd: doceuobsmrycchid
@@ -28,3 +27,15 @@ spring:
     username: root
   profiles:
     include: infrastructure,trigger
+  mail:
+    host: smtp.qq.com
+    username: bws.66@qq.com
+    password: doceuobsmrycchid
+    emailFrom: bws.66@qq.com
+    properties :
+      mail:
+        smtp:
+          ssl:
+            enable: true
+
+

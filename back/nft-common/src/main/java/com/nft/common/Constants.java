@@ -92,7 +92,7 @@ public class Constants {
         private static final String ADMIN_UPDATE_LOCK = "ADMIN_UPDATE_LOCK_";//用于管理员更新商品信息的锁，不管是审核还是修改信息都用这把锁前缀
         //空值，用于空缓存用
         private static final String REDIS_EMPTY_CACHE = "{}";
-
+        public static final Integer MINUTE_5 = 60*5;
 
         public static String REDIS_COLLECTION(Integer id) {
             return REDIS_COLLECTION + id;
