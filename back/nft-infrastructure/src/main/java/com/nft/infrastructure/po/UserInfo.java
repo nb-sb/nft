@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  * @since 2023-12-08
  */
 @Data
-@TableName(value = "nft_user_detal")
+@TableName(value = "nft_user_info")
 public class UserInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
