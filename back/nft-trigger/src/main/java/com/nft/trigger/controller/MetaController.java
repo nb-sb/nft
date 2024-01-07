@@ -1,6 +1,8 @@
 package com.nft.trigger.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
+import com.nft.common.PageRequest;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nftSort.model.req.SortReq;
@@ -42,8 +44,10 @@ public class MetaController {
     //查看分类
     @GetMapping("getSort")
     @ResponseBody
-    public Result selectSortByPage(@Valid  Search search) {
-        List<SortVo> sortVos = iSortService.selectSortByPage(search);
+    public Result selectSortByPage(@Valid PageRequest pageRequest) {
+        List<SortVo> sortVos = iSortService.selectSortByPage(
+                new Page<>(pageRequest.getCurrent(),pageRequest.getPageSize())
+        );
         return SortRes.success( sortVos);
     }
 

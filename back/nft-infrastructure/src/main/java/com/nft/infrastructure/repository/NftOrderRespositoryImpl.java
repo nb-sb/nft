@@ -25,6 +25,7 @@ public class NftOrderRespositoryImpl implements INftOrderRespository {
     @Override
     public List<OrderInfoVo> selectAllOrder(Page page) {
         Page<OrderInfo> orderInfoPage = new Page<>(page.getCurrent(),page.getSize());
+        page.setOptimizeCountSql(true);
         Page<OrderInfo> orderInfos = orderInfoMapper.selectPage(orderInfoPage, null);
         List<OrderInfo> records = orderInfos.getRecords();
         if (records.size() == 0) {

@@ -51,10 +51,8 @@ public class ISortRepositoryImpl implements ISortRepository {
     }
 
     @Override
-    public List<SortVo> selectSortByPage(Search search) {
-        Integer current = Math.toIntExact(search.getCurrent());
-        Integer size = Math.toIntExact(search.getPageSize());
-        Page<NftMetas> page = new Page<>(current, size);
+    public List<SortVo> selectSortByPage(Page page1) {
+        Page<NftMetas> page = new Page<>(page1.getCurrent(), page1.getSize());
         page.setOptimizeCountSql(true);
         Page<NftMetas> userInfoPage = nftMetasMapper.selectPage(page, null);
         List<NftMetas> records = userInfoPage.getRecords();

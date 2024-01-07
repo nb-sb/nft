@@ -38,20 +38,19 @@ public class SelectConllection {
         GetNftRes result = iNftInfoService.selectConllectionById(id);
         return result;
     }
-
+    //查询所有出售的藏品
     @GetMapping("selectConllectionPage")
     @ResponseBody
     //分页查询在售的藏品
     public Result Select_Conllection_ByPage(@Valid PageRequest pageRequest) {
         //1.都可以查询到出售列表中的内容
-        System.out.println(pageRequest);
         //查询当前页码，查询条数
         return iNftInfoService.selectSellConllectionByPage(
                 new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize())
         );
     }
 
-    //按照分类查询藏品
+    //按照分类查询出售藏品
     @GetMapping("selectConllectionKindByPage")
     @ResponseBody
     public Result selectConllectionKindByPage(@Valid InfoKindReq infoKindReq) {
@@ -63,10 +62,10 @@ public class SelectConllection {
     //查询所有订单信息
     @GetMapping("selectOrderByPage")
     @ResponseBody
-    public Result selectOrderByPage(@Valid Search search) {
+    public Result selectOrderByPage(@Valid PageRequest pageRequest) {
          //查询当前页码，查询条数
         return iNftOrderService.selectAllOrder(
-                new Page<>(search.getCurrent(), search.getPageSize())
+                new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize())
         );
     }
 }

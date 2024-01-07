@@ -1,5 +1,6 @@
 package com.nft.domain.nftSort.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.nftSort.model.req.SortReq;
 import com.nft.domain.nftSort.model.req.UpdateSortReq;
 import com.nft.domain.nftSort.model.vo.SortVo;
@@ -31,8 +32,8 @@ public class ISortServiceImpl implements ISortService {
     }
 
     @Override
-    public List<SortVo> selectSortByPage(Search search) {
-        return iSortRepository.selectSortByPage(search);
+    public List<SortVo> selectSortByPage(Page page) {
+        return iSortRepository.selectSortByPage(page);
     }
 
     @Override

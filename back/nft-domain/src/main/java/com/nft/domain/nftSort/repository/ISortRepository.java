@@ -1,5 +1,6 @@
 package com.nft.domain.nftSort.repository;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.nftSort.model.req.SortReq;
 import com.nft.domain.nftSort.model.req.UpdateSortReq;
 import com.nft.domain.nftSort.model.vo.SortVo;
@@ -15,7 +16,7 @@ public interface ISortRepository {
 
     boolean delSortById(Integer id);
 
-    List<SortVo> selectSortByPage(Search search);
+    List<SortVo> selectSortByPage(Page page);
 
     SortVo selectSortByName(SortReq sortReq);
     //查询分类
