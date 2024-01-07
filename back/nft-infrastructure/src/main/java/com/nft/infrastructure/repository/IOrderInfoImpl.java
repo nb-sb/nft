@@ -1,5 +1,6 @@
 package com.nft.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
@@ -12,6 +13,7 @@ import com.nft.infrastructure.dao.OrderInfoMapper;
 import com.nft.infrastructure.po.OrderInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.mockito.internal.verification.api.VerificationInOrderMode;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -84,10 +86,20 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
 
     @Override
     public Integer getOrderStatus(String orderNumber) {
-        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("order_no", orderNumber);
-        OrderInfo orderInfo = orderInfoMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper();
+        wrapper.eq(OrderInfo::getOrderNo, orderNumber)
+                .select(OrderInfo::getStatus);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
         return orderInfo.getStatus();
+    }
+
+    @Override
+    public OrderInfoVo getOrder(String orderNumber) {
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNumber);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
+        OrderInfoVo orderInfoVo = BeanCopyUtils.convertTo(orderInfo, OrderInfoVo ::new);
+        return orderInfoVo;
     }
 
     @Override

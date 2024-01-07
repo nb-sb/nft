@@ -64,6 +64,7 @@ public class SelectConllection {
     //管理员查询所有订单信息
     @GetMapping("selectOrdersByPage")
     @ResponseBody
+    @AuthPermisson(Constants.permiss.admin)
     public Result selectOrderByPage(@Valid PageRequest pageRequest) {
          //查询当前页码，查询条数
         return iNftOrderService.selectAllOrder(

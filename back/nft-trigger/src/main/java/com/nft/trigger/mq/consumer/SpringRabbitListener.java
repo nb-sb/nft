@@ -3,6 +3,9 @@ package com.nft.trigger.mq.consumer;
 import com.nft.common.APIException;
 import com.nft.common.Constants.*;
 import com.nft.common.RabbitMqConstant;
+import com.nft.domain.nft.model.vo.OrderInfoVo;
+import com.nft.domain.nft.model.vo.SellInfoVo;
+import com.nft.domain.nft.repository.ISellInfoRespository;
 import com.nft.domain.order.respository.IOrderInfoRespository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class SpringRabbitListener {
     private final IOrderInfoRespository iOrderInfoRespository;
+    private final ISellInfoRespository iSellInfoRespository;
     /**
      * @Des 订单状态检查
      * @Date 2024/1/5 15:43
@@ -32,7 +36,8 @@ public class SpringRabbitListener {
     public void ORDER_CHECK_STATUS(String orderId) {
         log.info("消息接受成功 orderId : "+orderId);
         //检查订单状态 如果未支付则取消，其他状态如取消订单等状态则不修改
-        Integer orderStatus = iOrderInfoRespository.getOrderStatus(orderId);
+        OrderInfoVo order = iOrderInfoRespository.getOrder(orderId);
+        Integer orderStatus = order.getStatus();
         if (!payOrderStatus.NO_PAY.equals(orderStatus)) {
             //订单状态只能是未支付的，但是此时订单状态未：已支付/已取消
             log.info("订单状态无需修改 orderId : "+orderId +" status ： " + orderStatus);
@@ -40,8 +45,17 @@ public class SpringRabbitListener {
         }
         //修改订单状态为已取消
         boolean b = iOrderInfoRespository.setOrderStatus(orderId, payOrderStatus.CANCEL);
+        // 退回订单剩余的数量
+        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(order.getProductId());
+        boolean b1 = iSellInfoRespository.setSellStocks(sellInfoVo.getId(), sellInfoVo.getRemain() + 1);
+
         if (!b) {
+            log.error("修改订单状态为已取消 失败");
             throw new APIException(ResponseCode.NO_UPDATE, "修改订单状态为已取消 失败");
+        }
+        if (!b1) {
+            log.error("退回订单剩余的数量 失败");
+            throw new APIException(ResponseCode.NO_UPDATE, "退回订单剩余的数量 失败");
         }
     }
 

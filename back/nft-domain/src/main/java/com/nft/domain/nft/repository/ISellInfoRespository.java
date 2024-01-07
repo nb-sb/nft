@@ -26,7 +26,6 @@ public interface ISellInfoRespository {
     IPage<ConllectionInfoVo> selectSellConllectionKindByPage(Page page, Integer mid);
 
     boolean updataConllectionInfo(UpdataCollectionReq updataCollectionReq);
-
     //设置库存
     boolean setSellStocks(Integer id, Integer number);
 }

@@ -27,5 +27,7 @@ public interface IOrderInfoRespository {
 
     //查询订单状态
     Integer getOrderStatus(String orderNumber);
+    //查询订单信息
+    OrderInfoVo getOrder(String orderNumber);
     Integer selectOrderStatusByUser(Integer userId, String orderNumber);
 }
