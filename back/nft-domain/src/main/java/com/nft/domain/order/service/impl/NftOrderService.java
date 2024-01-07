@@ -1,29 +1,25 @@
-package com.nft.domain.nft.service.impl;
+package com.nft.domain.order.service.impl;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
 import com.nft.common.Utils.OrderNumberUtil;
-import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
-import com.nft.domain.apply.service.INftSubmitService;
-import com.nft.domain.common.mq.MqOperations;
+import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.order.model.res.OrderRes;
+import com.nft.domain.support.mq.MqOperations;
 import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
-import com.nft.domain.nft.model.req.ReviewReq;
-import com.nft.domain.nft.model.req.SellReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
-import com.nft.domain.nft.model.res.AuditRes;
-import com.nft.domain.nft.model.res.NftRes;
 import com.nft.domain.nft.model.vo.*;
 import com.nft.domain.nft.repository.IDetailInfoRespository;
-import com.nft.domain.nft.repository.INftSellRespository;
-import com.nft.domain.nft.repository.IOrderInfoRespository;
+import com.nft.domain.order.respository.INftOrderRespository;
+import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
-import com.nft.domain.nft.service.INftSellService;
-import com.nft.domain.support.ipfs.IpfsService;
+import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -41,19 +37,18 @@ import java.util.List;
 @Log4j2
 @Service
 @AllArgsConstructor
-public class NftSellService implements INftSellService {
+public class NftOrderService implements INftOrderService {
 
-    private final INftSellRespository iNftSellRespository;
+    private final INftOrderRespository iNftOrderRespository;
     private final ISubmitCacheRespository iSubmitCacheRespository;
-    private final INftSubmitService iNftSubmitService;
     private final RedisUtil redisUtil;
-    private final IpfsService ipfsService;
     private final IUserInfoRepository iUserInfoRepository;
     private final IOrderInfoRespository iOrderInfoRespository;
     private final IOwnerShipRespository iOwnerShipRespository;
     private final IDetailInfoRespository iDetailInfoRespository;
     private final Token2User token2User;
     private final MqOperations mqOperations;
+    private final ISellInfoRespository iSellInfoRespository;
 
 
 
@@ -76,7 +71,7 @@ public class NftSellService implements INftSellService {
             return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
         }
         //已拥有的hash不能再次购买
-        SellInfoVo sellInfoVo = iNftSellRespository.selectSellInfoById(conllectionId);
+        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
         OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(user.getAddress(), sellInfoVo.getIpfsHash());
         if (ownerShipVo != null) {
             return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
@@ -88,14 +83,14 @@ public class NftSellService implements INftSellService {
                 //2.查询剩余库存
                 ConllectionInfoVo conllectionInfoVo ;
                 //查询mysql
-                conllectionInfoVo = iNftSellRespository.selectConllectionById(conllectionId);
+                conllectionInfoVo = iSellInfoRespository.selectConllectionById(conllectionId);
                 if (conllectionInfoVo == null) {
                     return new Result("0", "商品不存在");
                 }
                 stock = conllectionInfoVo.getRemain();
                 if (stock <= 0) return new Result("0", "商品库存不足");
                 //3.减少库存操作
-                if (!iNftSellRespository.decreaseSellStocks(conllectionId, 1)) {
+                if (!iSellInfoRespository.setSellStocks(conllectionId, stock-1)) {
                     log.error("商品库存减少失败");
                     return new Result("0", "库存减少失败");
                 }
@@ -190,7 +185,7 @@ public class NftSellService implements INftSellService {
             //2.更新藏品信息
             //1)updataConllectionInfo
             if (updataCollectionReq.getName() != null || updataCollectionReq.getPresent() != null) {
-                boolean b = iNftSellRespository.updataConllectionInfo(updataCollectionReq);//更新藏品信息
+                boolean b = iSellInfoRespository.updataConllectionInfo(updataCollectionReq);//更新藏品信息
                 return b ? Result.success("更新藏品信息成功!") : Result.error("更新藏品信息失败!");
             }
             if (updataCollectionReq.getStatus() != null) {
@@ -209,43 +204,19 @@ public class NftSellService implements INftSellService {
     }
 
     @Override
-    public AuditRes ReviewCollection(ReviewReq req) {
-        // 需要先修改区块链状态在修改mysql状态！！
-        //这里因为是在审核中，所以不需要使用读写锁，普通的redisson锁即可防止多个管理员同时审核，造成数据库、区块链或ipfs多次上传等情况
-        DistributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
-        try {
-            //2.操作审核状态 （1 为不通过 2为通过）
-            AuditRes auditRes = iNftSubmitService.changeSellStatus(req);
-            if (!String.valueOf(Constants.SellState.PASS.getCode()).equals(auditRes.getCode())) {
-                //如果是不通过则这里直接返回参数，无需进行下面操作
-                return auditRes;
-            }
-            // -- 通过：通过才会加入到出售表，ipfs,区块链数据--
-            //3.添加至ipfs 获得hash
-            String hash = ipfsService.addIpfsById(String.valueOf(req.getId()));
-            System.err.println("hash : " + hash);
-            //4.添加至区块链
-            boolean addFISCO = iNftSellRespository.addSellByFISCO(hash, req.getId());
-            System.out.println(addFISCO);
-            if (!addFISCO) {
-                return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
-            }
-            //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
-            if (!iNftSubmitService.insertSellInfo(req, hash)) {
-                return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
-            }
-            return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
-        } finally {
-            DistributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
+    public Result selectAllOrder(Page page) {
+        List<OrderInfoVo> orderInfoVos = iNftOrderRespository.selectAllOrder(page);
+        if (orderInfoVos != null) {
+            return OrderRes.success(orderInfoVos);
         }
-
-
+        return OrderRes.success("success");
     }
+
 
     //更新藏品所有者
     public DetailInfoVo transferConllection(OrderInfoVo orderInfo,UserVo user) {
         //购买成功后更新藏品所有者
-        ConllectionInfoVo conllectionInfoVo = iNftSellRespository.selectConllectionById(orderInfo.getProductId());
+        ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectConllectionById(orderInfo.getProductId());
         //1）更新区块链上数据 => transCollectionByFisco(用户地址，藏品hash)
         boolean b = iOwnerShipRespository.addUserConllectionByFisco(user.getAddress(), conllectionInfoVo.getIpfsHash());
         if (!b) {
@@ -254,7 +225,7 @@ public class NftSellService implements INftSellService {
         //如果更新区块链上数据成功的话，进行更新数据库内容
         //2）更新mysql上数据//更新数据库中用户拥有的藏品
         //查询fisco中存储的数据赋值到mysql中
-        SellInfoVo sellInfoVo = iNftSellRespository.selectSellInfoById(orderInfo.getProductId());
+        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(orderInfo.getProductId());
         //a.从fisco中获取所属信息 [1,"1703683065626","1","1#80"]
         List list = iOwnerShipRespository.selectOWnerShipInfoByFisco(user.getAddress(), sellInfoVo.getIpfsHash());
         System.out.println(list);

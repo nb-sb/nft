@@ -1,11 +1,13 @@
 package com.nft.trigger.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.email.SendEmailService;
+import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
@@ -104,11 +106,13 @@ public class UserController {
     }
 
     //    使用分页查询查询所有用户
-    @PostMapping("/selectUserPage")
+    @GetMapping("/selectUserPage")
     @ResponseBody
     @AuthPermisson(Constants.permiss.admin)
-    public Result selectUserPage(@RequestBody Search search) {
-        List<UserVo> userVos = iUserAccountService.selectUserPage(search);
+    public Result selectUserPage(@Valid Search search) {
+        //查询当前页码，查询条数
+        List<UserVo> userVos = iUserAccountService.selectUserPage(
+                new Page<>(search.getCurrent(), search.getPageSize()));
         return SelectRes.success(userVos);
     }
 

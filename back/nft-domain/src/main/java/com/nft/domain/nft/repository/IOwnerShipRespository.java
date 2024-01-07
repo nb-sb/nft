@@ -4,7 +4,11 @@ import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 
 import java.util.List;
-
+/**
+* @author: 戏人看戏
+* @Date: 2024/1/7 16:31
+* @Description: 用户所属藏品的操作
+*/
 public interface IOwnerShipRespository {
     //添加用户所属藏品
     boolean addUserConllection(AddUserConllection2MysqlReq sellInfoVo, String UserAddress);

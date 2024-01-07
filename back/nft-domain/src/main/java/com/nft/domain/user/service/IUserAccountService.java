@@ -1,5 +1,6 @@
 package com.nft.domain.user.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.support.Search;
@@ -24,7 +25,7 @@ public interface IUserAccountService {
 
 
     //使用分页查询用户信息
-    List<UserVo> selectUserPage(Search search);
+    List<UserVo> selectUserPage(Page<UserVo> page);
 
     //判断是否为管理员
     boolean isAdmin(String username,String password);

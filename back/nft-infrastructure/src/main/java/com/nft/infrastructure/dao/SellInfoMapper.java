@@ -8,9 +8,6 @@ import com.nft.infrastructure.po.SellInfo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * <p>
  *  Mapper 接口
@@ -36,6 +33,6 @@ public interface SellInfoMapper extends BaseMapper<SellInfo> {
             "JOIN nft_relationships ON sell_info.id = nft_relationships.cid " +
             "WHERE nft_relationships.mid = #{mid} " +
             "ORDER BY sell_info.id DESC")
-    IPage<ConllectionInfoVo> selectConllectionKindByPage(Page<ConllectionInfoVo> page, @Param("mid") Long mid);
+    IPage<ConllectionInfoVo> selectSellConllectionKindByPage(Page<ConllectionInfoVo> page, @Param("mid") Long mid);
 
 }

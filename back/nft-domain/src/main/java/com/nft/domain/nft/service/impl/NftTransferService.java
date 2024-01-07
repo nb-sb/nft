@@ -2,21 +2,16 @@ package com.nft.domain.nft.service.impl;
 
 import com.nft.common.APIException;
 import com.nft.common.Constants;
-import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.common.Utils.TimeUtils;
 import com.nft.domain.nft.model.req.TransferReq;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 import com.nft.domain.nft.repository.IDetailInfoRespository;
-import com.nft.domain.nft.repository.INftSellRespository;
-import com.nft.domain.nft.repository.IOrderInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.service.INftTransferService;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.user.model.vo.UserVo;
-import com.nft.domain.user.repository.IUserInfoRepository;
 import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 @Log4j2
 @Service
@@ -45,7 +39,7 @@ public class NftTransferService implements INftTransferService {
         if (StringUtil.equals(fromAddress, toAddress)) {
             return Result.error("不能将藏品转移给自己");
         }
-        // TODO: 2024/1/4 判断toAddress是否存在 
+        // TODO: 2024/1/4 判断toAddress是否存在
         //验证是否是自己的藏品
         OwnerShipVo myConllection = iOwnerShipRespository.getMyConllection(id, fromAddress);
         if (myConllection == null) {

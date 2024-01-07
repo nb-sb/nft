@@ -1,4 +1,4 @@
-package com.nft.domain.nft.model.req;
+package com.nft.domain.apply.model.req;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 @Data
-public class SellReq {
+public class ApplyReq {
     @NotNull
     private String path; //文件路径
     @NotNull

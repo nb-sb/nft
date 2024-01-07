@@ -40,9 +40,9 @@ public class MetaController {
     }
 
     //查看分类
-    @PostMapping("getSort")
+    @GetMapping("getSort")
     @ResponseBody
-    public Result selectSortByPage(@Valid @RequestBody Search search) {
+    public Result selectSortByPage(@Valid  Search search) {
         List<SortVo> sortVos = iSortService.selectSortByPage(search);
         return SortRes.success( sortVos);
     }

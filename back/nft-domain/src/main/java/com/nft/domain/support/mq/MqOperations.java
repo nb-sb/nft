@@ -1,4 +1,4 @@
-package com.nft.domain.common.mq;
+package com.nft.domain.support.mq;
 
 /**
  * MQ操作接口

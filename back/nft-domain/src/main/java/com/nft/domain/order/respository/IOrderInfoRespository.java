@@ -1,10 +1,12 @@
-package com.nft.domain.nft.repository;
+package com.nft.domain.order.respository;
 
-import cn.hutool.db.sql.Order;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.OrderInfoVo;
-
-import java.text.ParseException;
+/**
+* @author: 戏人看戏
+* @Date: 2024/1/7 16:33
+* @Description: 订单的存贮操作
+*/
 import java.util.List;
 
 public interface IOrderInfoRespository {
@@ -16,8 +18,6 @@ public interface IOrderInfoRespository {
 
     //查询用户指定商品订单
     List<OrderInfoVo> selectOrderInfoByUser(Integer userId, Integer collectionId, Integer OrderStatus);
-
-    //todo查询用户拥有的商品订单列表
 
 
     //设置订单支付状态

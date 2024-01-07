@@ -4,20 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.common.Utils.TimeUtils;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.OrderInfoVo;
-import com.nft.domain.nft.repository.IOrderInfoRespository;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.infrastructure.dao.OrderInfoMapper;
 import com.nft.infrastructure.po.OrderInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 

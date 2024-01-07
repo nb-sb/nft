@@ -100,10 +100,8 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public List<UserVo> selectUserPage(Search search) {
-        Integer current = search.getCurrent();
-        Integer size = search.getSize();
-        Page<UserInfo> page = new Page<>(current, size);
+    public List<UserVo> selectUserPage(Page page1) {
+        Page<UserInfo> page = new Page<>(page1.getCurrent(), page1.getSize());
         page.setOptimizeCountSql(true);
         Page<UserInfo> userInfoPage = userInfoMapper.selectPage(page, null);
         List<UserInfo> records = userInfoPage.getRecords();

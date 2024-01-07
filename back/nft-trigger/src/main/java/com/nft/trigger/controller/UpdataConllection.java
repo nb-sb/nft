@@ -4,7 +4,7 @@ import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
-import com.nft.domain.nft.service.INftSellService;
+import com.nft.domain.order.service.INftOrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +16,7 @@ import javax.validation.Valid;
 @RestController
 @AllArgsConstructor
 public class UpdataConllection {
-    private final INftSellService iNftSellService;
+    private final INftOrderService iNftOrderService;
 
 
     /**
@@ -34,6 +34,6 @@ public class UpdataConllection {
     public Result updataConllection(@Valid @RequestBody UpdataCollectionReq updataCollectionReq) {
         //1.验证调用者权限
         //2.进行更新藏品信息
-        return iNftSellService.updataConllectionInfo(updataCollectionReq);
+        return iNftOrderService.updataConllectionInfo(updataCollectionReq);
     }
 }

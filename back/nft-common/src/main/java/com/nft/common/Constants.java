@@ -21,6 +21,17 @@ public class Constants {
     public static Integer USER = 0; //普通用户权限
 
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public static final class SortOrder {
+        /**
+         * 升序
+         */
+        public static final String SORT_ORDER_ASC = "ascend";
+
+        /**
+         * 降序
+         */
+        public static final String SORT_ORDER_DESC = " descend";
+    }
 
     public enum ResponseCode {
         SUCCESS("1", "成功"),

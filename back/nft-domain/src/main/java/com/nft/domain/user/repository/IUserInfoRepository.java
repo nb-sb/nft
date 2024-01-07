@@ -1,6 +1,7 @@
 package com.nft.domain.user.repository;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
@@ -27,7 +28,7 @@ public interface IUserInfoRepository {
 
     Constants.ResponseCode register(SignReq signReq);
 
-    List<UserVo> selectUserPage(Search search);
+    List<UserVo> selectUserPage(Page page);
 
     boolean chanagePassword(ChanagePwReq chanagePwReq);
 

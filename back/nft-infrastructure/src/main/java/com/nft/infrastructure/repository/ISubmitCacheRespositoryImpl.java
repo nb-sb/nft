@@ -8,12 +8,11 @@ import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.nft.model.req.ReviewReq;
-import com.nft.domain.nft.model.req.SellReq;
+import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.infrastructure.dao.SellInfoMapper;
 import com.nft.infrastructure.dao.SubmitCacheMapper;
-import com.nft.infrastructure.fisco.service.SellStroageService;
 import com.nft.infrastructure.po.SellInfo;
 import com.nft.infrastructure.po.SubmitCache;
 import lombok.AllArgsConstructor;
@@ -41,8 +40,8 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
 
     @Override
     @Transactional
-    public boolean addSellCheck(SellReq sellReq, UserVo userVo) {
-        SubmitCache submitCache = BeanCopyUtils.convertTo(sellReq, SubmitCache::new);
+    public boolean addSellCheck(ApplyReq applyReq, UserVo userVo) {
+        SubmitCache submitCache = BeanCopyUtils.convertTo(applyReq, SubmitCache::new);
         submitCache.setStatus(0)
                 .setAuthorId(String.valueOf(userVo.getId()))
                 .setAuthorAddress(userVo.getAddress());
@@ -52,13 +51,13 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
         SubmitCache submitCache1 = submitCacheMapper.selectOne(submitWrapper);
         if (insert > 0) {
             //添加分类表
-            boolean b = nftRelationship.addMetas(submitCache1.getId(), sellReq.getMid());
+            boolean b = nftRelationship.addMetas(submitCache1.getId(), applyReq.getMid());
             if (!b) {
                 log.error("添加至分类表错误!: "+ false);
                 throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加至分类表错误");
             }
             //修改分类表中分类记录数
-            boolean incr = nftMetas.incr(sellReq.getMid(), 1);
+            boolean incr = nftMetas.incr(applyReq.getMid(), 1);
             if (!incr) {
                 log.error("修改分类表中分类记录数 错误 ！："+ false);
                 throw new APIException(Constants.ResponseCode.NO_UPDATE, "修改分类表中分类记录数错误");

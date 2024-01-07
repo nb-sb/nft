@@ -1,6 +1,7 @@
 package com.nft.domain.user.service.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
@@ -141,8 +142,8 @@ public class UserAccountService implements IUserAccountService {
     }
 
     @Override
-    public List<UserVo> selectUserPage(Search search) {
-        return iUserInfoRepository.selectUserPage(search);
+    public List<UserVo> selectUserPage(Page page) {
+        return iUserInfoRepository.selectUserPage(page);
     }
 
     @Override

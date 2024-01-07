@@ -1,11 +1,8 @@
 package com.nft.infrastructure.event.mq.producer.domain;
 
 import com.nft.common.RabbitMqConstant;
-import com.nft.domain.common.mq.MqOperations;
+import com.nft.domain.support.mq.MqOperations;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +21,7 @@ public class OrderPublisher implements MqOperations {
     public void SendCheckMessage(String orderId) {
         rabbitTemplate.convertAndSend(RabbitMqConstant.DELAY_DERECT, RabbitMqConstant.ORDER_CHECK_STATUS,
                 orderId, message -> {
-                    message.getMessageProperties().setDelay(RabbitMqConstant.MINUTE_1);
+                    message.getMessageProperties().setDelay(RabbitMqConstant.MINUTE_30);
                     return message;
                 });
         log.info("消息发送成功 orderId: "+orderId);

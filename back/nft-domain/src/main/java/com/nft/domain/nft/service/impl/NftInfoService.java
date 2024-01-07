@@ -8,8 +8,8 @@ import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
-import com.nft.domain.nft.repository.INftSellRespository;
-import com.nft.domain.nft.service.INftSelectService;
+import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.nft.service.INftInfoService;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 import java.util.Random;
 @AllArgsConstructor
 @Service
-public class NftSelectService implements INftSelectService {
+public class NftInfoService implements INftInfoService {
     private  final RedisUtil redisUtil;
-    private final INftSellRespository iNftSellRespository;
+    private final ISellInfoRespository iSellInfoRespository;
 //    private final ElasticsearchRestTemplate elasticTemplate ;
 //    @PostConstruct
 //    public void init() {
@@ -42,15 +42,15 @@ public class NftSelectService implements INftSelectService {
 //        }
 //    }
     @Override
-    public GetNftRes selectConllectionByPage(Page<ConllectionInfoVo> page) {
+    public GetNftRes selectSellConllectionByPage(Page page) {
         //todo:
-        IPage<ConllectionInfoVo> conllectionInfoVoIPage = iNftSellRespository.selectConllectionByPage(page);
+        IPage<ConllectionInfoVo> conllectionInfoVoIPage = iSellInfoRespository.selectSellConllectionByPage(page);
         return GetNftRes.success(conllectionInfoVoIPage.getRecords());
     }
 
     @Override
-    public GetNftRes selectConllectionKindByPage(Page<ConllectionInfoVo> page, Integer mid) {
-        return GetNftRes.success(iNftSellRespository.selectConllectionKindByPage(page, mid).getRecords());
+    public GetNftRes selectSellConllectionKindByPage(Page page, Integer mid) {
+        return GetNftRes.success(iSellInfoRespository.selectSellConllectionKindByPage(page, mid).getRecords());
     }
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
@@ -87,7 +87,7 @@ public class NftSelectService implements INftSelectService {
             //1.这里设置读锁,在查询mysql之前设置读锁,然后在updata方法里设置更新锁，这个方法比延时双删要好
             DistributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             try {
-                conllectionInfoVo = iNftSellRespository.selectConllectionById(id);
+                conllectionInfoVo = iSellInfoRespository.selectConllectionById(id);
                 Random rand = new Random();
                 if (conllectionInfoVo != null) {
                     //一、设置缓存并解决 缓存击穿问题

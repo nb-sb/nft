@@ -3,7 +3,7 @@ package com.nft.trigger.mq.consumer;
 import com.nft.common.APIException;
 import com.nft.common.Constants.*;
 import com.nft.common.RabbitMqConstant;
-import com.nft.domain.nft.repository.IOrderInfoRespository;
+import com.nft.domain.order.respository.IOrderInfoRespository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.ExchangeTypes;
