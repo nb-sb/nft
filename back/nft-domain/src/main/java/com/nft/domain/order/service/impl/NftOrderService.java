@@ -220,8 +220,9 @@ public class NftOrderService implements INftOrderService {
     }
 
     @Override
-    public Result getOrderByStatus() {
-        return null;
+    public Result getOrderByStatus(Integer userId, Integer payOrderStatus) {
+        List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrderByStatus(userId,payOrderStatus);
+        return OrderRes.success(orderInfoVos);
     }
 
 

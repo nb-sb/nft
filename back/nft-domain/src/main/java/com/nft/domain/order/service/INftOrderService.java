@@ -1,6 +1,7 @@
 package com.nft.domain.order.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
@@ -30,5 +31,5 @@ public interface INftOrderService {
     //查询用户给指定订单信息
     Result getOrder(Integer userId,String orderId);
     //查询自己待支付/已支付等状态订单
-    Result getOrderByStatus();
+    Result getOrderByStatus(Integer userId, Integer payOrderStatus);
 }

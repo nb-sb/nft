@@ -1,12 +1,14 @@
 package com.nft.trigger.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.Constants;
 import com.nft.common.PageRequest;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.InfoKindReq;
 import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.service.INftInfoService;
+import com.nft.domain.order.model.req.OrderStateReq;
 import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.vo.UserVo;
@@ -69,7 +71,7 @@ public class SelectConllection {
         );
     }
     //查询自己订单信息
-    @GetMapping("/user/orders")
+    @GetMapping("/user/orders/")
     @ResponseBody
     @AuthPermisson()
     public Result selectMyOrder() {
@@ -86,5 +88,14 @@ public class SelectConllection {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         return iNftOrderService.getOrder(userOne.getId(),orderId);
+    }
+    //查询自己待支付/已支付等状态订单 由于用户自己订单不会过多，所以无需使用分页查询（定期清理数据库中取消订单）
+    @GetMapping("/user/orders")
+    @ResponseBody
+    @AuthPermisson()
+    public Result getUserOrderDetails(@Valid OrderStateReq orderStateReq) {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iNftOrderService.getOrderByStatus(userOne.getId(), orderStateReq.getStatus());
     }
 }

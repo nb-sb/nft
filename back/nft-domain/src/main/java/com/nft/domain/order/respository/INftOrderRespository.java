@@ -14,6 +14,8 @@ public interface INftOrderRespository {
     List<UserOrderSimpleVo> getOrder(Integer userId);
 
     List<OrderInfoVo> getOrder(Integer userId,String orderId);
+
+    List<UserOrderSimpleVo> getOrderByStatus(Integer userId, Integer payOrderStatus);
     //查询用户拥有的商品订单列表
 
 

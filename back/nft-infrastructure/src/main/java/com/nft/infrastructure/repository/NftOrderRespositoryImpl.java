@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -41,7 +40,7 @@ public class NftOrderRespositoryImpl implements INftOrderRespository {
     @Override
     public List<UserOrderSimpleVo> getOrder(Integer userId) {
         LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper();
-        // 商家图片，未删除，可用状态
+        // 订单号，商品名称，商品图片，订单创建时间，订单价格
         wrapper.eq(OrderInfo::getUserId,userId)
                 .select(OrderInfo::getOrderNo,
                         OrderInfo::getProductName,
@@ -62,6 +61,23 @@ public class NftOrderRespositoryImpl implements INftOrderRespository {
         List<OrderInfo> orderInfos = orderInfoMapper.selectList(queryWrapper);
         if (orderInfos.size() == 0) return null;
         List<OrderInfoVo> orderInfoVos = BeanCopyUtils.convertListTo(orderInfos, OrderInfoVo ::new);
+        return orderInfoVos;
+    }
+
+    @Override
+    public List<UserOrderSimpleVo> getOrderByStatus(Integer userId, Integer payOrderStatus) {
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper();
+        // 订单号，商品名称，商品图片，订单创建时间，订单价格
+        wrapper.eq(OrderInfo::getUserId, userId)
+                .eq(OrderInfo::getStatus, payOrderStatus)
+                .select(OrderInfo::getOrderNo,
+                        OrderInfo::getProductName,
+                        OrderInfo::getProductImg,
+                        OrderInfo::getInitDate,
+                        OrderInfo::getProductPrice); // 只查询指定字段
+        List<OrderInfo> orderInfos = orderInfoMapper.selectList(wrapper);
+        if (orderInfos.size() == 0) return null;
+        List<UserOrderSimpleVo> orderInfoVos = BeanCopyUtils.convertListTo(orderInfos, UserOrderSimpleVo ::new);
         return orderInfoVos;
     }
 

@@ -297,6 +297,7 @@ public class Constants {
         public static final Integer CANCEL = 4; //取消订单
         public static final Integer REFUN = 5; //退款
     }
+
     /**
      * 用户aop验证权限参数
      */
