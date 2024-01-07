@@ -11,17 +11,17 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 06/01/2024 23:34:07
+ Date: 07/01/2024 19:29:54
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for detail_info
+-- Table structure for nft_detail_info
 -- ----------------------------
-DROP TABLE IF EXISTS `detail_info`;
-CREATE TABLE `detail_info`  (
+DROP TABLE IF EXISTS `nft_detail_info`;
+CREATE TABLE `nft_detail_info`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash',
   `transfer_address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '转移方用户地址',
@@ -45,21 +45,10 @@ CREATE TABLE `nft_metas`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for nft_relationships
+-- Table structure for nft_order_info
 -- ----------------------------
-DROP TABLE IF EXISTS `nft_relationships`;
-CREATE TABLE `nft_relationships`  (
-  `cid` int NOT NULL COMMENT '藏品id',
-  `mid` smallint NOT NULL COMMENT '分类id',
-  PRIMARY KEY (`cid`) USING BTREE,
-  INDEX `mid`(`mid` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for order_info
--- ----------------------------
-DROP TABLE IF EXISTS `order_info`;
-CREATE TABLE `order_info`  (
+DROP TABLE IF EXISTS `nft_order_info`;
+CREATE TABLE `nft_order_info`  (
   `order_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '订单id',
   `user_id` int NULL DEFAULT NULL COMMENT '用户id',
   `product_id` int NULL DEFAULT NULL COMMENT '藏品id',
@@ -74,10 +63,10 @@ CREATE TABLE `order_info`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for owner_ship
+-- Table structure for nft_owner_ship
 -- ----------------------------
-DROP TABLE IF EXISTS `owner_ship`;
-CREATE TABLE `owner_ship`  (
+DROP TABLE IF EXISTS `nft_owner_ship`;
+CREATE TABLE `nft_owner_ship`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '所属用户地址',
   `time` datetime NULL DEFAULT NULL COMMENT '获得时间',
@@ -86,14 +75,25 @@ CREATE TABLE `owner_ship`  (
   `digital_collection_id` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE,
-  CONSTRAINT `hash` FOREIGN KEY (`hash`) REFERENCES `sell_info` (`ipfs_hash`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `hash` FOREIGN KEY (`hash`) REFERENCES `nft_sell_info` (`ipfs_hash`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for sell_info
+-- Table structure for nft_relationships
 -- ----------------------------
-DROP TABLE IF EXISTS `sell_info`;
-CREATE TABLE `sell_info`  (
+DROP TABLE IF EXISTS `nft_relationships`;
+CREATE TABLE `nft_relationships`  (
+  `cid` int NOT NULL COMMENT '藏品id',
+  `mid` smallint NOT NULL COMMENT '分类id',
+  PRIMARY KEY (`cid`) USING BTREE,
+  INDEX `mid`(`mid` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for nft_sell_info
+-- ----------------------------
+DROP TABLE IF EXISTS `nft_sell_info`;
+CREATE TABLE `nft_sell_info`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `unique_id` int NULL DEFAULT NULL COMMENT '提交的缓存表的对应的id',
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash',
@@ -108,10 +108,10 @@ CREATE TABLE `sell_info`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for submit_cache
+-- Table structure for nft_submit_cache
 -- ----------------------------
-DROP TABLE IF EXISTS `submit_cache`;
-CREATE TABLE `submit_cache`  (
+DROP TABLE IF EXISTS `nft_submit_cache`;
+CREATE TABLE `nft_submit_cache`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '文件路径',
   `total` int NULL DEFAULT NULL COMMENT '出售数量',
@@ -124,14 +124,14 @@ CREATE TABLE `submit_cache`  (
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1是通过，2是拒绝',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `author_address`(`author_address` ASC) USING BTREE,
-  CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `nft_user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for user_detal
+-- Table structure for nft_user_detal
 -- ----------------------------
-DROP TABLE IF EXISTS `user_detal`;
-CREATE TABLE `user_detal`  (
+DROP TABLE IF EXISTS `nft_user_detal`;
+CREATE TABLE `nft_user_detal`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `for_id` int NOT NULL COMMENT '来自用户表中的id',
   `name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '姓名 ',
@@ -142,15 +142,15 @@ CREATE TABLE `user_detal`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `for_id`(`for_id` ASC) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE,
-  CONSTRAINT `address` FOREIGN KEY (`address`) REFERENCES `user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `for_id` FOREIGN KEY (`for_id`) REFERENCES `user_info` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `address` FOREIGN KEY (`address`) REFERENCES `nft_user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `for_id` FOREIGN KEY (`for_id`) REFERENCES `nft_user_info` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for user_info
+-- Table structure for nft_user_info
 -- ----------------------------
-DROP TABLE IF EXISTS `user_info`;
-CREATE TABLE `user_info`  (
+DROP TABLE IF EXISTS `nft_user_info`;
+CREATE TABLE `nft_user_info`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `privatekey` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '私钥',

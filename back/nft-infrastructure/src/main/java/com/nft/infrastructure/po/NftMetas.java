@@ -1,6 +1,8 @@
 package com.nft.infrastructure.po;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -15,6 +17,7 @@ import lombok.experimental.Accessors;
 /*@ApiModel(value="NftMetas对象", description="")*/
 @Accessors(chain = true)
 @Data
+@TableName(value = "nft_metas")
 public class NftMetas implements Serializable {
 
     private static final long serialVersionUID = 1L;
