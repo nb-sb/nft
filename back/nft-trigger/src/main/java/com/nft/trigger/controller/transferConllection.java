@@ -4,6 +4,8 @@ import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.TransferReq;
 import com.nft.domain.nft.service.INftTransferService;
+import com.nft.domain.support.Token2User;
+import com.nft.domain.user.model.vo.UserVo;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +22,14 @@ import javax.validation.Valid;
 public class transferConllection {
     private final HttpServletRequest httpServletRequest;
     private final INftTransferService iNftTransferService;
+    private final Token2User token2User;
     //用户转增藏品
     @PostMapping("transferConllection")
     @ResponseBody
     @AuthPermisson
     public Result transfer(@Valid @RequestBody TransferReq transferReq) {
-        return iNftTransferService.transferCollection(transferReq, httpServletRequest);
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iNftTransferService.transferCollection(transferReq, userOne);
     }
 }

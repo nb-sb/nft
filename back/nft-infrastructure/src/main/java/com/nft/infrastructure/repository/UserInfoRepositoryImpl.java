@@ -111,6 +111,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
 //        System.out.println(userInfoPage.getSize());
 //        System.out.println(userInfoPage.getCurrent());
 //        System.out.println(userInfoPage.getTotal());
+        if (records.size() ==0) return null;
         List<UserVo> userVos = BeanCopyUtils.convertListTo(records, UserVo::new);
         return userVos;
     }
@@ -132,6 +133,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     @Override
     public UserVo selectUserByid(Integer id) {
         UserInfo userInfo = userInfoMapper.selectById(id);
+        if (userInfo == null) return null;
         UserVo userVo = new UserVo();
         userVo.setId(userInfo.getId());
         userVo.setAddress(userInfo.getAddress());
@@ -144,6 +146,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     @Override
     public boolean decrementUserBalance(Integer id, BigDecimal balance) {
         UserInfo userInfo = userInfoMapper.selectById(id);
+        if (userInfo == null) return false;
         BigDecimal balance1 = userInfo.getBalance(); //当前余额
         BigDecimal balance2 = balance1.subtract(balance);//减少后的余额
         //必须减少后的余额大于等于0
@@ -183,9 +186,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username);
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
-        if (Optional.ofNullable(userInfo).isPresent()) {
-            return true;
-        }
+        if (Optional.ofNullable(userInfo).isPresent()) return true;
         return false;
     }
 }

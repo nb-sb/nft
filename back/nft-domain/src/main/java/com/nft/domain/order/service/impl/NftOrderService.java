@@ -11,6 +11,7 @@ import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
 import com.nft.domain.order.model.res.OrderRes;
+import com.nft.domain.order.model.vo.UserOrderSimpleVo;
 import com.nft.domain.support.mq.MqOperations;
 import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
@@ -46,7 +47,6 @@ public class NftOrderService implements INftOrderService {
     private final IOrderInfoRespository iOrderInfoRespository;
     private final IOwnerShipRespository iOwnerShipRespository;
     private final IDetailInfoRespository iDetailInfoRespository;
-    private final Token2User token2User;
     private final MqOperations mqOperations;
     private final ISellInfoRespository iSellInfoRespository;
 
@@ -56,23 +56,21 @@ public class NftOrderService implements INftOrderService {
 
     @Override
     @Transactional
-    public Result addConllectionOrder(HttpServletRequest httpServletRequest, Integer conllectionId) {
+    public Result addConllectionOrder(UserVo fromUser, Integer conllectionId) {
         //获取使用token用户id
-        UserVo user =token2User.getUserOne(httpServletRequest);
-        if (user == null) return Result.userNotFinded();
-        Integer userid = user.getId();
+        Integer userid = fromUser.getId();
         Integer stock ;
 
         //添加一把用户锁防止重复提交
         DistributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         //判断是否有同一个商品未支付的，如果有则无法提交
-        List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(user.getId(), conllectionId);
+        List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
         if (userNoPayOrder.size() > 0) {
             return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
         }
         //已拥有的hash不能再次购买
         SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
-        OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(user.getAddress(), sellInfoVo.getIpfsHash());
+        OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
         if (ownerShipVo != null) {
             return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
         }
@@ -117,12 +115,9 @@ public class NftOrderService implements INftOrderService {
 
     @Override
     @Transactional
-    public Result payOrder(HttpServletRequest httpServletRequest,String orderNumber,Integer paytype) {
+    public Result payOrder(UserVo fromUser,String orderNumber,Integer paytype) {
         //传入用户id和订单号和支付方式
-        UserVo userVo =token2User.getUserOne(httpServletRequest);
-        if (userVo == null) return Result.userNotFinded();
-        Integer userid = userVo.getId();
-        paytype = Constants.payType.WEB_BALANCE_PAY;
+        Integer userid = fromUser.getId();
         // 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
         DistributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
         try {
@@ -153,7 +148,7 @@ public class NftOrderService implements INftOrderService {
                 }
                 //3)todo 返回购买状态（应该是直接在扣除余额成功的时候就可以返回了，然后后面操作发送到mq异步操作）
                 //如果支付成功则转移藏品 => transferConllection()
-                DetailInfoVo detailInfoVo1 = transferConllection(orderInfoVo, userVo);
+                DetailInfoVo detailInfoVo1 = transferConllection(orderInfoVo, fromUser);
                 // 加入mysql流水表中 || 加入区块链流水表中
                 boolean b1 = addDetailInfo(detailInfoVo1);
                 if (b1) {
@@ -210,6 +205,23 @@ public class NftOrderService implements INftOrderService {
             return OrderRes.success(orderInfoVos);
         }
         return OrderRes.success("success");
+    }
+
+    @Override
+    public Result getOrder(Integer userId) {
+        List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrder(userId);
+        return OrderRes.success(orderInfoVos);
+    }
+
+    @Override
+    public Result getOrder(Integer userId, String orderId) {
+        List<OrderInfoVo> orderInfoVos =  iNftOrderRespository.getOrder(userId,orderId);
+        return OrderRes.success(orderInfoVos);
+    }
+
+    @Override
+    public Result getOrderByStatus() {
+        return null;
     }
 
 

@@ -281,6 +281,10 @@ public class Constants {
         public static final Integer ZFB_PAY = 1;
         public static final Integer XV_PAY = 2;
         public static final Integer WEB_BALANCE_PAY = 3;
+
+        public static final String ZFB_PAY_STR = "1";
+        public static final String XV_PAY_STR = String.valueOf(XV_PAY);
+        public static final String WEB_BALANCE_PAY_STR = String.valueOf(WEB_BALANCE_PAY);
     }
     /**
      * 订单支付状态

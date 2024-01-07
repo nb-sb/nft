@@ -29,11 +29,9 @@ public class NftTransferService implements INftTransferService {
     private final IDetailInfoRespository iDetailInfoRespository;
     @Override
     @Transactional
-    public Result transferCollection(TransferReq transferReq, HttpServletRequest httpServletRequest) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne == null) return Result.userNotFinded();
-        String privatekey = userOne.getPrivatekey();
-        String fromAddress = userOne.getAddress();
+    public Result transferCollection(TransferReq transferReq, UserVo fromUser) {
+        String privatekey = fromUser.getPrivatekey();
+        String fromAddress = fromUser.getAddress();
         String toAddress = transferReq.getToAddress();
         Integer id = transferReq.getId(); //所属藏品id
         if (StringUtil.equals(fromAddress, toAddress)) {

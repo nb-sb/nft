@@ -20,9 +20,7 @@ public class ISortServiceImpl implements ISortService {
     @Override
     public boolean addSort(SortReq sortReq) {
         SortVo sortVo = iSortRepository.selectSortByName(sortReq);
-        if (sortVo != null) {
-            return false;
-        }
+        if (sortVo != null) return false;
         return iSortRepository.addSort(sortReq);
     }
 

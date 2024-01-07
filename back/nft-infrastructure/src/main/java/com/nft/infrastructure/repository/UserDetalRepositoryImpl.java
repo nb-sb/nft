@@ -48,9 +48,7 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
         QueryWrapper<UserDetal> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("for_id", id);
         UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
-        if (userDetal == null) {
-            return null;
-        }
+        if (userDetal == null) return null;
         RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);
         return realNameAuthVo;
     }

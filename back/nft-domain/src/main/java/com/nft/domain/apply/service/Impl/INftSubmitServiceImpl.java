@@ -32,10 +32,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
     private final ISellInfoRespository iSellInfoRespository;
 
     @Override
-    public Result addApply(HttpServletRequest httpServletRequest, ApplyReq applyReq) {
-        UserVo userVo =token2User.getUserOne(httpServletRequest);
-        if (userVo == null) return Result.userNotFinded();
-
+    public Result addApply(UserVo fromUser, ApplyReq applyReq) {
 
         SubCacheVo subCacheVo = iSubmitCacheRespository.selectOneByHash(applyReq.getHash());
         if (subCacheVo != null) {
@@ -47,7 +44,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
             log.info("分类不存在："+ applyReq.getMid());
             return new NftRes("0", "分类不存在："+ applyReq.getMid());
         }
-        boolean res = iSubmitCacheRespository.addSellCheck(applyReq, userVo);
+        boolean res = iSubmitCacheRespository.addSellCheck(applyReq, fromUser);
 
         if (res) return new NftRes("1", "已经添加到审核中~");
         return new NftRes("0", "添加审核失败，请联系网站管理员查看");

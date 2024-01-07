@@ -21,7 +21,7 @@ public interface IUserAccountService {
     UserResult retrievePassword(LoginReq loginReq);
 
     //修改密码
-    Result chanagePassword(HttpServletRequest httpServletRequest,ChanagePwReq chanagePwReq);
+    Result chanagePassword(UserVo fromUser,ChanagePwReq chanagePwReq);
 
 
     //使用分页查询用户信息
@@ -34,7 +34,7 @@ public interface IUserAccountService {
 
     UserInfoVo selectUserDetail(UserVo userVo);
 
-    Result submitRealNameAuth(HttpServletRequest httpServletRequest,RealNameAuthReq realNameAuthReq);
+    Result submitRealNameAuth(UserVo fromUser,RealNameAuthReq realNameAuthReq);
 
     Result AuditRealNameAuth(UpdateRealNameAuthStatusReq req);
 }

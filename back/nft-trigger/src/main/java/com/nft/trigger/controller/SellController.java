@@ -6,10 +6,14 @@ import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
 import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.common.Aop.AuthPermisson;
+import com.nft.domain.common.anno.Status;
 import com.nft.domain.nft.model.req.AddOrder;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.order.service.INftOrderService;
+import com.nft.domain.support.Token2User;
+import com.nft.domain.user.model.vo.UserVo;
+import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.validation.annotation.Validated;
@@ -32,21 +36,24 @@ public class SellController {
     private final HttpServletRequest httpServletRequest;
     private final INftOrderService iNftOrderService;
     private final INftSubmitService iNftSubmitService;
+    private final Token2User token2User;
 
 
 
     @PostMapping("addsellcheck")
     @ResponseBody
-    @AuthPermisson(Constants.permiss.everyone)
+    @AuthPermisson()
     //添加藏品到待审核数据库
     public Result addsellcheck(@Valid @RequestBody ApplyReq applyReq) {
-        return iNftSubmitService.addApply(httpServletRequest, applyReq);
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iNftSubmitService.addApply(userOne, applyReq);
     }
 
     //上传图片接口
     @PostMapping("/upfile")
     @ResponseBody
-    @AuthPermisson(Constants.permiss.everyone)
+    @AuthPermisson()
     public Object upfile(HttpServletRequest request) {
         List<String> result = new ArrayList<>();
         //多个文件上传  就只是简单的多文件上传保存在本地的磁盘
@@ -82,8 +89,10 @@ public class SellController {
     public Result purchaseConllection(
             @Valid
             @RequestBody AddOrder addOrder) {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
-        return iNftOrderService.addConllectionOrder(httpServletRequest, addOrder.getId());
+        return iNftOrderService.addConllectionOrder(userOne, addOrder.getId());
     }
 
 
@@ -94,11 +103,14 @@ public class SellController {
     public Result payOrder(
             @NotNull
             @RequestParam String OrderNumber,
+            @NotNull
             Integer paytype
     ) {
         // TODO: 2024/1/7 应该是支付后自动调用这个方法，这里为了测试就跳过支付阶段直接执行支付藏品后的方法
         //传入订单id，传入支付类型，传入http用于校验用户信息等
-        return iNftOrderService.payOrder(httpServletRequest, OrderNumber, paytype);
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iNftOrderService.payOrder(userOne, OrderNumber, paytype);
     }
 
 

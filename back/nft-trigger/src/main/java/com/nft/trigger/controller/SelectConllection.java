@@ -3,20 +3,18 @@ package com.nft.trigger.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.PageRequest;
 import com.nft.common.Result;
+import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.InfoKindReq;
 import com.nft.domain.nft.model.res.GetNftRes;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
-import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.nft.service.INftInfoService;
 import com.nft.domain.order.service.INftOrderService;
-import com.nft.domain.support.Search;
+import com.nft.domain.support.Token2User;
+import com.nft.domain.user.model.vo.UserVo;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -28,6 +26,8 @@ public class SelectConllection {
 
     private final INftInfoService iNftInfoService;
     private final INftOrderService iNftOrderService;
+    private final Token2User token2User;
+    private final HttpServletRequest httpServletRequest;
 
     //查询单个藏品
     @GetMapping("selectConllectionById")
@@ -59,13 +59,32 @@ public class SelectConllection {
                 new Page<>(infoKindReq.getCurrent(), infoKindReq.getPageSize()),
                 infoKindReq.getMin());
     }
-    //查询所有订单信息
-    @GetMapping("selectOrderByPage")
+    //管理员查询所有订单信息
+    @GetMapping("selectOrdersByPage")
     @ResponseBody
     public Result selectOrderByPage(@Valid PageRequest pageRequest) {
          //查询当前页码，查询条数
         return iNftOrderService.selectAllOrder(
                 new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize())
         );
+    }
+    //查询自己订单信息
+    @GetMapping("/user/orders")
+    @ResponseBody
+    @AuthPermisson()
+    public Result selectMyOrder() {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        //注意：只返回 藏品名称，商品图片，藏品价格，订单号，创建时间
+        //详细信息用下面接口查询，此接口用于展示用户自己拥有订单列表
+        return iNftOrderService.getOrder(userOne.getId());
+    }
+    //查询自己订单详细信息
+    @GetMapping("/user/orders/{orderId}")
+    @ResponseBody
+    @AuthPermisson()
+    public Result getUserOrderDetails(@PathVariable String orderId) {
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iNftOrderService.getOrder(userOne.getId(),orderId);
     }
 }

@@ -127,6 +127,7 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     @Override
     public boolean insertSellInfo(Integer id, String hash) {
         SubmitCache submitCache = submitCacheMapper.selectById(id);
+        if (submitCache == null) return false;
         SellInfo sellInfo = new SellInfo();
         sellInfo.setUniqueId(id)
                 .setHash(submitCache.getHash())
@@ -143,6 +144,7 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     public boolean addSellByFISCO(String hash,Integer id)   {
         //获取提交数据
         SubmitCache submitCache = submitCacheMapper.selectById(id);
+        if (submitCache == null) return false;
         SellStroageCreateSellInputBO sellStroageCreateSellInputBO = new SellStroageCreateSellInputBO();
         //传入hash 和 发售总数
         sellStroageCreateSellInputBO.set_hash(hash)

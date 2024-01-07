@@ -56,6 +56,7 @@ public class ISortRepositoryImpl implements ISortRepository {
         page.setOptimizeCountSql(true);
         Page<NftMetas> userInfoPage = nftMetasMapper.selectPage(page, null);
         List<NftMetas> records = userInfoPage.getRecords();
+        if (records.size()==0) return null;
         List<SortVo> userVos = BeanCopyUtils.convertListTo(records, SortVo::new);
         return userVos;
     }
@@ -66,6 +67,7 @@ public class ISortRepositoryImpl implements ISortRepository {
         queryWrapper.eq("conllection_name", sortReq.getConllectionName())
                 .or().eq("conllection_slug", sortReq.getConllectionSlug());
         NftMetas nftMetas = nftMetasMapper.selectOne(queryWrapper);
+        if (nftMetas == null) return null;
         return BeanCopyUtils.convertTo(nftMetas, SortVo::new);
     }
 }

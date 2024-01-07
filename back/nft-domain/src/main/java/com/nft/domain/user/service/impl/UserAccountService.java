@@ -92,7 +92,7 @@ public class UserAccountService implements IUserAccountService {
      * }
      */
     @Override
-    public Result chanagePassword(HttpServletRequest httpServletRequest,ChanagePwReq chanagePwReq) {
+    public Result chanagePassword(UserVo fromUser,ChanagePwReq chanagePwReq) {
 
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();
@@ -121,12 +121,10 @@ public class UserAccountService implements IUserAccountService {
             if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
                 return UserResult.error("不能使用近期使用过的密码!");
             }
-            UserVo userOne = token2User.getUserOne(httpServletRequest);
-            if (userOne == null) return Result.userNotFinded();
             //判断旧密码是否正确
             LoginReq loginReq = new LoginReq();
-            loginReq.setUsername(userOne.getUsername());
-            chanagePwReq.setUsername(userOne.getUsername());
+            loginReq.setUsername(fromUser.getUsername());
+            chanagePwReq.setUsername(fromUser.getUsername());
             loginReq.setPassword(chanagePwReq.getOldpassword());
             UserVo userVo = iUserInfoRepository.selectOne(loginReq);
             if (userVo == null) {
@@ -185,13 +183,11 @@ public class UserAccountService implements IUserAccountService {
     }
 
     @Override
-    public Result submitRealNameAuth(HttpServletRequest httpServletRequest,RealNameAuthReq realNameAuthReq) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne ==null) return Result.userNotFinded();
-        realNameAuthReq.setAddress(userOne.getAddress());
-        realNameAuthReq.setForid(userOne.getId());
+    public Result submitRealNameAuth(UserVo fromUser,RealNameAuthReq realNameAuthReq) {
+        realNameAuthReq.setAddress(fromUser.getAddress());
+        realNameAuthReq.setForid(fromUser.getId());
         //判断自己是否已经存在了认证信息，存在则无需提交
-        RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(userOne.getId());
+        RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(fromUser.getId());
         if (realNameAuthVo != null) {
             return Result.error("有待审核的认证，请等待审核！");
         }

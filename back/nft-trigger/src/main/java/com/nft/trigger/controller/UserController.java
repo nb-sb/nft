@@ -101,8 +101,11 @@ public class UserController {
     //修改密码
     @PostMapping("/chanagePassword")
     @ResponseBody
+    @AuthPermisson
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
-        return iUserAccountService.chanagePassword(httpServletRequest, chanagePwReq);
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iUserAccountService.chanagePassword(userOne, chanagePwReq);
     }
 
     //    使用分页查询查询所有用户
@@ -130,7 +133,9 @@ public class UserController {
     @PostMapping("/submitRealNameAuth")
     @ResponseBody
     public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthReq realNameAuthReq) {
-        return iUserAccountService.submitRealNameAuth(httpServletRequest, realNameAuthReq);
+        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        if (userOne == null) return Result.userNotFinded();
+        return iUserAccountService.submitRealNameAuth(userOne, realNameAuthReq);
     }
     //todo 用户修改被驳回的认证信息并提交
 
