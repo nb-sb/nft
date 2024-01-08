@@ -26,7 +26,7 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
     private  final OrderInfoMapper orderInfoMapper;
 
     @Override
-    public boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid,String orderNo) {
+    public boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid,String orderNo,Date time) {
         OrderInfo orderInfo = new OrderInfo();
 
         orderInfo.setUserId(userid)
@@ -37,7 +37,7 @@ public class IOrderInfoImpl implements IOrderInfoRespository {
                 .setProductName(conllectionInfoVo.getName())
                 .setProductPrice(conllectionInfoVo.getPrice())
                 .setSeckillPrice(conllectionInfoVo.getPrice())
-                .setInitDate(TimeUtils.getCurrent());
+                .setInitDate(time);
         int insert = orderInfoMapper.insert(orderInfo);
         if (insert >0) return true;
         return false;

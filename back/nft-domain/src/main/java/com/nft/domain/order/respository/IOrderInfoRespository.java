@@ -7,12 +7,13 @@ import com.nft.domain.nft.model.vo.OrderInfoVo;
 * @Date: 2024/1/7 16:33
 * @Description: 订单的存贮操作
 */
+import java.util.Date;
 import java.util.List;
 
 public interface IOrderInfoRespository {
 
     //添加订单表
-    boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid,String OrderNo);
+    boolean addOrderInfo(ConllectionInfoVo conllectionInfoVo, Integer userid, String OrderNo, Date time);
 
     OrderInfoVo selectOrderInfoByNumber(String orderNumber);
 

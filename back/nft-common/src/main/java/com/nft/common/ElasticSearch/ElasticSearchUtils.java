@@ -1,9 +1,7 @@
-package com.nft.infrastructure.util;
+package com.nft.common.ElasticSearch;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,6 @@ import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +26,22 @@ import java.util.List;
 public class ElasticSearchUtils {
     @Autowired
     ElasticsearchRestTemplate elasticTemplate;
+    //查询所属用户中的订单
+    public <T> List<T> searchUserOrder(Integer userId, Class<T> clazz) {
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.multiMatchQuery(userId,"userId"))
+                .withSort(SortBuilders.fieldSort("initDate").order(SortOrder.DESC))//使用时间倒叙排序先展示最新出的藏品
+                .build();
+        SearchHits<T> search = elasticTemplate.search(query, clazz);
+        ArrayList<T> ts = new ArrayList<>();
+        for (SearchHit<T> searchHit : search.getSearchHits()) {
+            System.out.println("searchHit : "+searchHit.getContent());
+            //查询到对应的类信息后加入到列表中
+            ts.add(searchHit.getContent());
+        }
+        return ts;
+    }
+
     //分页查询
     public <T> List<T> searchByPage(Page<T> page, Class<T> clazz) {
         int pageNumber = (int) (page.getCurrent() - 1);
@@ -78,7 +91,6 @@ public class ElasticSearchUtils {
     public <T> void insert(T entity) {
         Class<T> clazz = (Class<T>) entity.getClass();
         T save = elasticTemplate.save(entity);
-        System.out.println(save);
     }
     public <T> void insertList(List<T> entityList) {
         if (entityList == null || entityList.isEmpty()) {

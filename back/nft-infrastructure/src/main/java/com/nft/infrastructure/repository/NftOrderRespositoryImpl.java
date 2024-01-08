@@ -46,7 +46,8 @@ public class NftOrderRespositoryImpl implements INftOrderRespository {
                         OrderInfo::getProductName,
                         OrderInfo::getProductImg,
                         OrderInfo::getInitDate,
-                        OrderInfo::getProductPrice); // 只查询指定字段
+                        OrderInfo::getProductPrice,
+                        OrderInfo::getStatus); // 只查询指定字段
         List<OrderInfo> orderInfos = orderInfoMapper.selectList(wrapper);
         if (orderInfos.size() == 0) return null;
         List<UserOrderSimpleVo> orderInfoVos = BeanCopyUtils.convertListTo(orderInfos, UserOrderSimpleVo ::new);

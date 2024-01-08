@@ -12,10 +12,11 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-@Document(indexName = "conllectioninfovo",createIndex = true)
+@Document(indexName = "conllectioninfo",createIndex = true)
 @Accessors(chain = true)
-public class ConllectionInfoVo implements Serializable {
+public class ConllectionInfoES implements Serializable {
     @Id
+    @Field(type = FieldType.Keyword, docValues = true)
     private Integer id;//出售id
     @Field(type = FieldType.Keyword)
     private String hash;
@@ -37,4 +38,7 @@ public class ConllectionInfoVo implements Serializable {
     private String name;//藏品名称
     @Field(type = FieldType.Double)
     private BigDecimal price; // 价格
+
+    @Field(type = FieldType.Integer)
+    private BigDecimal mid; //分类id
 }

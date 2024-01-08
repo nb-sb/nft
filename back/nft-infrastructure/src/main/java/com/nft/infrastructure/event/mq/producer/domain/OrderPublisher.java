@@ -1,6 +1,8 @@
 package com.nft.infrastructure.event.mq.producer.domain;
 
+import cn.hutool.json.JSONUtil;
 import com.nft.common.RabbitMqConstant;
+import com.nft.domain.order.model.req.AddOrderMqMessage;
 import com.nft.domain.support.mq.MqOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -25,5 +27,18 @@ public class OrderPublisher implements MqOperations {
                     return message;
                 });
         log.info("消息发送成功 orderId: "+orderId);
+    }
+
+    @Override
+    public void SendAddEsMessage(String jsonStr) {
+        rabbitTemplate.convertAndSend(RabbitMqConstant.ADDES_DERECT, RabbitMqConstant.ADDES_KEY, jsonStr);
+        log.info("消息发送成功 addes jsonStr: "+jsonStr);
+    }
+
+    @Override
+    public void SendAddOrderMessage(AddOrderMqMessage addOrderMqMessage) {
+        String jsonStr = JSONUtil.toJsonStr(addOrderMqMessage);
+        rabbitTemplate.convertAndSend(RabbitMqConstant.ADD_ORDER_DERECT, RabbitMqConstant.ADD_ORDER_KEY, jsonStr);
+        log.info("消息发送成功 SendAddOrderMessage: "+jsonStr);
     }
 }

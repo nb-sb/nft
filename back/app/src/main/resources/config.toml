@@ -2,7 +2,7 @@
 certPath = "conf"
 
 [network]
-peers=["47.117.169.254:20200"]
+peers=["47.117.169.254:20250"]
 
 
 [threadPool]

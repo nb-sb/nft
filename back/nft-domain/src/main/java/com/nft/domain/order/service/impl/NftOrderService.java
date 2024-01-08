@@ -1,15 +1,21 @@
 package com.nft.domain.order.service.impl;
 
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
+import com.nft.common.ElasticSearch.ElasticSearchUtils;
+import com.nft.common.ElasticSearch.UserOrderSimpleES;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
+import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.common.Utils.OrderNumberUtil;
+import com.nft.common.Utils.TimeUtils;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.order.model.req.AddOrderMqMessage;
 import com.nft.domain.order.model.res.OrderRes;
 import com.nft.domain.order.model.vo.UserOrderSimpleVo;
 import com.nft.domain.support.mq.MqOperations;
@@ -49,6 +55,7 @@ public class NftOrderService implements INftOrderService {
     private final IDetailInfoRespository iDetailInfoRespository;
     private final MqOperations mqOperations;
     private final ISellInfoRespository iSellInfoRespository;
+    private final ElasticSearchUtils elasticSearchUtils;
 
 
 
@@ -59,50 +66,37 @@ public class NftOrderService implements INftOrderService {
     public Result addConllectionOrder(UserVo fromUser, Integer conllectionId) {
         //获取使用token用户id
         Integer userid = fromUser.getId();
-        Integer stock ;
-
+        Date time = TimeUtils.getCurrent();
         //添加一把用户锁防止重复提交
         DistributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
-        //判断是否有同一个商品未支付的，如果有则无法提交
-        List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
-        if (userNoPayOrder.size() > 0) {
-            return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
-        }
-        //已拥有的hash不能再次购买
-        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
-        OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
-        if (ownerShipVo != null) {
-            return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
-        }
         try {
+            //判断是否有同一个商品未支付的，如果有则无法提交
+            List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
+            if (userNoPayOrder.size() > 0) {
+                return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
+            }
+            //已拥有的hash不能再次购买
+            SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
+            OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
+            if (ownerShipVo != null) {
+                return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
+            }
             //1.添加写锁 -- 因为这个会改变出售的商品信息，所以要和查询商品id用同一把锁--这里添加写锁后就可以和查询商品信息的读锁连用
             DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
             try {
                 //2.查询剩余库存
-                ConllectionInfoVo conllectionInfoVo ;
                 //查询mysql
-                conllectionInfoVo = iSellInfoRespository.selectConllectionById(conllectionId);
+                ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectConllectionById(conllectionId);
                 if (conllectionInfoVo == null) {
                     return new Result("0", "商品不存在");
                 }
-                stock = conllectionInfoVo.getRemain();
+                Integer stock = conllectionInfoVo.getRemain();
                 if (stock <= 0) return new Result("0", "商品库存不足");
                 //3.减少库存操作
-                if (!iSellInfoRespository.setSellStocks(conllectionId, stock-1)) {
+                if (!iSellInfoRespository.setSellStocks(conllectionId, stock - 1)) {
                     log.error("商品库存减少失败");
                     return new Result("0", "库存减少失败");
                 }
-                // 4.将藏品添加至订单中
-                String orderNo = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
-                boolean b = iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid,orderNo);
-                if (!b) {
-                    throw new APIException(Constants.ResponseCode.NO_UPDATE, "藏品添加至订单失败");
-                }
-                //1)decrRemain
-                //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
-                redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(conllectionId));
-                // 5.发送mq请求，半小时后检查订单状态
-                mqOperations.SendCheckMessage(orderNo);
             } finally {
                 //释放写锁
                 DistributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
@@ -110,6 +104,13 @@ public class NftOrderService implements INftOrderService {
         } finally {
             DistributedRedisLock.release(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         }
+        // 4.将藏品添加至订单中
+        //   发送mq操作数据库写入订单
+        AddOrderMqMessage addOrderMqMessage = new AddOrderMqMessage()
+                .setConllectionId(conllectionId)
+                .setTime(time)
+                .setUserId(userid);
+        mqOperations.SendAddOrderMessage(addOrderMqMessage);
         return new Result("1", "成功添加至订单，请前往我的订单中查看");
     }
 
@@ -209,7 +210,17 @@ public class NftOrderService implements INftOrderService {
 
     @Override
     public Result getOrder(Integer userId) {
+        //查询es
+        List<UserOrderSimpleES> userOrderSimpleES = elasticSearchUtils.searchUserOrder(userId, UserOrderSimpleES.class);
+        if (userOrderSimpleES.size() > 0) return OrderRes.success(userOrderSimpleES);
         List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrder(userId);
+        if (orderInfoVos.size() == 0) return OrderRes.success(null);
+        //添加至es
+        List<UserOrderSimpleES> orderInfoVos2 = BeanCopyUtils.convertListTo(orderInfoVos, UserOrderSimpleES::new);
+        for (UserOrderSimpleES orderSimpleES : orderInfoVos2) {
+            orderSimpleES.setUserId(userId);
+        }
+        elasticSearchUtils.insertList(orderInfoVos2);
         return OrderRes.success(orderInfoVos);
     }
 
