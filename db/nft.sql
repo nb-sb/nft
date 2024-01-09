@@ -11,7 +11,7 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 07/01/2024 19:29:54
+ Date: 09/01/2024 15:11:30
 */
 
 SET NAMES utf8mb4;
@@ -29,6 +29,8 @@ CREATE TABLE `nft_detail_info`  (
   `type` tinyint NULL DEFAULT NULL COMMENT '0 表示转增，1表示购买 ||用于藏品来源显示',
   `time` datetime NULL DEFAULT NULL COMMENT '时间',
   `digital_collection_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号\r\n例如 1#5000 或 51#5000 等也就是id和总数进行拼接',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
@@ -41,6 +43,8 @@ CREATE TABLE `nft_metas`  (
   `conllection_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品分类名称',
   `conllection_slug` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品分类代号',
   `count` int NULL DEFAULT NULL COMMENT '该分类下藏品总数',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`mid`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
@@ -49,6 +53,7 @@ CREATE TABLE `nft_metas`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `nft_order_info`;
 CREATE TABLE `nft_order_info`  (
+  `id` int NOT NULL AUTO_INCREMENT,
   `order_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '订单id',
   `user_id` int NULL DEFAULT NULL COMMENT '用户id',
   `product_id` int NULL DEFAULT NULL COMMENT '藏品id',
@@ -59,7 +64,9 @@ CREATE TABLE `nft_order_info`  (
   `status` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '0是创建完成订单，1是未支付，2是已支付，3是藏品已经到账，4是取消订单，5是已经退款',
   `init_date` datetime NULL DEFAULT NULL COMMENT '订单创建时间',
   `pay_date` datetime NULL DEFAULT NULL COMMENT '支付时间',
-  PRIMARY KEY (`order_no`) USING BTREE
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`, `order_no`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -73,6 +80,8 @@ CREATE TABLE `nft_owner_ship`  (
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品hash',
   `type` tinyint(1) NULL DEFAULT NULL COMMENT '获得类型 type ||  0 表示转增，1表示购买',
   `digital_collection_id` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品编号',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE,
   CONSTRAINT `hash` FOREIGN KEY (`hash`) REFERENCES `nft_sell_info` (`ipfs_hash`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -85,6 +94,8 @@ DROP TABLE IF EXISTS `nft_relationships`;
 CREATE TABLE `nft_relationships`  (
   `cid` int NOT NULL COMMENT '藏品id',
   `mid` smallint NOT NULL COMMENT '分类id',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`cid`) USING BTREE,
   INDEX `mid`(`mid` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
@@ -102,6 +113,8 @@ CREATE TABLE `nft_sell_info`  (
   `auther` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '数字藏品作者地址',
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '# 1 为正常 ，  0 为闭售',
   `ipfs_hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'ipfs中的hash',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `hash`(`hash` ASC) USING BTREE,
   INDEX `ipfs_hash`(`ipfs_hash` ASC) USING BTREE
@@ -115,17 +128,19 @@ CREATE TABLE `nft_submit_cache`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '文件路径',
   `total` int NULL DEFAULT NULL COMMENT '出售数量',
-  `present` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '介绍',
+  `present` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL COMMENT '介绍',
   `name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品姓名',
   `hash` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '藏品hash , 审核阶段并无ifpfs hash',
   `author_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 所属id',
   `author_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '作者 区块链账户地址',
   `price` decimal(10, 2) NULL DEFAULT NULL COMMENT '售价',
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '审核状态 | 0为未审核 ，1是通过，2是拒绝',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `author_address`(`author_address` ASC) USING BTREE,
   CONSTRAINT `author_address` FOREIGN KEY (`author_address`) REFERENCES `nft_user_info` (`address`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for nft_user_detal
@@ -139,6 +154,8 @@ CREATE TABLE `nft_user_detal`  (
   `cardid` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '身份证',
   `phone_number` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '手机号',
   `status` tinyint(1) UNSIGNED ZEROFILL NOT NULL COMMENT '用户信息审核状态：0为待审核，1 为审核成功，2为审核退回需要重新提交',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `for_id`(`for_id` ASC) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE,
@@ -158,6 +175,8 @@ CREATE TABLE `nft_user_info`  (
   `password` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   `role` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '用户权限，普通用户为0，管理员为1',
   `balance` decimal(10, 2) UNSIGNED ZEROFILL NOT NULL COMMENT '用户余额',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `address`(`address` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
