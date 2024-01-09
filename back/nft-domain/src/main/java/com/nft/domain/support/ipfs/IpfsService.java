@@ -41,5 +41,5 @@ public interface IpfsService {
      * @Param id 提交表中id 用于获取存贮路径
      * @Return hash 返回ipfs中存贮的hash
      */
-    String addIpfsById(String id) ;
+    String addIpfsById(String fileName) ;
 }

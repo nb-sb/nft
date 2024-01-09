@@ -72,10 +72,10 @@ public class SelectConllection {
         );
     }
     //查询自己订单信息
-    @GetMapping("/user/orders/")
+    @GetMapping("/user/orders/listall")
     @ResponseBody
     @AuthPermisson()
-    public Result selectMyOrder() {
+    public Result selectMyOrderAll() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         //注意：只返回 藏品名称，商品图片，藏品价格，订单号，创建时间
         //详细信息用下面接口查询，此接口用于展示用户自己拥有订单列表
@@ -91,12 +91,16 @@ public class SelectConllection {
         return iNftOrderService.getOrder(userOne.getId(),orderId);
     }
     //查询自己待支付/已支付等状态订单 由于用户自己订单不会过多，所以无需使用分页查询（定期清理数据库中取消订单）
-    @GetMapping("/user/orders")
+    @GetMapping("/user/orders/list")
     @ResponseBody
     @AuthPermisson()
     public Result getUserOrderDetails(@Valid OrderStateReq orderStateReq) {
+        if (orderStateReq == null) {
+            return selectMyOrderAll();
+        }
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         return iNftOrderService.getOrderByStatus(userOne.getId(), orderStateReq.getStatus());
     }
+
 }

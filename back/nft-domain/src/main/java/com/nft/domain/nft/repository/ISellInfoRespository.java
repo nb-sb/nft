@@ -6,6 +6,8 @@ import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
 
+import java.math.BigInteger;
+
 /**
 * @author: 戏人看戏
 * @Date: 2024/1/7 16:19
@@ -15,7 +17,7 @@ public interface ISellInfoRespository {
     //添加出售记录
     boolean insertSellInfo(Integer id, String hash);
     //添加出售记录
-    boolean addSellByFISCO(String hash,Integer id);
+    boolean addSellByFISCO(String hash, BigInteger totail);
 
     //查询正在出售的藏品
     ConllectionInfoVo selectConllectionById(Integer id);

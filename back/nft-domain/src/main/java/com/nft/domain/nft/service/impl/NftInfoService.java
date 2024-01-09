@@ -43,7 +43,6 @@ public class NftInfoService implements INftInfoService {
 //    }
     @Override
     public GetNftRes selectSellConllectionByPage(Page page) {
-        //todo:
         IPage<ConllectionInfoVo> conllectionInfoVoIPage = iSellInfoRespository.selectSellConllectionByPage(page);
         return GetNftRes.success(conllectionInfoVoIPage.getRecords());
     }

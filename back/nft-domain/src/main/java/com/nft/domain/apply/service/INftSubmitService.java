@@ -1,6 +1,7 @@
 package com.nft.domain.apply.service;
 
 import com.nft.common.Result;
+import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.nft.model.res.AuditRes;
@@ -13,11 +14,11 @@ public interface INftSubmitService {
     Result addApply(UserVo fromUser, ApplyReq applyReq);
 
     //修改藏品审核状态
-    AuditRes changeSellStatus(ReviewReq req);
+    AuditRes changeSellStatus(SubCacheVo subCacheVo, Integer status);
 
     boolean insertSellInfo(ReviewReq req, String hash);
     //审核藏品
-    AuditRes ReviewCollection(ReviewReq req);
+    Result ReviewCollection(ReviewReq req);
 
     //查询待审核藏品
 

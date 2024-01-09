@@ -211,16 +211,24 @@ public class NftOrderService implements INftOrderService {
     @Override
     public Result getOrder(Integer userId) {
         //查询es
-        List<UserOrderSimpleES> userOrderSimpleES = elasticSearchUtils.searchUserOrder(userId, UserOrderSimpleES.class);
-        if (userOrderSimpleES.size() > 0) return OrderRes.success(userOrderSimpleES);
+        try {
+            List<UserOrderSimpleES> userOrderSimpleES = elasticSearchUtils.searchUserOrder(userId, UserOrderSimpleES.class);
+            if (userOrderSimpleES.size() > 0) return OrderRes.success(userOrderSimpleES);
+        } catch (Exception e) {
+            log.error(e);
+        }
         List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrder(userId);
         if (orderInfoVos.size() == 0) return OrderRes.success(null);
         //添加至es
-        List<UserOrderSimpleES> orderInfoVos2 = BeanCopyUtils.convertListTo(orderInfoVos, UserOrderSimpleES::new);
-        for (UserOrderSimpleES orderSimpleES : orderInfoVos2) {
-            orderSimpleES.setUserId(userId);
+        try {
+            List<UserOrderSimpleES> orderInfoVos2 = BeanCopyUtils.convertListTo(orderInfoVos, UserOrderSimpleES::new);
+            for (UserOrderSimpleES orderSimpleES : orderInfoVos2) {
+                orderSimpleES.setUserId(userId);
+            }
+            elasticSearchUtils.insertList(orderInfoVos2);
+        } catch (Exception e) {
+            log.error(e);
         }
-        elasticSearchUtils.insertList(orderInfoVos2);
         return OrderRes.success(orderInfoVos);
     }
 

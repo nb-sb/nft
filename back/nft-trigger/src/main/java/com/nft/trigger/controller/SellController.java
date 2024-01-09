@@ -97,6 +97,7 @@ public class SellController {
 
 
     //支付藏品订单
+    // TODO: 2024/1/7 应该是支付后自动调用这个方法，这里为了测试就跳过支付阶段直接执行支付藏品后的方法
     @GetMapping("payConllectionOrder")
     @ResponseBody
     @AuthPermisson()
@@ -106,12 +107,16 @@ public class SellController {
             @NotNull
             Integer paytype
     ) {
-        // TODO: 2024/1/7 应该是支付后自动调用这个方法，这里为了测试就跳过支付阶段直接执行支付藏品后的方法
         //传入订单id，传入支付类型，传入http用于校验用户信息等
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         return iNftOrderService.payOrder(userOne, OrderNumber, paytype);
     }
 
-
+    //todo 支付回调接收
+    //目前订单处理业务流程：用户将商品提交到订单中 （mq定时30分钟后检查订单状态） -> 支付订单 -> 修改订单状态
+    //     30分钟后 => 接受mq消息查询订单状态 如果是已支付/已取消/已退款等（只要不是待支付订单《初始状态》）
+                //        如果订单是初始状态改为取消订单
+    //todo 以上业务需要修改，因为如果订单虽然大于30分钟了，但是用户还是停在支付界面，
+    // 订单以及被修改为取消了，但是用户还是付款了，这时候就需要在回调函数中判断用户支付状态，从而进行修改实际订单状态
 }

@@ -125,8 +125,6 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
 
     @Override
     public boolean transferCollectionByFisco(String privatekey, String hash,String toAddress, Integer id) {
-        // TODO: 2024/1/3 设置调用者
-
         OwnershipStorageTransferInputBO inputBO = new OwnershipStorageTransferInputBO();
         inputBO.set_hash(hash);
         inputBO.setTarget_address(toAddress);

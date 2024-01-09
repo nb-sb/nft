@@ -101,16 +101,12 @@ public class IpfsServiceImpl implements IpfsService {
     }
 
     @Override
-    public String addIpfsById(String id) {
-        //查询这个id所属的提交表
-        SubmitCache submitCache = submitCacheMapper.selectById(id);
+    public String addIpfsById(String fileName) {
         //获取path路径
-        String path = submitCache.getPath();
         File directory = new File("");//参数为空
-        String courseFile = null;
         try {
-            courseFile = directory.getCanonicalPath();
-            path = courseFile + "\\imgs\\";
+            String courseFile = directory.getCanonicalPath();
+            String path = courseFile + "\\imgs\\"+fileName;
             String s = uploadToIpfs(path);
             //进行ipfs存贮
             System.out.println("ipfs hash : "+s);

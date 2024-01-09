@@ -129,7 +129,7 @@ public class UserController {
         return SelectRes.success(userInfoVo);
     }
 
-    //2023/12/29 提交实名认证信息
+    //提交实名认证信息
     @PostMapping("/submitRealNameAuth")
     @ResponseBody
     public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthReq realNameAuthReq) {
@@ -142,8 +142,6 @@ public class UserController {
     // TODO: 2023/12/29 管理员 审核实名认证信息
     public Result AuditRealNameAuth(@Valid @RequestBody UpdateRealNameAuthStatusReq req) {
         return iUserAccountService.AuditRealNameAuth(req);
-
-
     }
     //todo 修改用户信息
 

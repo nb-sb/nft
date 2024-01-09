@@ -197,12 +197,12 @@ public class UserAccountService implements IUserAccountService {
 
     @Override
     public Result AuditRealNameAuth(UpdateRealNameAuthStatusReq req) {
-        // TODO: 2023/12/29 判断状态需要为待审核才能进行修改
         RealNameAuthVo realNameAuthReq = iUserDetalRepository.selectById(req.getId());
         if (realNameAuthReq == null) {
             //返回 审核的id不存在
             return Result.error("审核的id不存在");
         }
+        //判断状态需要为待审核才能进行修改
         if (!Constants.realNameAuthStatus.AWAIT_AUDIT.equals(realNameAuthReq.getStatus())) {
             //返回 该内容已经被审核
             return Result.error("该信息已经被审核");

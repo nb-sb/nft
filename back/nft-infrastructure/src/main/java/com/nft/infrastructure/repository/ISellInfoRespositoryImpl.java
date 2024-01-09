@@ -141,14 +141,12 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     }
 
     @Override
-    public boolean addSellByFISCO(String hash,Integer id)   {
-        //获取提交数据
-        SubmitCache submitCache = submitCacheMapper.selectById(id);
-        if (submitCache == null) return false;
+    public boolean addSellByFISCO(String hash,BigInteger totail)   {
+
         SellStroageCreateSellInputBO sellStroageCreateSellInputBO = new SellStroageCreateSellInputBO();
         //传入hash 和 发售总数
         sellStroageCreateSellInputBO.set_hash(hash)
-                .setAmount(BigInteger.valueOf(submitCache.getTotal()));
+                .setAmount(totail);
         System.out.println(sellStroageCreateSellInputBO);
         try {
 //            SellStroageExistSellInputBO sellStroageCatRemainInputBO = new SellStroageExistSellInputBO();

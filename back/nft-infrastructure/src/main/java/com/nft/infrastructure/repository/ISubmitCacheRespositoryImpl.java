@@ -68,11 +68,11 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     }
 
     @Override
-    public boolean upDateSubStatus(ReviewReq req) {
+    public boolean upDateSubStatus(Integer id,Integer status) {
         UpdateWrapper<SubmitCache> submitWrapper = new UpdateWrapper<>();
-        submitWrapper.eq("id", req.getId());
+        submitWrapper.eq("id", id);
         SubmitCache submitCache = new SubmitCache();
-        submitCache.setStatus(req.getStatus());
+        submitCache.setStatus(status);
         int update = submitCacheMapper.update(submitCache,submitWrapper);
         return update > 0;
     }
@@ -87,7 +87,7 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     }
 
     @Override
-    public SubCacheVo selectSubSellById(Integer id) {
+    public SubCacheVo selectById(Integer id) {
         SubmitCache submitCache = submitCacheMapper.selectById(id);
         if (submitCache != null) {
             return BeanCopyUtils.convertTo(submitCache, SubCacheVo::new);
