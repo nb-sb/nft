@@ -1,7 +1,6 @@
 package com.nft.common.exception;
 
 import com.nft.common.APIException;
-import com.nft.common.ErrorCode;
 import com.nft.common.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;

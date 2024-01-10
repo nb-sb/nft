@@ -1,5 +1,6 @@
 package com.nft.common.Redis;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisCallback;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @description: Redis 工具类
  */
 @Component
+@Log4j2
 public class RedisUtil {
 
     @Resource
@@ -100,7 +102,13 @@ public class RedisUtil {
     }
 
     public String getStr(String key) {
-        return key == null ? null : (String) redisTemplate.opsForValue().get(key);
+        try {
+            return key == null ? null : (String) redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            log.error("redis 错误：" + e.getMessage());
+            return null;
+        }
+
     }
 
     /**
@@ -137,7 +145,7 @@ public class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("redis set error : "+e.getMessage());
             return false;
         }
     }

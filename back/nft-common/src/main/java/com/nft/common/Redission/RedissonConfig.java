@@ -25,7 +25,7 @@ public class RedissonConfig {
     private String password;
 
     @Bean
-    public Redisson redissonClient() {
+    public RedissonClient redissonClient() {
         // 1. 创建配置
         Config config = new Config();
         String redisAddress = String.format("redis://%s:%s", host, port);
@@ -41,7 +41,7 @@ public class RedissonConfig {
 //                .setPassword("123456");
         // 2. 创建实例
         //得到redisson对象
-        Redisson redisson = (Redisson) Redisson.create(config);
-        return redisson;
+        RedissonClient redissonClient = Redisson.create(config);
+        return redissonClient;
     }
 }

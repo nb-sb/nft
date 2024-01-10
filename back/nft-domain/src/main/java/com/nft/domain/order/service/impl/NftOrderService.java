@@ -58,20 +58,15 @@ public class NftOrderService implements INftOrderService {
     private final DistributedRedisLock distributedRedisLock;
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
-        try {
-            String conllectionCacheKey = redisUtil.getStr(reidKey);
-            if (!StringUtils.isEmpty(conllectionCacheKey)) {
-                //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
-                if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
-                    return new ConllectionInfoVo();
-                }
-                return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+        String conllectionCacheKey = redisUtil.getStr(reidKey);
+        if (!StringUtils.isEmpty(conllectionCacheKey)) {
+            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
+            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                return new ConllectionInfoVo();
             }
-            return null;
-        } catch (Exception e) {
-            System.err.println("redisUtil 错误："+e);
-            return null;
+            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
         }
+        return null;
     }
 
 

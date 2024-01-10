@@ -57,20 +57,15 @@ public class NftInfoService implements INftInfoService {
     }
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
-        try {
-            String conllectionCacheKey = redisUtil.getStr(reidKey);
-            if (!StringUtils.isEmpty(conllectionCacheKey)) {
-                //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
-                if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
-                    return new ConllectionInfoVo();
-                }
-                return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+        String conllectionCacheKey = redisUtil.getStr(reidKey);
+        if (!StringUtils.isEmpty(conllectionCacheKey)) {
+            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
+            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                return new ConllectionInfoVo();
             }
-            return null;
-        } catch (Exception e) {
-            log.error("redis 连接错误：" + e.getMessage());
-            return null;
+            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
         }
+        return null;
     }
     //查询藏品信息
     @Override

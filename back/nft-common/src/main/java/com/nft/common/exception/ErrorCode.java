@@ -1,4 +1,4 @@
-package com.nft.common;
+package com.nft.common.exception;
 
 /**
  * 错误码
@@ -34,7 +34,7 @@ public enum ErrorCode {
     /**
      * 系统错误
      */
-    SYSTEM_ERROR(50000, "系统内部异常"),
+    SYSTEM_ERROR(500, "系统内部异常"),
     /**
      * 操作错误
      */

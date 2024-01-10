@@ -1,14 +1,9 @@
 package com.nft.trigger.controller;
 
 
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
-import com.nft.common.ErrorCode;
 import com.nft.common.Result;
-import com.nft.common.exception.BusinessException;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.user.model.res.UserResult;

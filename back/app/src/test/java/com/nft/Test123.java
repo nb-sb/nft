@@ -1,6 +1,5 @@
 package com.nft;
 
-import com.nft.common.SendEmail;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,7 @@ public class Test123 {
 
     @Test
     public void email() throws MessagingException {
-        boolean b = sendEmail.sentSimpleMail("123", "456", "3500079813@qq.com");
-        System.out.println(b);
+//        boolean b = sendEmail.sentSimpleMail("123", "456", "3500079813@qq.com");
+//        System.out.println(b);
     }
 }

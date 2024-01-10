@@ -1,8 +1,6 @@
 package com.nft.common.exception;
 
 
-import com.nft.common.ErrorCode;
-
 /**
  * 自定义异常类
  *

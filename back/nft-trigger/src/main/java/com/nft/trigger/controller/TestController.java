@@ -1,10 +1,8 @@
 package com.nft.trigger.controller;
 
 
-
-import com.nft.common.SendEmail;
-import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.common.Redis.RedisUtil;
+import com.nft.domain.support.ipfs.IpfsService;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
@@ -64,8 +61,7 @@ public class TestController {
     }
     @Autowired
     RedisUtil redisUtil;
-    @Resource
-    SendEmail sendEmail;
+
     @GetMapping("test2")
     public String test2() throws Exception {
 //        System.out.println(redisUtil.set("testkey", "value", 30));
@@ -86,7 +82,7 @@ public class TestController {
 //        search.setCurrent(1);
 //        Object o = iUserAccountService.selectUserPage(search);
         //测试验证码逻辑
-        sendEmail.sentSimpleMail("123", "456", "3500079813@qq.com");
+//        sendEmail.sentSimpleMail("123", "456", "3500079813@qq.com");
         return "o";
     }
 
