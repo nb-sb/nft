@@ -11,15 +11,19 @@ import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.repository.ISellInfoRespository;
 import com.nft.domain.nft.service.INftInfoService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+
 @AllArgsConstructor
 @Service
+@Log4j2
 public class NftInfoService implements INftInfoService {
     private  final RedisUtil redisUtil;
     private final ISellInfoRespository iSellInfoRespository;
+    private final DistributedRedisLock distributedRedisLock;
 //    private final ElasticsearchRestTemplate elasticTemplate ;
 //    @PostConstruct
 //    public void init() {
@@ -53,16 +57,20 @@ public class NftInfoService implements INftInfoService {
     }
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
-        String conllectionCacheKey = redisUtil.getStr(reidKey);
-
-        if (!StringUtils.isEmpty(conllectionCacheKey)) {
-            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
-            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
-                return new ConllectionInfoVo();
+        try {
+            String conllectionCacheKey = redisUtil.getStr(reidKey);
+            if (!StringUtils.isEmpty(conllectionCacheKey)) {
+                //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
+                if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                    return new ConllectionInfoVo();
+                }
+                return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
             }
-            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+            return null;
+        } catch (Exception e) {
+            log.error("redis 连接错误：" + e.getMessage());
+            return null;
         }
-        return null;
     }
     //查询藏品信息
     @Override
@@ -75,7 +83,7 @@ public class NftInfoService implements INftInfoService {
             return GetNftRes.success( conllectionInfoVo);
         }
         //三、突发性热点问题DCL（冷门商品爆单,大量请求穿过第一层到第二层开始打到数据上） -->优化锁 ：此锁优化方案 1.串行转并发 2.jvm缓存，实际上无需优化，因为大多数都在第一阶段进行返回内容了
-        DistributedRedisLock.acquire(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));
+        distributedRedisLock.acquire(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));
         try {
             //1.在加一层查询缓存，防止所有请求全部打到数据库中，并且有分布式锁的加持，实际上只会查到次数据库就把数据更新到redis中了，优化很大性能
             conllectionInfoVo = getConllectionCache(reidsKey);
@@ -84,7 +92,7 @@ public class NftInfoService implements INftInfoService {
             }
             //四、缓存与数据库双写不一致问题
             //1.这里设置读锁,在查询mysql之前设置读锁,然后在updata方法里设置更新锁，这个方法比延时双删要好
-            DistributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
+            distributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             try {
                 conllectionInfoVo = iSellInfoRespository.selectConllectionById(id);
                 Random rand = new Random();
@@ -99,10 +107,10 @@ public class NftInfoService implements INftInfoService {
                 }
                 return GetNftRes.success( conllectionInfoVo);
             } finally {
-                DistributedRedisLock.releaseReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
+                distributedRedisLock.releaseReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             }
         } finally {
-            DistributedRedisLock.release(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));
+            distributedRedisLock.release(Constants.RedisKey.LOCK_PRODUCT_HOT_CACHE_CREATE_PREFIX(id));
         }
     }
 }

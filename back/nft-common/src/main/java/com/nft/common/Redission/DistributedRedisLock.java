@@ -5,21 +5,26 @@ import lombok.extern.log4j.Log4j2;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 @Log4j2
+@Service
 public class DistributedRedisLock {
 
     //从配置类中获取redisson对象
-    private static Redisson redisson = RedissonManager.getRedisson();
-
+//    private static Redisson redisson = RedissonManager.getRedisson();
+    @Resource
+    public RedissonClient redisson;
 
 
     private DistributedRedisLock() {
         // 私有构造方法，避免外部实例化
     }
     //加锁
-    public static boolean acquire(String lockName){
+    public  boolean acquire(String lockName){
         //获取锁对象
         RLock mylock = redisson.getLock(lockName);
         try {
@@ -35,7 +40,7 @@ public class DistributedRedisLock {
     }
 
     //锁的释放
-    public static void release(String lockName) {
+    public  void release(String lockName) {
         //获取所对象
         RLock mylock = redisson.getLock(lockName);
         try {
@@ -55,7 +60,7 @@ public class DistributedRedisLock {
      */
 
     //读锁
-    public static boolean acquireReadLock(String lockName) {
+    public  boolean acquireReadLock(String lockName) {
         //获取所对象
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
@@ -69,7 +74,7 @@ public class DistributedRedisLock {
         }
     }
     //释放读锁
-    public static boolean releaseReadLock(String lockName) {
+    public  boolean releaseReadLock(String lockName) {
         //获取所对象
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
@@ -83,7 +88,7 @@ public class DistributedRedisLock {
         }
     }
     //写锁
-    public static boolean acquireWriteLock(String lockName) {
+    public  boolean acquireWriteLock(String lockName) {
         //从配置类中获取redisson对象
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {
@@ -97,7 +102,7 @@ public class DistributedRedisLock {
         }
     }
     //释放写锁
-    public static boolean releaseWriteLock(String lockName) {
+    public  boolean releaseWriteLock(String lockName) {
         //获取所对象
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(lockName);
         try {

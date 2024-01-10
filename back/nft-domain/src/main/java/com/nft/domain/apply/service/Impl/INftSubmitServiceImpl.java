@@ -31,6 +31,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
     private final INftMetasRespository iNftMetasRespository;
     private final IpfsService ipfsService;
     private final ISellInfoRespository iSellInfoRespository;
+    private final DistributedRedisLock distributedRedisLock;
 
     @Override
     public Result addApply(UserVo fromUser, ApplyReq applyReq) {
@@ -83,7 +84,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
     public Result ReviewCollection(ReviewReq req) {
         // 需要先修改区块链状态在修改mysql状态！！
         //这里因为是在审核中，所以不需要使用读写锁，普通的redisson锁即可防止多个管理员同时审核，造成数据库、区块链或ipfs多次上传等情况
-        DistributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
+        distributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         try {
             //2.操作审核状态 （1 为不通过 2为通过）\
             //获取提交数据
@@ -112,7 +113,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
             }
             return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
         } finally {
-            DistributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
+            distributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         }
 
 

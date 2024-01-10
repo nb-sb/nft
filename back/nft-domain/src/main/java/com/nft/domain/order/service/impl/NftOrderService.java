@@ -55,18 +55,23 @@ public class NftOrderService implements INftOrderService {
     private final MqOperations mqOperations;
     private final ISellInfoRespository iSellInfoRespository;
     private final ElasticSearchUtils elasticSearchUtils;
+    private final DistributedRedisLock distributedRedisLock;
 
     public ConllectionInfoVo getConllectionCache(String reidKey) {
-        String conllectionCacheKey = redisUtil.getStr(reidKey);
-
-        if (!StringUtils.isEmpty(conllectionCacheKey)) {
-            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
-            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
-                return new ConllectionInfoVo();
+        try {
+            String conllectionCacheKey = redisUtil.getStr(reidKey);
+            if (!StringUtils.isEmpty(conllectionCacheKey)) {
+                //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
+                if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                    return new ConllectionInfoVo();
+                }
+                return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
             }
-            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+            return null;
+        } catch (Exception e) {
+            System.err.println("redisUtil 错误："+e);
+            return null;
         }
-        return null;
     }
 
 
@@ -78,15 +83,13 @@ public class NftOrderService implements INftOrderService {
         Integer userid = fromUser.getId();
         Date time = TimeUtils.getCurrent();
         //添加一把用户锁防止重复提交
-        DistributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
+        distributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         try {
-
             //判断是否有同一个商品未支付的，如果有则无法提交
             List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
             if (userNoPayOrder.size() > 0) {
                 return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
             }
-
             //已拥有的hash不能再次购买
             SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
             OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
@@ -94,7 +97,7 @@ public class NftOrderService implements INftOrderService {
                 return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
             }
             //1.添加写锁 -- 因为这个会改变出售的商品信息，所以要和查询商品id用同一把锁--这里添加写锁后就可以和查询商品信息的读锁连用
-            DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
+            distributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
             try {
                 Integer stock;
                 //2.查询剩余库存
@@ -123,10 +126,10 @@ public class NftOrderService implements INftOrderService {
                 }
             } finally {
                 //释放写锁
-                DistributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
+                distributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
             }
         } finally {
-            DistributedRedisLock.release(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
+            distributedRedisLock.release(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         }
         // 4.将藏品添加至订单中
         //   发送mq操作数据库写入订单
@@ -144,7 +147,7 @@ public class NftOrderService implements INftOrderService {
         //传入用户id和订单号和支付方式
         Integer userid = fromUser.getId();
         // 加锁(例如代付情况或点多次支付请求) 判断订单是否已经修改，除了 订单状态为 0 刚创建或者是 状态为1 未支付，否则无法支付订单
-        DistributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
+        distributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
         try {
             //使用订单号查询订单信息
             OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
@@ -190,7 +193,7 @@ public class NftOrderService implements INftOrderService {
             //如果支付成功则转移藏品 => transferConllection()
             return Result.error("支付类型错误");
         }finally {
-            DistributedRedisLock.releaseReadLock(Constants.RedisKey.PAY_LOCK(orderNumber));
+            distributedRedisLock.releaseReadLock(Constants.RedisKey.PAY_LOCK(orderNumber));
         }
 
     }
@@ -199,7 +202,7 @@ public class NftOrderService implements INftOrderService {
     @Override
     public Result updataConllectionInfo(UpdataCollectionReq updataCollectionReq) {
         //1.添加写锁
-        DistributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
+        distributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
         try {
             //2.更新藏品信息
             //1)updataConllectionInfo
@@ -218,7 +221,7 @@ public class NftOrderService implements INftOrderService {
             String reidsKey = Constants.RedisKey.REDIS_COLLECTION(updataCollectionReq.getId());
             redisUtil.del(reidsKey);
             //释放写锁
-            DistributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
+            distributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
         }
     }
 
