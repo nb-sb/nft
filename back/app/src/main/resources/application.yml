@@ -5,6 +5,17 @@ logging:
     cn.itcast : debug
 server:
   port: 8081
+  tomcat:
+    threads:
+#      最少线程数
+      min-spare: 10
+      #最大线程数
+      max: 200
+    max-connections: 8192
+    #最大等待数
+    accept-count: 100
+
+
 test:
   name: "oknb"
 mybatis:

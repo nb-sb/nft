@@ -112,12 +112,6 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
 
     @Override
     public boolean setSellStocks(Integer id, Integer number) {
-//        SellInfoVo sellInfo1 = selectSellInfoById(id);
-//        if (sellInfo1 == null) {
-//            log.error("商品id不存在");
-//            return false;
-//        }
-//        Integer remain = sellInfo1.getRemain();
         SellInfo sellInfo = new SellInfo();
         sellInfo.setRemain(number);
         sellInfo.setId(id);

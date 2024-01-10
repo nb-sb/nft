@@ -25,7 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Log4j2
@@ -94,14 +96,25 @@ public class SellController {
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
         return iNftOrderService.addConllectionOrder(userOne, addOrder.getId());
     }
+    //todo 发起支付订单接口
+    @GetMapping("payOrderZFB")
+    @ResponseBody
+    @AuthPermisson()
+    public Result payOrderZFB(
 
+    ) {
+        //调用第三方支付接口
+        //生成图片base64，返回至前端 / 直接跳转支付链接等方式
+        return null;
+    }
 
     //支付藏品订单
-    // TODO: 2024/1/7 应该是支付后自动调用这个方法，这里为了测试就跳过支付阶段直接执行支付藏品后的方法
+    //应该是支付后自动调用这个方法，这里为了测试就跳过支付阶段直接执行支付藏品后的方法
+    // 此开源系统只使用网站余额支付，若有其他支付需求可以自行扩展，注释也都写好了2开很容易
     @GetMapping("payConllectionOrder")
     @ResponseBody
     @AuthPermisson()
-    public Result payOrder(
+    public Result payConllectionOrder(
             @NotNull
             @RequestParam String OrderNumber,
             @NotNull
@@ -119,4 +132,40 @@ public class SellController {
                 //        如果订单是初始状态改为取消订单
     //todo 以上业务需要修改，因为如果订单虽然大于30分钟了，但是用户还是停在支付界面，
     // 订单以及被修改为取消了，但是用户还是付款了，这时候就需要在回调函数中判断用户支付状态，从而进行修改实际订单状态
+//    @PostMapping("/notify")  // 注意这里必须是POST接口
+//    public String payNotify(HttpServletRequest request) throws Exception {
+//        if (request.getParameter("trade_status").equals("TRADE_SUCCESS")) {
+//            System.out.println("=========支付宝异步回调========");
+//            Map<String, String> params = new HashMap<>();
+//            Map<String, String[]> requestParams = request.getParameterMap();
+//            for (String name : requestParams.keySet()) {
+//                params.put(name, request.getParameter(name));
+//            }
+//            // 支付宝验签
+//            if (Factory.Payment.Common().verifyNotify(params)) {
+//                // 验签通过
+//                System.out.println("交易名称: " + params.get("subject"));
+//                System.out.println("交易状态: " + params.get("trade_status"));
+//                System.out.println("支付宝交易凭证号: " + params.get("trade_no"));
+//                System.out.println("商户订单号: " + params.get("out_trade_no"));
+//                System.out.println("交易金额: " + params.get("total_amount"));
+//                System.out.println("买家在支付宝唯一id: " + params.get("buyer_id"));
+//                System.out.println("买家付款时间: " + params.get("gmt_payment"));
+//                System.out.println("买家付款金额: " + params.get("buyer_pay_amount"));
+//                //保存到订单表中
+//                    调用支付方法功能
+//                // 更新订单为已支付
+////                ShopOrder order = new ShopOrder();
+////                order.setId(tradeNo);
+////                order.setStatus("1");
+////                Date payTime = DateUtil.parse(gmtPayment, "yyyy-MM-dd HH:mm:ss");
+////                order.setZhhifuTime(payTime);
+////                shopOrderMapper.updateById(order);
+//            }
+//        }
+
+//        //如果是错误信息则写入日志，发送提醒等
+//
+//        return "success";
+//    }
 }

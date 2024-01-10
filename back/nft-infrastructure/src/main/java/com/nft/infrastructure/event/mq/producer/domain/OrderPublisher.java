@@ -1,7 +1,7 @@
 package com.nft.infrastructure.event.mq.producer.domain;
 
 import cn.hutool.json.JSONUtil;
-import com.nft.common.RabbitMqConstant;
+import com.nft.common.Rabbitmq.RabbitMqConstant;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
 import com.nft.domain.support.mq.MqOperations;
 import lombok.extern.slf4j.Slf4j;

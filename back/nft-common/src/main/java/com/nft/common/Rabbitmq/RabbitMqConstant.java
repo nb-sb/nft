@@ -1,4 +1,4 @@
-package com.nft.common;
+package com.nft.common.Rabbitmq;
 
 public interface RabbitMqConstant {
     //延时消息交换机
