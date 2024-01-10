@@ -2,6 +2,7 @@ package com.nft.domain.nft.repository;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
@@ -15,7 +16,7 @@ import java.math.BigInteger;
 */
 public interface ISellInfoRespository {
     //添加出售记录
-    boolean insertSellInfo(Integer id, String hash);
+    boolean insertSellInfo(SubCacheVo subCacheVo, String hash);
     //添加出售记录
     boolean addSellByFISCO(String hash, BigInteger totail);
 

@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Utils.BeanCopyUtils;
+import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
@@ -119,15 +120,14 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
         return update > 0;
     }
     @Override
-    public boolean insertSellInfo(Integer id, String hash) {
-        SubmitCache submitCache = submitCacheMapper.selectById(id);
-        if (submitCache == null) return false;
+    public boolean insertSellInfo(SubCacheVo subCacheVo, String hash) {
+        if (subCacheVo == null) return false;
         SellInfo sellInfo = new SellInfo();
-        sellInfo.setUniqueId(id)
-                .setHash(submitCache.getHash())
-                .setAmount(submitCache.getTotal())
-                .setRemain(submitCache.getTotal())
-                .setAuther(submitCache.getAuthorAddress())
+        sellInfo.setUniqueId(subCacheVo.getId())
+                .setHash(subCacheVo.getHash())
+                .setAmount(subCacheVo.getTotal())
+                .setRemain(subCacheVo.getTotal())
+                .setAuther(subCacheVo.getAuthorAddress())
                 .setStatus(1)
                 .setIpfsHash(hash);
         int insert = sellInfoMapper.insert(sellInfo);

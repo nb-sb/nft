@@ -1,5 +1,6 @@
 package com.nft.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.APIException;
@@ -7,7 +8,6 @@ import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
-import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.user.model.vo.UserVo;
@@ -37,7 +37,13 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
         SubCacheVo subCacheVo = BeanCopyUtils.convertTo(submitCache1, SubCacheVo::new);
         return subCacheVo;
     }
-
+    public Integer selectIdByHash(String hash) {
+        LambdaQueryWrapper<SubmitCache> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SubmitCache::getHash, hash)
+                .select(SubmitCache::getId);
+        SubmitCache submitCache1 = submitCacheMapper.selectOne(queryWrapper);
+        return submitCache1.getId();
+    }
     @Override
     @Transactional
     public boolean addSellCheck(ApplyReq applyReq, UserVo userVo) {
@@ -45,13 +51,11 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
         submitCache.setStatus(0)
                 .setAuthorId(String.valueOf(userVo.getId()))
                 .setAuthorAddress(userVo.getAddress());
-        QueryWrapper<SubmitCache> submitWrapper = new QueryWrapper<>();
-        submitWrapper.eq("hash", submitCache.getHash());
         int insert = submitCacheMapper.insert(submitCache);
-        SubmitCache submitCache1 = submitCacheMapper.selectOne(submitWrapper);
+        Integer id = selectIdByHash(submitCache.getHash());
         if (insert > 0) {
             //添加分类表
-            boolean b = nftRelationship.addMetas(submitCache1.getId(), applyReq.getMid());
+            boolean b = nftRelationship.addMetas(id, applyReq.getMid());
             if (!b) {
                 log.error("添加至分类表错误!: "+ false);
                 throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加至分类表错误");

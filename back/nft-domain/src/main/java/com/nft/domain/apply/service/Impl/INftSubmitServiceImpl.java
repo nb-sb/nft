@@ -1,6 +1,7 @@
 package com.nft.domain.apply.service.Impl;
 
 import com.nft.common.Constants;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
 import com.nft.domain.apply.model.vo.SubCacheVo;
@@ -17,7 +18,9 @@ import com.nft.domain.support.ipfs.IpfsService;
 import com.nft.domain.user.model.vo.UserVo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 
@@ -25,13 +28,12 @@ import java.math.BigInteger;
 @Service
 @AllArgsConstructor
 public class INftSubmitServiceImpl implements INftSubmitService {
-    private final INftOrderRespository iNftOrderRespository;
     private final ISubmitCacheRespository iSubmitCacheRespository;
-    private final Token2User token2User;
     private final INftMetasRespository iNftMetasRespository;
     private final IpfsService ipfsService;
     private final ISellInfoRespository iSellInfoRespository;
     private final DistributedRedisLock distributedRedisLock;
+    private final RedisUtil redisUtil;
 
     @Override
     public Result addApply(UserVo fromUser, ApplyReq applyReq) {
@@ -47,10 +49,10 @@ public class INftSubmitServiceImpl implements INftSubmitService {
             return new NftRes("0", "分类不存在："+ applyReq.getMid());
         }
         boolean res = iSubmitCacheRespository.addSellCheck(applyReq, fromUser);
-
         if (res) return new NftRes("1", "已经添加到审核中~");
         return new NftRes("0", "添加审核失败，请联系网站管理员查看");
     }
+
 
     @Override
     public AuditRes changeSellStatus(SubCacheVo subCacheVo,Integer status) {
@@ -75,14 +77,15 @@ public class INftSubmitServiceImpl implements INftSubmitService {
 
 
     @Override
-    public boolean insertSellInfo(ReviewReq req, String hash) {
-        boolean b = iSubmitCacheRespository.upDateSubStatus(req.getId(), req.getStatus()); //修改提交表
-        boolean b1 = iSellInfoRespository.insertSellInfo(req.getId(), hash); //增加出售表
+    public boolean insertSellInfo(SubCacheVo subCacheVo,Integer status, String hash) {
+        boolean b = iSubmitCacheRespository.upDateSubStatus(subCacheVo.getId(), status); //修改提交表
+        boolean b1 = iSellInfoRespository.insertSellInfo(subCacheVo, hash); //增加出售表
         return b && b1;
     }
     @Override
+    @Transactional
     public Result ReviewCollection(ReviewReq req) {
-        // 需要先修改区块链状态在修改mysql状态！！
+        // 需要先修改区块链状@态在修改mysql状态！！
         //这里因为是在审核中，所以不需要使用读写锁，普通的redisson锁即可防止多个管理员同时审核，造成数据库、区块链或ipfs多次上传等情况
         distributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         try {
@@ -108,7 +111,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
                 return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
             }
             //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
-            if (!insertSellInfo(req, hash)) {
+            if (!insertSellInfo(subCacheVo,req.getStatus(), hash)) {
                 return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
             }
             return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());

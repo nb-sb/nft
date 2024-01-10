@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
+import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.domain.nft.model.res.GetNftRes;
@@ -16,6 +17,8 @@ import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+
+import static com.nft.common.Redis.RedisConstant.*;
 
 @AllArgsConstructor
 @Service
@@ -90,15 +93,14 @@ public class NftInfoService implements INftInfoService {
             distributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             try {
                 conllectionInfoVo = iSellInfoRespository.selectConllectionById(id);
-                Random rand = new Random();
                 if (conllectionInfoVo != null) {
                     //一、设置缓存并解决 缓存击穿问题
                     //查询到的mysql中数据添加到redis时 添加24h + random s的redis缓存，随机增加几百秒缓存
-                    redisUtil.set(reidsKey, JSONUtil.toJsonStr(conllectionInfoVo), 60 * 60 * 24 + rand.nextInt(900) + 100);
+                    redisUtil.set(reidsKey, JSONUtil.toJsonStr(conllectionInfoVo), RedisConstant.RandomCacheTime(DAY_ONE));
                 } else {
                     //二、缓存穿透问题(商品已经删了，redis中无数据，大量请求打到数据库中导致数据库宕机)
-                    //添加redis空缓存
-                    redisUtil.set(reidsKey, Constants.RedisKey.REDIS_EMPTY_CACHE(), 60 * 3 + rand.nextInt(900) + 100);
+                    //添加几分钟 redis空缓存
+                    redisUtil.set(reidsKey, Constants.RedisKey.REDIS_EMPTY_CACHE(), RedisConstant.RandomCacheTime(MINUTE_3));
                 }
                 return GetNftRes.success( conllectionInfoVo);
             } finally {

@@ -16,7 +16,7 @@ public interface INftSubmitService {
     //修改藏品审核状态
     AuditRes changeSellStatus(SubCacheVo subCacheVo, Integer status);
 
-    boolean insertSellInfo(ReviewReq req, String hash);
+    boolean insertSellInfo(SubCacheVo subCacheVo,Integer status, String hash);
     //审核藏品
     Result ReviewCollection(ReviewReq req);
 

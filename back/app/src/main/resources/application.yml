@@ -37,7 +37,7 @@ spring:
     url: jdbc:mysql://localhost:3306/nft?characterEncoding=utf-8&userSSL=false
     username: root
   profiles:
-    include: infrastructure,trigger
+    include: infrastructure,trigger,common
   mail:
     host: smtp.qq.com
     username: bws.66@qq.com
@@ -48,5 +48,4 @@ spring:
         smtp:
           ssl:
             enable: true
-
 
