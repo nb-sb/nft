@@ -1,12 +1,9 @@
-package com.nft.domain.user.service.authCode.getCode.impl;
+package com.nft.domain.user.service.Factory.authCode.getCode.impl;
 
-import cn.hutool.Hutool;
 import cn.hutool.core.util.RandomUtil;
-import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.email.SendEmailService;
-import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
-import lombok.AllArgsConstructor;
+import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
 import lombok.extern.log4j.Log4j2;
 
 import javax.mail.MessagingException;

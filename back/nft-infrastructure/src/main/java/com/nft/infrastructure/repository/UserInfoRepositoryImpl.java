@@ -1,6 +1,7 @@
 package com.nft.infrastructure.repository;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,8 +9,6 @@ import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.common.Constants;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
-import com.nft.domain.support.Search;
-import com.nft.domain.user.model.req.RealNameAuthReq;
 import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -18,7 +17,6 @@ import com.nft.infrastructure.dao.UserDetalMapper;
 import com.nft.infrastructure.dao.UserInfoMapper;
 import com.nft.infrastructure.fisco.model.bo.UserStorageAddUserInputBO;
 import com.nft.infrastructure.fisco.service.UserStorageService;
-import com.nft.infrastructure.po.DetailInfo;
 import com.nft.infrastructure.po.UserDetal;
 import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
@@ -27,9 +25,7 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.stereotype.Repository;
-import scala.reflect.internal.Trees;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -66,9 +62,9 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public Constants.ResponseCode register(SignReq signReq) {
+    public Constants.ResponseCode addUser(SignReq signReq) {
         //todo 目前只做了用户名,应需判断 手机号 邮箱 等
-        boolean exist = isExist(signReq.getUsername());
+        boolean exist = isUserNameExist(signReq.getUsername());
         if (exist) {
             return Constants.ResponseCode.USER_EXIST;
         }
@@ -117,15 +113,27 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public boolean chanagePassword(ChanagePwReq chanagePwReq) {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setPassword(chanagePwReq.getPassword());
+    public boolean chanagePassword(ChanagePwReq changePwReq) {
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUsername, changePwReq.getUsername());
+        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
+        if (userInfo == null) return false;
+        QueryWrapper<UserDetal> userDetalQueryWrapper = new QueryWrapper<>();
+        userDetalQueryWrapper.eq("for_id", userInfo.getId())
+                .and(qw->qw.eq("phone_number", changePwReq.getPhone())
+                        .eq("email",changePwReq.getEmail()));
+        UserDetal userDetal = userDetalMapper.selectOne(userDetalQueryWrapper);
+        if (userDetal == null) {
+            log.info("用户不存在，或者手机号或邮箱不是你的");
+            return false;
+        }
+        userInfo.setPassword(changePwReq.getPassword());
         UpdateWrapper<UserInfo> userWrapper = new UpdateWrapper<>();
-        userWrapper.eq("username", chanagePwReq.getUsername());
+        userWrapper.eq("username", changePwReq.getUsername());
         int update = userInfoMapper.update(userInfo, userWrapper);
         if (update > 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -182,7 +190,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         return true;
     }
 
-    public boolean isExist(String username) {
+    public boolean isUserNameExist(String username) {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username);
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);

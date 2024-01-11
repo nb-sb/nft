@@ -3,7 +3,6 @@ package com.nft.domain.user.service.Info.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;
-import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
@@ -39,14 +38,8 @@ public class UserAccountService implements IUserAccountService {
     Token2User token2User;
     @Override
     public UserResult register(SignReq signReq) {
-        if (!CheckUtils.isUserName(signReq.getUsername())) {
-            return UserResult.error("用户名不合规(不包含特殊字符6-20位)");
-        }
-        if (!CheckUtils.isPassword(signReq.getPassword())) {
-            return UserResult.error("密码不合规(6-16位)");
-        }
         signReq.setRole(0);
-        Constants.ResponseCode responseCode = iUserInfoRepository.register(signReq);
+        Constants.ResponseCode responseCode = iUserInfoRepository.addUser(signReq);
 
         if (Objects.equals(responseCode.getCode(), Constants.ResponseCode.SUCCESS.getCode())) {
             return new UserResult("1", "注册成功");
@@ -90,7 +83,7 @@ public class UserAccountService implements IUserAccountService {
      * }
      */
     @Override
-    public Result chanagePassword(UserVo fromUser,ChanagePwReq chanagePwReq) {
+    public Result changePassword(UserVo fromUser, ChanagePwReq chanagePwReq) {
 
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();

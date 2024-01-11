@@ -3,7 +3,6 @@ package com.nft.domain.user.service.Info;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;
 import com.nft.domain.user.model.req.*;
-import com.nft.domain.support.Search;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -21,7 +20,7 @@ public interface IUserAccountService {
     UserResult retrievePassword(LoginReq loginReq);
 
     //修改密码
-    Result chanagePassword(UserVo fromUser,ChanagePwReq chanagePwReq);
+    Result changePassword(UserVo fromUser, ChanagePwReq chanagePwReq);
 
 
     //使用分页查询用户信息

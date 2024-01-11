@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
-import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.email.SendEmailService;
 import com.nft.domain.support.Search;
@@ -14,8 +13,8 @@ import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.Info.IUserAccountService;
-import com.nft.domain.user.service.authCode.AuthCode;
-import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
+import com.nft.domain.user.service.Factory.authCode.AuthCodeFactory;
+import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class UserController {
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
     private final SendEmailService sendEmailService;
-    private final AuthCode authCode;
+    private final AuthCodeFactory authCodeFactory;
 
 
     @GetMapping("/login")
@@ -66,7 +65,7 @@ public class UserController {
 //        Result res = getVerification(getCodeType.getCodeId());
 //        if (res != null) return res;
         try {
-            IGetCodeService codeService = authCode.getCodeService(authCodeReq.getType());
+            IGetCodeService codeService = authCodeFactory.getCodeService(authCodeReq.getType());
             if (codeService == null) {
                 return new Result("0", "获取验证码类型错误");
             }
@@ -89,7 +88,7 @@ public class UserController {
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iUserAccountService.chanagePassword(userOne, chanagePwReq);
+        return iUserAccountService.changePassword(userOne, chanagePwReq);
     }
 
     //    使用分页查询查询所有用户
