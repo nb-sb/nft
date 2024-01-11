@@ -7,14 +7,15 @@ import com.nft.common.Result;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.email.SendEmailService;
-import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
-import com.nft.domain.user.service.IUserAccountService;
+import com.nft.domain.user.service.Info.IUserAccountService;
+import com.nft.domain.user.service.authCode.AuthCode;
+import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,7 @@ public class UserController {
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
     private final SendEmailService sendEmailService;
+    private final AuthCode authCode;
 
 
     @GetMapping("/login")
@@ -59,43 +61,25 @@ public class UserController {
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码
     @PostMapping("/getcode")
     @ResponseBody
-    public Result getcode(@Valid @RequestBody GetCodeType getCodeType) {
+    public Result getcode(@Valid @RequestBody AuthCodeReq authCodeReq) {
         //获取验证码时需要进行滑动验证码验证等操作,防止脚本消息刷接口
 //        Result res = getVerification(getCodeType.getCodeId());
 //        if (res != null) return res;
-        String name = getCodeType.getName();
-        if (Constants.Get_Code_iphone.equals(getCodeType.getType())) {
-            //如果是手机号类型 验证手机是否正确
-            if (!CheckUtils.isMobile(name)) {
-                return new Result("0", "手机号错误");
+        try {
+            IGetCodeService codeService = authCode.getCodeService(authCodeReq.getType());
+            if (codeService == null) {
+                return new Result("0", "获取验证码类型错误");
             }
-            //1.调用发送验证码方法
-            int code = (int) (Math.random() * 50000);//模拟获取验证码操作
-            //todo: 调用发送逻辑
-            //2.记录到redis中设置5分钟 key: name value: code
-            //3.返回成功或失败消息
-            return new Result("0", String.valueOf(redisUtil.set(name, code, Constants.RedisKey.MINUTE_5)));
-        } else if (Constants.Get_Code_email.equals(getCodeType.getType())) {
-            //如果是邮箱类型 验证邮箱类型
-            if (!CheckUtils.isEmail(name)) {
-                return new Result("0", "邮箱类型错误");
+            String code = codeService.getCode(authCodeReq.getTarget());
+            if (code != null) {
+                //将验证码记录redis 5分钟
+                return new Result("1", String.valueOf(redisUtil.set(authCodeReq.getTarget(),
+                        code, Constants.RedisKey.MINUTE_5)));
             }
-            //1.调用发送验证码方法
-            int code = (int) (Math.random() * 50000);//模拟获取验证码操作
-            try {
-                sendEmailService.sendEmailAuthenticat(name, String.valueOf(code));
-            } catch (Exception e) {
-                log.error("邮箱发送验证码时出错 "+e );
-                return new Result("0", "未知错误-请联系管理员查看日志");
-            }
-            //2.记录到redis中设置5分钟 key: name value: code
-            //3.返回成功或失败消息
-            return new Result("1", String.valueOf(redisUtil.set(name, code, Constants.RedisKey.MINUTE_5)));
-        } else {
-            log.error("类型错误!" + getCodeType.getType());
-            return new Result("0", "获取验证码类型错误");
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
-
+        return new Result("0", "获取验证码发送失败,请检查是否输入有误");
     }
 
     //修改密码

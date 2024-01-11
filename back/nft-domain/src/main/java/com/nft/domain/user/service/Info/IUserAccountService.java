@@ -1,4 +1,4 @@
-package com.nft.domain.user.service;
+package com.nft.domain.user.service.Info;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Result;

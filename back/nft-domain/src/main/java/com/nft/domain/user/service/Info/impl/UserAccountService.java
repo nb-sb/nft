@@ -1,4 +1,4 @@
-package com.nft.domain.user.service.impl;
+package com.nft.domain.user.service.Info.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -7,8 +7,6 @@ import com.nft.common.Utils.CheckUtils;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
-import com.nft.domain.nft.model.res.NftRes;
-import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.req.*;
 import com.nft.domain.user.model.res.UserResult;
@@ -17,7 +15,7 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.IUserAccountService;
+import com.nft.domain.user.service.Info.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

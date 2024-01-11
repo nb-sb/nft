@@ -3,7 +3,7 @@
 <mapper namespace="com.nft.infrastructure.dao.SellInfoMapper">
 
 
-<!--    <select id="selectConllectionByPage" resultType="com.nft.domain.nft.model.vo.ConllectionInfoVo">-->
+<!--    <select id="selectConllectionreturn Result.userNotFinded();" resultType="com.nft.domain.nft.model.vo.ConllectionInfoVo">-->
 <!--        SELECT sell_info.id,sell_info.`hash`,sell_info.ipfs_hash,sell_info.amount,sell_info.remain,sell_info.auther,sell_info.`status`-->
 <!--             ,submit_cache.path,submit_cache.present,submit_cache.`name`,submit_cache.price FROM sell_info JOIN submit_cache ON sell_info.unique_id = submit_cache.id-->
 <!--    </select>-->

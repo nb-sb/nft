@@ -47,7 +47,7 @@ public class SelectConllection {
     public Result Select_Conllection_ByPage(@Valid PageRequest pageRequest) {
         //1.都可以查询到出售列表中的内容
         //查询当前页码，查询条数
-        return iNftInfoService.selectSellConllectionByPage(
+        return iNftInfoService.selectSellConllectionPage(
                 new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize())
         );
     }
@@ -55,9 +55,9 @@ public class SelectConllection {
     //按照分类查询出售藏品
     @GetMapping("selectConllectionKindByPage")
     @ResponseBody
-    public Result selectConllectionKindByPage(@Valid InfoKindReq infoKindReq) {
+    public Result selectConllectionKindPage(@Valid InfoKindReq infoKindReq) {
         //查询当前页码，查询条数
-        return iNftInfoService.selectSellConllectionKindByPage(
+        return iNftInfoService.selectSellConllectionKindPage(
                 new Page<>(infoKindReq.getCurrent(), infoKindReq.getPageSize()),
                 infoKindReq.getMin());
     }

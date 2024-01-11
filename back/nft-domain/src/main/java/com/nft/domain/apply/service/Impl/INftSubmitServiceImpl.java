@@ -114,11 +114,17 @@ public class INftSubmitServiceImpl implements INftSubmitService {
             if (!insertSellInfo(subCacheVo,req.getStatus(), hash)) {
                 return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
             }
+            // TODO: 2024/1/10 使用异步添加24h redis缓存
             return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
         } finally {
             distributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(req.getId()));
         }
 
 
+    }
+
+    @Override
+    public Result selectAllApplyPage() {
+        return null;
     }
 }

@@ -49,13 +49,13 @@ public class NftInfoService implements INftInfoService {
 //        }
 //    }
     @Override
-    public GetNftRes selectSellConllectionByPage(Page page) {
+    public GetNftRes selectSellConllectionPage(Page page) {
         IPage<ConllectionInfoVo> conllectionInfoVoIPage = iSellInfoRespository.selectSellConllectionByPage(page);
         return GetNftRes.success(conllectionInfoVoIPage.getRecords());
     }
 
     @Override
-    public GetNftRes selectSellConllectionKindByPage(Page page, Integer mid) {
+    public GetNftRes selectSellConllectionKindPage(Page page, Integer mid) {
         return GetNftRes.success(iSellInfoRespository.selectSellConllectionKindByPage(page, mid).getRecords());
     }
 
