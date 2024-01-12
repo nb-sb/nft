@@ -1,6 +1,8 @@
 package com.nft.trigger.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.app.user.UserService;
+import com.nft.app.user.dto.CreatCmd;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
@@ -32,6 +34,7 @@ public class UserController {
 
 
     private final IUserAccountService iUserAccountService;
+    private final UserService userService;
     private final RedisUtil redisUtil;
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
@@ -50,11 +53,11 @@ public class UserController {
 
     @GetMapping("/register")
     @ResponseBody
-    public Result register(@Valid @RequestBody SignReq signReq) {
+    public Result register(@Valid @RequestBody CreatCmd cmd) {
         //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
 //        UserResult res = getVerification(signReq.getCodeId());
 //        if (res != null) return res;
-        return iUserAccountService.register(signReq);
+        return userService.creat(cmd);
     }
 
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码
@@ -84,7 +87,6 @@ public class UserController {
     //修改密码
     @PostMapping("/chanagePassword")
     @ResponseBody
-    @AuthPermisson
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
@@ -108,7 +110,7 @@ public class UserController {
     public Result getOwnerInfo() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        UserInfoVo userInfoVo = iUserAccountService.selectUserDetail(userOne);
+        UserInfoVo userInfoVo = userService.selectUserAllInfo(userOne);
         return SelectRes.success(userInfoVo);
     }
 

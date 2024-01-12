@@ -6,10 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.common.Constants;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
-import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -21,9 +20,6 @@ import com.nft.infrastructure.po.UserDetal;
 import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
 
@@ -49,50 +45,45 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     private final UserDetalMapper userDetalMapper;
     @Override
     public UserVo selectOne(LoginReq loginReq) {
-        UserInfo userInfo = selectOne(loginReq.getUsername(), loginReq.getPassword());
+        UserVo userInfo = selectOne(loginReq.getUsername(), loginReq.getPassword());
+        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
+        return userVo;
+    }
+    @Override
+    public UserVo selectOne(String username, String password) {
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.eq("username", username).eq("password", password);
+        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
         UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
         return userVo;
     }
 
-    private UserInfo selectOne(String username,String password ) {
-        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-        userInfoQueryWrapper.eq("username", username).eq("password", password);
-        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
-        return userInfo;
-    }
-
     @Override
-    public Constants.ResponseCode addUser(SignReq signReq) {
-        //todo 目前只做了用户名,应需判断 手机号 邮箱 等
-        boolean exist = isUserNameExist(signReq.getUsername());
-        if (exist) {
-            return Constants.ResponseCode.USER_EXIST;
-        }
-        UserInfo userInfo = BeanCopyUtils.convertTo(signReq, UserInfo ::new);
-        // 创建非国密类型的CryptoSuite
-        CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
-        // 随机生成非国密公私钥对
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair();
-        userInfo.setAddress(cryptoKeyPair.getAddress());
-        userInfo.setPrivatekey(cryptoKeyPair.getHexPrivateKey());
-        userInfo.setBalance(BigDecimal.valueOf(0));
+    public boolean creat(UserEntity userEntity) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUsername(userEntity.getUsername());
+        userInfo.setPassword(userEntity.getPassword());
+        userInfo.setRole(userEntity.getRole());
+        userInfo.setAddress(userEntity.getAddress());
+        userInfo.setPrivatekey(userEntity.getPrivatekey());
+        userInfo.setBalance(userEntity.getBalance());
         int res = userInfoMapper.insert(userInfo);
-        if (res > 0) {
-            UserStorageAddUserInputBO userInputBO = new UserStorageAddUserInputBO();
-            LoginReq loginReq = BeanCopyUtils.convertTo(userInfo, LoginReq ::new);
-            UserVo userVo = selectOne(loginReq);
-            userInputBO.setUn_id(String.valueOf(userVo.getId()));
-            userInputBO.set_address(userVo.getAddress());
-            try {
-                //调用智能合约添加至区块链中
-                TransactionResponse transactionResponse = userStorageService.addUser(userInputBO);
-                log.info(transactionResponse.getValues());
-            } catch (Exception e) {
-                log.error(e);
-            }
-            return Constants.ResponseCode.SUCCESS;
+        return res > 0;
+    }
+    @Override
+    public boolean addUserByFisco(String id, String address) {
+        UserStorageAddUserInputBO userInputBO = new UserStorageAddUserInputBO();
+        userInputBO.setUn_id(id);
+        userInputBO.set_address(address);
+        try {
+            //调用智能合约添加至区块链中
+            TransactionResponse transactionResponse = userStorageService.addUser(userInputBO);
+            log.info(transactionResponse.getValues());
+        } catch (Exception e) {
+            log.error(e);
+            return false;
         }
-        return Constants.ResponseCode.UN_ERROR;
+        return true;
     }
 
     @Override
@@ -127,15 +118,12 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
             log.info("用户不存在，或者手机号或邮箱不是你的");
             return false;
         }
+        // TODO: 2024/1/11 上面代码应该提到上一层而不是在respository判断
         userInfo.setPassword(changePwReq.getPassword());
         UpdateWrapper<UserInfo> userWrapper = new UpdateWrapper<>();
         userWrapper.eq("username", changePwReq.getUsername());
         int update = userInfoMapper.update(userInfo, userWrapper);
-        if (update > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return update > 0;
     }
 
     @Override
@@ -164,8 +152,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         }
         userInfo.setBalance(balance2);
         int i = userInfoMapper.updateById(userInfo);
-        if (i>0) return true;
-        return false;
+        return i>0;
     }
 
     @Override
@@ -189,7 +176,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     private boolean chanagePassword() {
         return true;
     }
-
+    @Override
     public boolean isUserNameExist(String username) {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username);

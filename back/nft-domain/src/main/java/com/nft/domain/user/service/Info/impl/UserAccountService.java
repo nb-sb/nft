@@ -2,6 +2,7 @@ package com.nft.domain.user.service.Info.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Result;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
@@ -14,12 +15,13 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
+import com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.IChangePassWord;
+import com.nft.domain.user.service.Factory.ChangePW.ChangePwFactory;
 import com.nft.domain.user.service.Info.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,16 +38,9 @@ public class UserAccountService implements IUserAccountService {
     RedisUtil redisUtil;
     @Autowired
     Token2User token2User;
-    @Override
-    public UserResult register(SignReq signReq) {
-        signReq.setRole(0);
-        Constants.ResponseCode responseCode = iUserInfoRepository.addUser(signReq);
+    @Autowired
+    ChangePwFactory changePwFactory;
 
-        if (Objects.equals(responseCode.getCode(), Constants.ResponseCode.SUCCESS.getCode())) {
-            return new UserResult("1", "注册成功");
-        }
-        return new UserResult("0", responseCode.getInfo());
-    }
 
     @Override
     public UserResult login(LoginReq loginReq) {
@@ -87,38 +82,29 @@ public class UserAccountService implements IUserAccountService {
 
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();
-            //1.判断验证类型是邮箱验证还是旧密码修改
-        if (Constants.Use_Verification_code_modify.equals(type)) {
-            //2.如果是验证码验证的话则使用redis进行查询验证
-            String code = Optional.ofNullable(chanagePwReq.getCode()).orElse("");
-            String key;
-            if (chanagePwReq.getEmail() !=null) {
-                //如果是使用邮箱验证的话
-                key = chanagePwReq.getEmail();
-                if (!code.equals(redisUtil.get(key))) {
-                    return UserResult.error("邮箱验证码不正确-验证失败");
-                }
-            } else {
-                //使用手机号验证码验证
-                key = chanagePwReq.getPhone();
-                if (!code.equals(redisUtil.get(key))) {
-                    return UserResult.error("手机号验证码不正确-验证失败");
-                }
+        //1.判断验证类型
+        if (!Constants.Use_OrderPassword_modification.equals(type)) {
+            IChangePassWord changePwService = changePwFactory.getChangePwService(chanagePwReq.getType());
+            Result check = changePwService.Check(chanagePwReq);
+            if (check != null) {
+                return check;
             }
-            //到这里实际上判断验证码的逻辑已经结束,可以将redis中验证码进行删除
-            redisUtil.del(key);
         }else {
             //使用旧密码修改
             if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
-                return UserResult.error("不能使用近期使用过的密码!");
+                return UserResult.error("修改前后密码相等!");
             }
             //判断旧密码是否正确
+            if (fromUser == null) {
+                return UserResult.error("需要登录后才能使用旧密码修改");
+            }
             LoginReq loginReq = new LoginReq();
             loginReq.setUsername(fromUser.getUsername());
             chanagePwReq.setUsername(fromUser.getUsername());
             loginReq.setPassword(chanagePwReq.getOldpassword());
             UserVo userVo = iUserInfoRepository.selectOne(loginReq);
             if (userVo == null) {
+                log.info("token 验证失败，没找到此用户");
                 return UserResult.error("旧密码不正确-验证失败");
             }
         }
@@ -135,43 +121,10 @@ public class UserAccountService implements IUserAccountService {
         return iUserInfoRepository.selectUserPage(page);
     }
 
-    @Override
-    public boolean isAdmin(String username,String password) {
-        return false;
-    }
 
-    @Override
-    public boolean isAdmin(HttpServletRequest http) {
-        UserVo userVo = token2User.getUserOne(http);
-        if (userVo == null) {
-            log.error("token错误:"+userVo);
-            return false;
-        }
-        if (Constants.ADMIN == userVo.getRole()) {
-            return true;
-        }
-        log.warn("不是管理员权限: "+userVo);
-        return false;
-    }
 
-    @Override
-    public UserInfoVo selectUserDetail(UserVo userOne) {
-        //查询用户个人信息。由于个人信息基本是不变的所以可以直接存入redis中
-        UserInfoVo userDetailByRedis = getUserDetailByRedis(Constants.RedisKey.USER_INFO(userOne.getId()));
-        if (userDetailByRedis != null) {
-            return userDetailByRedis;
-        }
-        UserInfoVo userInfoVo = iUserInfoRepository.selectUserDetail(userOne.getId());
-        if (userInfoVo == null) {
-            return null;
-        }
-        userInfoVo.setUsername(userOne.getUsername());
-        userInfoVo.setPassword("******************");
-        userInfoVo.setRole(userOne.getRole());
-        userInfoVo.setBalance(userOne.getBalance());
-        redisUtil.set(Constants.RedisKey.USER_INFO(userOne.getId()), JSONUtil.toJsonStr(userInfoVo),60*30);
-        return userInfoVo;
-    }
+
+
 
     @Override
     public Result submitRealNameAuth(UserVo fromUser,RealNameAuthReq realNameAuthReq) {

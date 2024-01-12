@@ -28,7 +28,11 @@
             <artifactId>nft-infrastructure</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.nft</groupId>
+            <artifactId>app</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 

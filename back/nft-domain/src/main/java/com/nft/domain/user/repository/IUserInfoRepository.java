@@ -2,10 +2,9 @@ package com.nft.domain.user.repository;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.common.Constants;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.req.LoginReq;
-import com.nft.domain.user.model.req.SignReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 
@@ -24,7 +23,11 @@ public interface IUserInfoRepository {
 
     UserVo selectOne(LoginReq loginReq);
 
-    Constants.ResponseCode addUser(SignReq signReq);
+    UserVo selectOne(String username, String password);
+
+    boolean creat(UserEntity userEntity);
+
+    boolean addUserByFisco(String id, String address);
 
     List<UserVo> selectUserPage(Page page);
 
@@ -38,4 +41,5 @@ public interface IUserInfoRepository {
     UserInfoVo selectUserDetail(Integer forid);
 
 
+    boolean isUserNameExist(String username);
 }

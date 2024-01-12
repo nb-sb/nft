@@ -23,7 +23,7 @@ public class ChanagePwReq {
     String email;
     String code;
     @NotNull
-    @Status(statusType = {"1","2"})
-    Integer type; // 验证类型 2 是使用 使用验证码修改 , 1 是使用旧密码修改
+    @Status(statusType = {"1","2","3"})
+    Integer type; // 验证类型  1 是使用旧密码修改 2 是使用 使用邮箱验证码修改 , 3是使用手机验证码
 
 }
