@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+/**
+* @author: 戏人看戏
+* @Date: 2024/1/12 14:35
+* @Description: 策略模式
+*/
 @Service
 public class AuthCodeService {
     @Autowired

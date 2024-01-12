@@ -37,8 +37,6 @@ public class UserController {
     private final RedisUtil redisUtil;
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
-    private final SendEmailService sendEmailService;
-    private final AuthCodeFactory authCodeFactory;
     private final AuthCodeService authCodeService;
 
 

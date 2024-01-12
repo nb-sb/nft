@@ -18,21 +18,21 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface SellInfoMapper extends BaseMapper<SellInfo> {
 
-    @Select("SELECT sell_info.id, sell_info.`hash`, sell_info.ipfs_hash, sell_info.amount, sell_info.remain, sell_info.auther, sell_info.`status`, " +
-            "submit_cache.path, submit_cache.present, submit_cache.`name`, submit_cache.price " +
-            "FROM sell_info " +
-            "JOIN submit_cache ON sell_info.unique_id = submit_cache.id " +
-            "ORDER BY sell_info.id DESC ")
+    @Select("SELECT nft_sell_info.id, nft_sell_info.`hash`, nft_sell_info.ipfs_hash, nft_sell_info.amount, nft_sell_info.remain, nft_sell_info.auther, nft_sell_info.`status`, " +
+            "nft_submit_cache.path, nft_submit_cache.present, nft_submit_cache.`name`, nft_submit_cache.price " +
+            "FROM nft_sell_info " +
+            "JOIN nft_submit_cache ON nft_sell_info.unique_id = nft_submit_cache.id " +
+            "ORDER BY nft_sell_info.id DESC ")
     IPage<ConllectionInfoVo> selectConllectionByPage(Page<ConllectionInfoVo> page);
 
     //使用分类查询
-    @Select("SELECT sell_info.id, sell_info.`hash`, sell_info.ipfs_hash, sell_info.amount, sell_info.remain, sell_info.auther, sell_info.`status`, submit_cache.path, submit_cache.present, " +
-            "submit_cache.`name`, submit_cache.price, nft_relationships.mid " +
-            "FROM sell_info " +
-            "JOIN submit_cache ON sell_info.unique_id = submit_cache.id " +
-            "JOIN nft_relationships ON sell_info.id = nft_relationships.cid " +
+    @Select("SELECT nft_sell_info.id, nft_sell_info.`hash`, nft_sell_info.ipfs_hash, nft_sell_info.amount, nft_sell_info.remain, nft_sell_info.auther, nft_sell_info.`status`, nft_submit_cache.path, nft_submit_cache.present, " +
+            "nft_submit_cache.`name`, nft_submit_cache.price, nft_relationships.mid " +
+            "FROM nft_sell_info " +
+            "JOIN nft_submit_cache ON nft_sell_info.unique_id = nft_submit_cache.id " +
+            "JOIN nft_relationships ON nft_sell_info.id = nft_relationships.cid " +
             "WHERE nft_relationships.mid = #{mid} " +
-            "ORDER BY sell_info.id DESC")
+            "ORDER BY nft_sell_info.id DESC")
     IPage<ConllectionInfoVo> selectSellConllectionKindByPage(Page<ConllectionInfoVo> page, @Param("mid") Long mid);
 
 }

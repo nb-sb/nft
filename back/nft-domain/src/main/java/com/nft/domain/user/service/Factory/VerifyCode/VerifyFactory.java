@@ -6,7 +6,11 @@ import com.nft.domain.user.service.Factory.VerifyCode.Verify.impl.EmailCode;
 import com.nft.domain.user.service.Factory.VerifyCode.Verify.impl.PhoneCode;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
+/**
+* @author: 戏人看戏
+* @Date: 2024/1/12 14:35
+* @Description: 一个简单的验证验证码的工厂类
+*/
 @Service
 @AllArgsConstructor
 public class VerifyFactory {
