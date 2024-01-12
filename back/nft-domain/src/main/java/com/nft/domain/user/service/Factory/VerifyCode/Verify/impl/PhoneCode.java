@@ -1,12 +1,12 @@
-package com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.impl;
+package com.nft.domain.user.service.Factory.VerifyCode.Verify.impl;
 
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.res.UserResult;
-import com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.IChangePassWord;
+import com.nft.domain.user.service.Factory.VerifyCode.Verify.IVerifyService;
 
-public class PhoneCode implements IChangePassWord {
+public class PhoneCode implements IVerifyService {
     private RedisUtil redisUtil;
     public PhoneCode(RedisUtil redisUtil) {
         this.redisUtil = redisUtil;

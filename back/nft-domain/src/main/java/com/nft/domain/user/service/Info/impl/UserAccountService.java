@@ -1,9 +1,7 @@
 package com.nft.domain.user.service.Info.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Result;
 import com.nft.common.Constants;
 import com.nft.common.Utils.TokenUtils;
@@ -16,15 +14,14 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.IChangePassWord;
-import com.nft.domain.user.service.Factory.ChangePW.ChangePwFactory;
+import com.nft.domain.user.service.Factory.VerifyCode.Verify.IVerifyService;
+import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
 import com.nft.domain.user.service.Info.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -40,7 +37,7 @@ public class UserAccountService implements IUserAccountService {
     @Autowired
     Token2User token2User;
     @Autowired
-    ChangePwFactory changePwFactory;
+    VerifyFactory verifyFactory;
 
 
     @Override
@@ -84,8 +81,8 @@ public class UserAccountService implements IUserAccountService {
         Integer type = chanagePwReq.getType();
         //1.判断验证类型
         if (!Constants.Use_OrderPassword_modification.equals(type)) {
-            IChangePassWord changePwService = changePwFactory.getChangePwService(chanagePwReq.getType());
-            Result check = changePwService.Check(chanagePwReq);
+            IVerifyService verifyService = verifyFactory.getVerifyService(chanagePwReq.getType());
+            Result check = verifyService.Check(chanagePwReq);
             if (check != null) {
                 return check;
             }

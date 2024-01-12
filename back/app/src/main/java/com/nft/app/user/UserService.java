@@ -12,7 +12,7 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.Factory.ChangePW.ChangePwFactory;
+import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -34,7 +34,7 @@ public class UserService {
     @Autowired
     Token2User token2User;
     @Autowired
-    ChangePwFactory changePwFactory;
+    VerifyFactory verifyFactory;
     @Resource
     private UserEntityFatory userEntityFatory;
 

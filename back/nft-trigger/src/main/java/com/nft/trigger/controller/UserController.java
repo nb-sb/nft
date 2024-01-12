@@ -16,8 +16,6 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.service.Factory.authCode.AuthCodeService;
 import com.nft.domain.user.service.Info.IUserAccountService;
-import com.nft.domain.user.service.Factory.authCode.AuthCodeFactory;
-import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -70,14 +68,8 @@ public class UserController {
 //        Result res = getVerification(getCodeType.getCodeId());
 //        if (res != null) return res;
         try {
-//            IGetCodeService codeService = authCodeFactory.getCodeService(authCodeReq.getType());
-//
-//            if (codeService == null) {
-//                return new Result("0", "获取验证码类型错误");
-//            }
             String code = authCodeService.AuthCodeService(authCodeReq.getType())
                     .getResult(authCodeReq.getTarget());
-//            String code = codeService.getCode(authCodeReq.getTarget());
             if (code != null) {
                 //将验证码记录redis 5分钟
                 return new Result("1", String.valueOf(redisUtil.set(authCodeReq.getTarget(),

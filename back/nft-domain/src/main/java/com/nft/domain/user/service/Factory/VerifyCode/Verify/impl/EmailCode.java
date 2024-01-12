@@ -1,15 +1,12 @@
-package com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.impl;
+package com.nft.domain.user.service.Factory.VerifyCode.Verify.impl;
 
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.domain.user.model.req.ChanagePwReq;
 import com.nft.domain.user.model.res.UserResult;
-import com.nft.domain.user.service.Factory.ChangePW.ChangePassWord.IChangePassWord;
-import sun.util.resources.cldr.nyn.CalendarData_nyn_UG;
+import com.nft.domain.user.service.Factory.VerifyCode.Verify.IVerifyService;
 
-import java.util.Optional;
-
-public class EmailCode implements IChangePassWord {
+public class EmailCode implements IVerifyService {
     private RedisUtil redisUtil;
     public EmailCode(RedisUtil redisUtil) {
         this.redisUtil = redisUtil;
