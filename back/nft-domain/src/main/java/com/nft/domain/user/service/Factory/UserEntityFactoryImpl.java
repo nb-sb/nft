@@ -1,9 +1,10 @@
 package com.nft.domain.user.service.Factory;
 
 import com.nft.domain.user.model.entity.UserEntity;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-
+@Service
 public class UserEntityFactoryImpl implements UserEntityFatory{
 
     @Override

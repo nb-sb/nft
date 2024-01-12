@@ -1,6 +1,7 @@
 package com.nft.domain.user.service.Info.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Result;
@@ -79,7 +80,6 @@ public class UserAccountService implements IUserAccountService {
      */
     @Override
     public Result changePassword(UserVo fromUser, ChanagePwReq chanagePwReq) {
-
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();
         //1.判断验证类型
@@ -88,6 +88,17 @@ public class UserAccountService implements IUserAccountService {
             Result check = changePwService.Check(chanagePwReq);
             if (check != null) {
                 return check;
+            }
+            //使用邮箱/手机号反查到这人,然后在修改这个用户的密码
+            RealNameAuthVo userDetail = iUserDetalRepository.selectByEmail(chanagePwReq.getEmail());
+            if (userDetail != null) {
+                UserVo userVo = iUserInfoRepository.selectUserByid(userDetail.getForid());
+                chanagePwReq.setUsername(userVo.getUsername());
+            } else {
+                userDetail =iUserDetalRepository.selectByPhone(chanagePwReq.getPhone());
+                //查询用户名
+                UserVo userVo = iUserInfoRepository.selectUserByid(userDetail.getForid());
+                chanagePwReq.setUsername(userVo.getUsername());
             }
         }else {
             //使用旧密码修改
@@ -98,11 +109,9 @@ public class UserAccountService implements IUserAccountService {
             if (fromUser == null) {
                 return UserResult.error("需要登录后才能使用旧密码修改");
             }
-            LoginReq loginReq = new LoginReq();
-            loginReq.setUsername(fromUser.getUsername());
             chanagePwReq.setUsername(fromUser.getUsername());
-            loginReq.setPassword(chanagePwReq.getOldpassword());
-            UserVo userVo = iUserInfoRepository.selectOne(loginReq);
+            UserVo userVo = iUserInfoRepository.selectOne(fromUser.getUsername()
+                    ,chanagePwReq.getOldpassword());
             if (userVo == null) {
                 log.info("token 验证失败，没找到此用户");
                 return UserResult.error("旧密码不正确-验证失败");

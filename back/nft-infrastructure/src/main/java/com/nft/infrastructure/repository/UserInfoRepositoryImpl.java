@@ -105,20 +105,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
 
     @Override
     public boolean chanagePassword(ChanagePwReq changePwReq) {
-        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserInfo::getUsername, changePwReq.getUsername());
-        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
-        if (userInfo == null) return false;
-        QueryWrapper<UserDetal> userDetalQueryWrapper = new QueryWrapper<>();
-        userDetalQueryWrapper.eq("for_id", userInfo.getId())
-                .and(qw->qw.eq("phone_number", changePwReq.getPhone())
-                        .eq("email",changePwReq.getEmail()));
-        UserDetal userDetal = userDetalMapper.selectOne(userDetalQueryWrapper);
-        if (userDetal == null) {
-            log.info("用户不存在，或者手机号或邮箱不是你的");
-            return false;
-        }
-        // TODO: 2024/1/11 上面代码应该提到上一层而不是在respository判断
+        UserInfo userInfo = new UserInfo();
         userInfo.setPassword(changePwReq.getPassword());
         UpdateWrapper<UserInfo> userWrapper = new UpdateWrapper<>();
         userWrapper.eq("username", changePwReq.getUsername());
@@ -183,5 +170,13 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
         if (Optional.ofNullable(userInfo).isPresent()) return true;
         return false;
+    }
+    @Override
+    public UserVo selectUserName(String username) {
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.eq("username", username);
+        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
+        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
+        return userVo;
     }
 }

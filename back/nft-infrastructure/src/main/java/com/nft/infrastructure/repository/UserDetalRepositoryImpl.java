@@ -1,5 +1,6 @@
 package com.nft.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
@@ -72,7 +73,26 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
         realNameAuthVo.setAddress(userDetal.getAddress());
         realNameAuthVo.setForid(userDetal.getForId());
         realNameAuthVo.setStatus(userDetal.getStatus());
+        return realNameAuthVo;
+    }
 
+    @Override
+    public RealNameAuthVo selectByEmail(String email) {
+        LambdaQueryWrapper<UserDetal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDetal::getEmail, email);
+        UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
+        if (userDetal == null) return null;
+        RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);
+        return realNameAuthVo;
+    }
+
+    @Override
+    public RealNameAuthVo selectByPhone(String phone) {
+        LambdaQueryWrapper<UserDetal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDetal::getPhoneNumber, phone);
+        UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
+        if (userDetal == null) return null;
+        RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);
         return realNameAuthVo;
     }
 

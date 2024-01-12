@@ -1,15 +1,12 @@
-package com.nft.app;
+package com.nft.nftlauncher;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * @description: spring boot 启动类
@@ -20,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @SpringBootApplication
 @ComponentScan("com.nft.*")
 @MapperScan("com.nft.infrastructure.dao")
-public class AppApplication  {
+public class AppApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AppApplication.class, args);

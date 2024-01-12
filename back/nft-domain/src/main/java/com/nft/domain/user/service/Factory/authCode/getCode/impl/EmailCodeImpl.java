@@ -5,6 +5,7 @@ import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.email.SendEmailService;
 import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 

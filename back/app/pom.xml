@@ -22,12 +22,12 @@
             <version>2.7.10</version>
             <scope>test</scope>
         </dependency>
-        <!--将另一个子模块进入进来-->
-        <dependency>
-            <groupId>com.nft</groupId>
-            <artifactId>nft-trigger</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+<!--        &lt;!&ndash;将另一个子模块进入进来&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.nft</groupId>-->
+<!--            <artifactId>nft-trigger</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.nft</groupId>
             <artifactId>nft-domain</artifactId>

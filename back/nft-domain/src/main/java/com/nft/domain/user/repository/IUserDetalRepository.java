@@ -21,4 +21,8 @@ public interface IUserDetalRepository {
     boolean updataStatusById(UpdateRealNameAuthStatusReq req);
 
     RealNameAuthVo selectById(Integer id);
+
+    RealNameAuthVo selectByEmail(String email);
+
+    RealNameAuthVo selectByPhone(String phone);
 }

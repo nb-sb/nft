@@ -42,4 +42,6 @@ public interface IUserInfoRepository {
 
 
     boolean isUserNameExist(String username);
+
+    UserVo selectUserName(String username);
 }

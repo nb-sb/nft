@@ -33,6 +33,7 @@ public class UserDetal implements Serializable {
 
     private String address;
 
+    private String email;
     private String cardid;
 
     private String phoneNumber;

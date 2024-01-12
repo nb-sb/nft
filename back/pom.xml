@@ -32,6 +32,7 @@
         <module>nft-infrastructure</module>
         <module>nft-domain</module>
         <module>nft-trigger</module>
+        <module>nft-launcher</module>
     </modules>
     <dependencies>
         <dependency>
