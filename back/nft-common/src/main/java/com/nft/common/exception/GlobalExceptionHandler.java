@@ -22,12 +22,12 @@ public class GlobalExceptionHandler {
         log.error("businessException: " + e.getMessage(), e);
         return Result.error(e.getMessage());
     }
-
-    @ExceptionHandler(RuntimeException.class)
-    public Result runtimeExceptionHandler(RuntimeException e) {
-        log.error("runtimeException", e);
-        return Result.buildResult(String.valueOf(ErrorCode.SYSTEM_ERROR.getCode()), e.getMessage());
-    }
+    // TODO: 2024/1/12 暂时注释全局异常捕获类，便于开发调试
+//    @ExceptionHandler(RuntimeException.class)
+//    public Result runtimeExceptionHandler(RuntimeException e) {
+//        log.error("runtimeException", e);
+//        return Result.buildResult(String.valueOf(ErrorCode.SYSTEM_ERROR.getCode()), e.getMessage());
+//    }
 
 
 }

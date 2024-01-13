@@ -84,7 +84,6 @@ public class UserController {
     @ResponseBody
     public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
-        if (userOne == null) return Result.userNotFinded();
         return iUserAccountService.changePassword(userOne, chanagePwReq);
     }
 

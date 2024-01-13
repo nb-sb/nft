@@ -2,19 +2,21 @@ package com.nft.domain.user.service.Info.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.common.Result;
 import com.nft.common.Constants;
-import com.nft.common.Utils.TokenUtils;
 import com.nft.common.Redis.RedisUtil;
+import com.nft.common.Result;
+import com.nft.common.Utils.TokenUtils;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.req.*;
+import com.nft.domain.user.model.req.ChanagePwReq;
+import com.nft.domain.user.model.req.LoginReq;
+import com.nft.domain.user.model.req.RealNameAuthReq;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusReq;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.RealNameAuthVo;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.Factory.VerifyCode.Verify.IVerifyService;
 import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
 import com.nft.domain.user.service.Info.IUserAccountService;
 import lombok.extern.log4j.Log4j2;
@@ -79,47 +81,28 @@ public class UserAccountService implements IUserAccountService {
     public Result changePassword(UserVo fromUser, ChanagePwReq chanagePwReq) {
 //        判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = chanagePwReq.getType();
-        //1.判断验证类型
-        if (!Constants.Use_OrderPassword_modification.equals(type)) {
-            IVerifyService verifyService = verifyFactory.getVerifyService(chanagePwReq.getType());
-            Result check = verifyService.Check(chanagePwReq);
-            if (check != null) {
-                return check;
-            }
-            //使用邮箱/手机号反查到这人,然后在修改这个用户的密码
-            RealNameAuthVo userDetail = iUserDetalRepository.selectByEmail(chanagePwReq.getEmail());
-            if (userDetail != null) {
-                UserVo userVo = iUserInfoRepository.selectUserByid(userDetail.getForid());
-                chanagePwReq.setUsername(userVo.getUsername());
-            } else {
-                userDetail =iUserDetalRepository.selectByPhone(chanagePwReq.getPhone());
-                //查询用户名
-                UserVo userVo = iUserInfoRepository.selectUserByid(userDetail.getForid());
-                chanagePwReq.setUsername(userVo.getUsername());
-            }
-        }else {
-            //使用旧密码修改
-            if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
-                return UserResult.error("修改前后密码相等!");
-            }
+        if (Constants.Use_OldPassword_modification.equals(type)) {
             //判断旧密码是否正确
-            if (fromUser == null) {
-                return UserResult.error("需要登录后才能使用旧密码修改");
-            }
+            if (fromUser == null) return UserResult.error("需要登录后才能使用旧密码修改");
             chanagePwReq.setUsername(fromUser.getUsername());
-            UserVo userVo = iUserInfoRepository.selectOne(fromUser.getUsername()
-                    ,chanagePwReq.getOldpassword());
-            if (userVo == null) {
-                log.info("token 验证失败，没找到此用户");
-                return UserResult.error("旧密码不正确-验证失败");
-            }
+        }
+        Result verifyService = verifyFactory.getVerifyService(chanagePwReq);
+        if (verifyService.getCode().equals("0")) {
+            return verifyService;
+        }
+        if (!Constants.Use_OldPassword_modification.equals(type)){
+            //1.判断验证类型
+            //使用邮箱/手机号反查到这人,然后在使用这个用户名 进行修改这个用户的密码
+            RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByPhoneOrEmail(chanagePwReq.getEmail(), chanagePwReq.getPhone());
+            if (realNameAuthVo == null) return Result.error("输入错误，请检查邮箱或手机号是否正确");
+            UserVo userVo = iUserInfoRepository.selectUserByid(realNameAuthVo.getForId());
+            chanagePwReq.setUsername(userVo.getUsername());
         }
         // 修改密码操作
-        boolean b = iUserInfoRepository.chanagePassword(chanagePwReq);
-        if (b) {
-            return Result.success("修改成功!");
-        }
-        return UserResult.error("未知错误");
+        boolean b = iUserInfoRepository.saveUserPassword(chanagePwReq.getUsername(),
+                chanagePwReq.getPassword());
+        if (!b) return UserResult.error("修改失败");
+        return Result.success("修改成功!");
     }
 
     @Override
@@ -135,7 +118,7 @@ public class UserAccountService implements IUserAccountService {
     @Override
     public Result submitRealNameAuth(UserVo fromUser,RealNameAuthReq realNameAuthReq) {
         realNameAuthReq.setAddress(fromUser.getAddress());
-        realNameAuthReq.setForid(fromUser.getId());
+        realNameAuthReq.setForId(fromUser.getId());
         //判断自己是否已经存在了认证信息，存在则无需提交
         RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(fromUser.getId());
         if (realNameAuthVo != null) {

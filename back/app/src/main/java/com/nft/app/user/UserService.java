@@ -4,39 +4,27 @@ import cn.hutool.json.JSONUtil;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
-import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.app.user.dto.CreatCmd;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
-import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
+import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 
 @Service
+@AllArgsConstructor
 public class UserService {
-    @Autowired
-    IUserInfoRepository iUserInfoRepository;
-    @Autowired
-    IUserDetalRepository iUserDetalRepository;
-    @Autowired
-    RedisUtil redisUtil;
-    @Autowired
-    Token2User token2User;
-    @Autowired
-    VerifyFactory verifyFactory;
-    @Resource
-    private UserEntityFatory userEntityFatory;
+    private final IUserInfoRepository iUserInfoRepository;
+    private final RedisUtil redisUtil;
+    private final  UserEntityFatory userEntityFatory;
 
     public UserResult creat(CreatCmd cmd) {
         cmd.setRole(0);//设置普通用户权限
@@ -53,7 +41,7 @@ public class UserService {
                 cmd.getPassword(), cryptoKeyPair.getHexPrivateKey(), BigDecimal.valueOf(0), cmd.getRole());
         //添加数据库存贮
         boolean res = iUserInfoRepository.creat(userEntity);
-        UserVo userVo = iUserInfoRepository.selectOne(cmd.getUsername(), cmd.getPassword());
+        UserVo userVo = iUserInfoRepository.selectOne2(cmd.getUsername(), cmd.getPassword());
         //添加至fisco中存贮
         iUserInfoRepository.addUserByFisco(String.valueOf(userVo.getId()), userVo.getAddress());
         if (res) {

@@ -20,5 +20,5 @@ public class RealNameAuthReq {
     String phoneNumber;//手机号
 
     String address;
-    Integer forid;
+    Integer forId;
 }

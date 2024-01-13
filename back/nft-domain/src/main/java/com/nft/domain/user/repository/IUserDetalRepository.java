@@ -25,4 +25,5 @@ public interface IUserDetalRepository {
     RealNameAuthVo selectByEmail(String email);
 
     RealNameAuthVo selectByPhone(String phone);
+    RealNameAuthVo selectByPhoneOrEmail(String email,String phone);
 }

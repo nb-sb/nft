@@ -23,7 +23,7 @@ public interface IUserInfoRepository {
 
     UserVo selectOne(LoginReq loginReq);
 
-    UserVo selectOne(String username, String password);
+    UserVo selectOne2(String username, String password);
 
     boolean creat(UserEntity userEntity);
 
@@ -31,7 +31,7 @@ public interface IUserInfoRepository {
 
     List<UserVo> selectUserPage(Page page);
 
-    boolean chanagePassword(ChanagePwReq chanagePwReq);
+    boolean saveUserPassword(String username,String password);
 
     UserVo selectUserByid(Integer id);
 

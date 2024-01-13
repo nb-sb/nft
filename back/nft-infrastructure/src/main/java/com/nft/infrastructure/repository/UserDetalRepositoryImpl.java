@@ -39,7 +39,7 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
                 .setPhoneNumber(realNameAuthReq.getPhoneNumber())
                 .setStatus(Constants.realNameAuthStatus.AWAIT_AUDIT)
                 .setAddress(realNameAuthReq.getAddress())
-                .setForId(realNameAuthReq.getForid());
+                .setForId(realNameAuthReq.getForId());
         int insert = userDetalMapper.insert(userDetal);
         return insert > 0;
     }
@@ -71,7 +71,7 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
         realNameAuthVo.setCardId(userDetal.getCardid());
         realNameAuthVo.setPhoneNumber(userDetal.getPhoneNumber());
         realNameAuthVo.setAddress(userDetal.getAddress());
-        realNameAuthVo.setForid(userDetal.getForId());
+        realNameAuthVo.setForId(userDetal.getForId());
         realNameAuthVo.setStatus(userDetal.getStatus());
         return realNameAuthVo;
     }
@@ -90,6 +90,18 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
     public RealNameAuthVo selectByPhone(String phone) {
         LambdaQueryWrapper<UserDetal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserDetal::getPhoneNumber, phone);
+        UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
+        if (userDetal == null) return null;
+        RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);
+        return realNameAuthVo;
+    }
+
+    @Override
+    public RealNameAuthVo selectByPhoneOrEmail(String email,String phone) {
+        LambdaQueryWrapper<UserDetal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDetal::getPhoneNumber, phone)
+                .or()
+                .eq(UserDetal::getEmail,email);
         UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
         if (userDetal == null) return null;
         RealNameAuthVo realNameAuthVo = BeanCopyUtils.convertTo(userDetal, RealNameAuthVo ::new);

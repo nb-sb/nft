@@ -1,7 +1,6 @@
 package com.nft.infrastructure.repository;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -45,17 +44,30 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     private final UserDetalMapper userDetalMapper;
     @Override
     public UserVo selectOne(LoginReq loginReq) {
-        UserVo userInfo = selectOne(loginReq.getUsername(), loginReq.getPassword());
+        UserVo userInfo = selectOne2(loginReq.getUsername(), loginReq.getPassword());
+        if (userInfo == null) {
+            return null;
+        }
         UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
         return userVo;
     }
     @Override
-    public UserVo selectOne(String username, String password) {
+    public UserVo selectOne2(String username, String password) {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username).eq("password", password);
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
-        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
-        return userVo;
+        if (userInfo == null) {
+            return null;
+        }
+        UserVo userVo1 = new UserVo();
+        userVo1.setUsername(userInfo.getUsername());
+        userVo1.setAddress(userInfo.getAddress());
+        userVo1.setPassword(userInfo.getPassword());
+        userVo1.setPrivatekey(userInfo.getPrivatekey());
+        userVo1.setBalance(userInfo.getBalance());
+        userVo1.setRole(userInfo.getRole());
+        userVo1.setId(userInfo.getId());
+        return userVo1;
     }
 
     @Override
@@ -104,11 +116,11 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public boolean chanagePassword(ChanagePwReq changePwReq) {
+    public boolean saveUserPassword(String username,String password) {
         UserInfo userInfo = new UserInfo();
-        userInfo.setPassword(changePwReq.getPassword());
+        userInfo.setPassword(password);
         UpdateWrapper<UserInfo> userWrapper = new UpdateWrapper<>();
-        userWrapper.eq("username", changePwReq.getUsername());
+        userWrapper.eq("username", username);
         int update = userInfoMapper.update(userInfo, userWrapper);
         return update > 0;
     }

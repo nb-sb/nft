@@ -9,13 +9,12 @@ import java.text.SimpleDateFormat;
  * @Copyright：网站：https://nb.sb || git开源地址：https://gitee.com/nb-sb/nft/tree/master
  */
 public class Constants {
-    public static Integer Use_OrderPassword_modification = 1;
+    public static Integer Use_OldPassword_modification = 1;
 
     //使用验证码修改
-    public static Integer Use_Verification_code_modify = 2;
+    public static Integer Get_Code_email = 2;
 
     public static Integer Get_Code_iphone = 3;
-    public static Integer Get_Code_email = 4;
 
     public static Integer ADMIN = 1; //管理员权限
     public static Integer USER = 0; //普通用户权限

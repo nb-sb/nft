@@ -1,0 +1,28 @@
+package com.nft.domain.user.service.Factory.VerifyCode.mode;
+
+import com.nft.common.Result;
+import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.repository.IUserInfoRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+@Log4j2
+@AllArgsConstructor
+public class OldPasswordMode implements IVerifyMode {
+
+    private final IUserInfoRepository iUserInfoRepository;
+
+    @Override
+    public Result verify(String username, String oldPassword) {
+        UserVo userVo;
+        userVo = iUserInfoRepository.selectOne2(username, oldPassword);
+        if (userVo != null) {
+            return Result.success("验证成功");
+        }
+        log.info("旧密码输入错误");
+        return Result.error("旧密码输入错误");
+    }
+}
