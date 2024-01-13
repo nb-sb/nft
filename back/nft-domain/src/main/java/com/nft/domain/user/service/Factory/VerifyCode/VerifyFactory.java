@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author: 戏人看戏
  * @Date: 2024/1/12 14:35
- * @Description: 一个简单的验证验证码的工厂类
+ * @Description: 使用桥接方式用于不同验证类型
  */
 @Service
 @AllArgsConstructor
