@@ -4,6 +4,8 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.Constants;
+import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.apply.model.vo.SubCacheVo;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
@@ -20,6 +22,7 @@ import com.nft.infrastructure.po.SubmitCache;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
+import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
@@ -31,6 +34,7 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     private final SubmitCacheMapper submitCacheMapper;
     private final SellInfoMapper sellInfoMapper;
     private final SellStroageService sellStroageService;
+    private final RedisUtil redisUtil;
     @Override
     public SellInfoVo selectSellInfoById(Integer id) {
         SellInfo sellInfo = sellInfoMapper.selectById(id);
@@ -38,7 +42,7 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     }
 
     @Override
-    public ConllectionInfoVo selectConllectionById(Integer id) {
+    public ConllectionInfoVo selectByCollectId(Integer id) {
         SellInfo sellInfo = sellInfoMapper.selectById(id);
         ConllectionInfoVo conllectionInfoVo;
         if (sellInfo == null) {
@@ -56,10 +60,24 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
         return null;
     }
 
+    @Override
+    public ConllectionInfoVo selectCacheByCollectId(Integer id) {
+        String reidsKey = Constants.RedisKey.REDIS_COLLECTION(id);
+        String conllectionCacheKey = redisUtil.getStr(reidsKey);
+        if (!StringUtils.isEmpty(conllectionCacheKey)) {
+            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
+            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                return new ConllectionInfoVo();
+            }
+            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+        }
+        return null;
+    }
+
 
 
     @Override
-    public IPage<ConllectionInfoVo> selectSellConllectionByPage(Page page) {
+    public IPage<ConllectionInfoVo> selectSellCollectionByPage(Page page) {
         //
         // 漏洞1.比如id为5的商品已经删除了，es没及时更新，查询为第一页1-10的内容，也就会将这个id为5的商品传输出去
         // 漏洞2：如果查询商品为10条数据，但是es中最后一页的商品为3条数据就会导致下面这个if判断无效 大量请求穿过es打到mysql上，

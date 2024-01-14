@@ -21,10 +21,11 @@ public interface ISellInfoRespository {
     boolean addSellByFISCO(String hash, BigInteger totail);
 
     //查询正在出售的藏品
-    ConllectionInfoVo selectConllectionById(Integer id);
+    ConllectionInfoVo selectByCollectId(Integer id);
+    ConllectionInfoVo selectCacheByCollectId(Integer id);
     SellInfoVo selectSellInfoById(Integer id);
     //查询出售中的藏品
-    IPage<ConllectionInfoVo> selectSellConllectionByPage(Page page);
+    IPage<ConllectionInfoVo> selectSellCollectionByPage(Page page);
     //查询指定分类中正在出售的藏品
     IPage<ConllectionInfoVo> selectSellConllectionKindByPage(Page page, Integer mid);
 

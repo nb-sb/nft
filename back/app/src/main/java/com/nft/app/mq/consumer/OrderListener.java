@@ -1,9 +1,12 @@
 package com.nft.app.mq.consumer;
 
 import cn.hutool.json.JSONUtil;
+import com.nft.app.mq.producer.OrderPublisher;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
-import com.nft.common.Constants.*;
+import com.nft.common.Constants.RedisKey;
+import com.nft.common.Constants.ResponseCode;
+import com.nft.common.Constants.payOrderStatus;
 import com.nft.common.ElasticSearch.ElasticSearchUtils;
 import com.nft.common.ElasticSearch.UserOrderSimpleES;
 import com.nft.common.Rabbitmq.RabbitMqConstant;
@@ -11,13 +14,14 @@ import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Utils.OrderNumberUtil;
+import com.nft.domain.detail.IDetailInfoRespository;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
+import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.nft.model.vo.OrderInfoVo;
 import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.repository.ISellInfoRespository;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
 import com.nft.domain.order.respository.IOrderInfoRespository;
-import com.nft.domain.support.mq.MqOperations;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.utils.StringUtils;
@@ -41,8 +45,9 @@ public class OrderListener {
     private final ISellInfoRespository iSellInfoRespository;
     private final ElasticSearchUtils elasticSearchUtils;
     private final RedisUtil redisUtil;
-    private final MqOperations mqOperations;
+    private final OrderPublisher orderPublisher;
     private final DistributedRedisLock distributedRedisLock;
+    private final IDetailInfoRespository iDetailInfoRespository;
 
     /**
      * @Des 订单状态检查
@@ -113,7 +118,7 @@ public class OrderListener {
         Integer userid = bean.getUserId();
         Date time = bean.getTime();
         Integer conllectionId = bean.getConllectionId();
-        ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectConllectionById(conllectionId);
+        ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectByCollectId(conllectionId);
         // 4.将藏品添加至订单中
         String orderNo = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
         boolean b = iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid, orderNo, time);
@@ -124,7 +129,7 @@ public class OrderListener {
 //        //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
 //        redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(conllectionId));
         // 5.发送mq请求，半小时后检查订单状态
-        mqOperations.SendCheckMessage(orderNo);
+        orderPublisher.SendCheckMessage(orderNo);
         //添加订单信息至es中
         UserOrderSimpleES userOrderSimpleES = new UserOrderSimpleES()
                 .setUserId(userid)
@@ -149,6 +154,21 @@ public class OrderListener {
         elasticSearchUtils.insert(bean);
     }
 
+    //添加流水表信息
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(name = RabbitMqConstant.ADD_DETAIL_QUEUE, declare = "true"),
+            exchange = @Exchange(name = RabbitMqConstant.ADD_DETAIL_DERECT, type = ExchangeTypes.DIRECT),
+            key = RabbitMqConstant.ADD_DETAIL_KEY
+    ))
+    private void addDetailInfo(String jsonStr) {
+        DetailInfoVo detailInfo = JSONUtil.toBean(jsonStr, DetailInfoVo.class);
+        boolean b = iDetailInfoRespository.addDetailInfo(detailInfo);
+        //添加到区块链流水表中
+        if (!b) {
+            log.error("添加至mysql流水表失败 : "+jsonStr);
+        }
+
+    }
     //使用注解获取队列没有则会创建
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = "direct5.queue55", declare = "true"),

@@ -9,5 +9,4 @@ import java.math.BigDecimal;
 @Data
 @Accessors(chain = true)
 public class UserVo extends UserEntity {
-    private Integer id;
 }

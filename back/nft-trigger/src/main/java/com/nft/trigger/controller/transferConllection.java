@@ -1,9 +1,9 @@
 package com.nft.trigger.controller;
 
+import com.nft.app.collection.CollectionCommandService;
+import com.nft.app.collection.dto.TransferCmd;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
-import com.nft.domain.nft.model.req.TransferReq;
-import com.nft.domain.nft.service.INftTransferService;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.vo.UserVo;
 import lombok.AllArgsConstructor;
@@ -21,15 +21,17 @@ import javax.validation.Valid;
 @Validated
 public class transferConllection {
     private final HttpServletRequest httpServletRequest;
-    private final INftTransferService iNftTransferService;
+    private final CollectionCommandService collectionCommandService;
     private final Token2User token2User;
     //用户转增藏品
-    @PostMapping("transferConllection")
+    @PostMapping("transferCollection")
     @ResponseBody
     @AuthPermisson
-    public Result transfer(@Valid @RequestBody TransferReq transferReq) {
+    public Result transfer(@Valid @RequestBody TransferCmd cmd) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iNftTransferService.transferCollection(transferReq, userOne);
+        cmd.setUserAddress(userOne.getAddress());
+        cmd.setUserPrivatekey(userOne.getPrivatekey());
+        return collectionCommandService.transferCollection(cmd);
     }
 }

@@ -2,8 +2,8 @@ package com.nft.app.mq.producer;
 
 import cn.hutool.json.JSONUtil;
 import com.nft.common.Rabbitmq.RabbitMqConstant;
+import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
-import com.nft.domain.support.mq.MqOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +38,12 @@ public class OrderPublisher  {
         String jsonStr = JSONUtil.toJsonStr(addOrderMqMessage);
         rabbitTemplate.convertAndSend(RabbitMqConstant.ADD_ORDER_DERECT, RabbitMqConstant.ADD_ORDER_KEY, jsonStr);
         log.info("消息发送成功 SendAddOrderMessage: "+jsonStr);
+    }
+
+    //记录流水表
+    public void SendDetailInfo(DetailInfoVo detailInfoVo1) {
+        String jsonStr = JSONUtil.toJsonStr(detailInfoVo1);
+        rabbitTemplate.convertAndSend(RabbitMqConstant.ADD_DETAIL_DERECT, RabbitMqConstant.ADD_DETAIL_KEY, jsonStr);
+        log.info("消息发送成功 SendDetailInfo: "+jsonStr);
     }
 }

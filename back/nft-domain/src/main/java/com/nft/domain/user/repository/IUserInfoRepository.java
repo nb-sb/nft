@@ -22,6 +22,7 @@ public interface IUserInfoRepository {
     UserVo selectOne(String username, String password);
 
     boolean creat(UserEntity userEntity);
+    void test();
 
     boolean addUserByFisco(String id, String address);
 

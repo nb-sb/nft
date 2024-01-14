@@ -141,8 +141,6 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
         } catch (Exception e) {
             System.out.println(e);
         }
-
-//        System.err.println("qqq : "+qqq);
         return false;
     }
 }

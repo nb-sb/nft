@@ -14,4 +14,5 @@ public class UserEntity {
     private String privatekey;
     private BigDecimal balance;
     private Integer role;
+
 }

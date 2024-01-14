@@ -59,7 +59,8 @@ public class UserController {
         //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
 //        UserResult res = getVerification(signReq.getCodeId());
 //        if (res != null) return res;
-        return userCommandService.creat(cmd);
+        userCommandService.creat(cmd);
+        return null;
     }
 
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码
@@ -110,7 +111,7 @@ public class UserController {
     public Result getOwnerInfo() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        UserInfoVo userInfoVo = userQueryService.selectUserAllInfo(userOne);
+        UserInfoVo userInfoVo = userQueryService.selectUserInfo(userOne);
         return SelectRes.success(userInfoVo);
     }
 

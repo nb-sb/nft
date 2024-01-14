@@ -11,6 +11,10 @@ public interface RabbitMqConstant {
     String ADDES_DERECT = "addes.derect";
     String ADDES_QUEUE = "addorder.queue";
     String ADDES_KEY = "addes";
+    //add detail
+    String ADD_DETAIL_DERECT = "adddetail.derect";
+    String ADD_DETAIL_QUEUE = "adddetail.queue";
+    String ADD_DETAIL_KEY = "adddetail";
     //添加订单数据
     String ADD_ORDER_DERECT = "addorder.derect";
     String ADD_ORDER_QUEUE = "derect.queue";

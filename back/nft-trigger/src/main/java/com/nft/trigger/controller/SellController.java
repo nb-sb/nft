@@ -1,19 +1,19 @@
 package com.nft.trigger.controller;
 
 
+import com.nft.app.order.OrderCommandService;
+import com.nft.app.order.dto.PayOrderCmd;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
 import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.common.Aop.AuthPermisson;
-import com.nft.domain.common.anno.Status;
-import com.nft.domain.nft.model.req.AddOrder;
+import com.nft.domain.nft.model.req.AddOrderCmd;
 import com.nft.domain.nft.model.req.ReviewReq;
 import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.vo.UserVo;
-import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.validation.annotation.Validated;
@@ -25,9 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Log4j2
@@ -39,6 +37,7 @@ public class SellController {
     private final INftOrderService iNftOrderService;
     private final INftSubmitService iNftSubmitService;
     private final Token2User token2User;
+    private final OrderCommandService orderCommandService;
 
 
 
@@ -90,11 +89,13 @@ public class SellController {
     @AuthPermisson(Constants.permiss.regularUser)
     public Result purchaseConllection(
             @Valid
-            @RequestBody AddOrder addOrder) {
+            @RequestBody AddOrderCmd cmd) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
+        cmd.setUserId(userOne.getId());
+        cmd.setUserAddress(userOne.getAddress());
         //这里直接获取到用户id 和 购买商品的id即可，传入到方法中在方法中进行执行
-        return iNftOrderService.addConllectionOrder(userOne, addOrder.getId());
+        return orderCommandService.creat(cmd);
     }
     //todo 发起支付订单接口
     @GetMapping("payOrderZFB")
@@ -123,7 +124,8 @@ public class SellController {
         //传入订单id，传入支付类型，传入http用于校验用户信息等
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iNftOrderService.payOrder(userOne, OrderNumber, paytype);
+        PayOrderCmd payOrderCmd = new PayOrderCmd(userOne.getId(), userOne.getAddress(), OrderNumber,paytype);
+        return orderCommandService.payOrder(payOrderCmd);
     }
 
     //todo 支付回调接收

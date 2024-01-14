@@ -4,20 +4,15 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
-import com.nft.domain.nft.repository.IDetailInfoRespository;
+import com.nft.domain.detail.IDetailInfoRespository;
 import com.nft.infrastructure.dao.DetailInfoMapper;
 import com.nft.infrastructure.fisco.model.bo.DetailStorageAddDetailInputBO;
-import com.nft.infrastructure.fisco.raw.DetailStorage;
 import com.nft.infrastructure.fisco.service.DetailStorageService;
 import com.nft.infrastructure.po.DetailInfo;
-import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.aspectj.weaver.ast.Var;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
-
-import java.io.PipedReader;
 
 @Repository
 @Log4j2

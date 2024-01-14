@@ -1,4 +1,4 @@
-package com.nft.domain.nft.repository;
+package com.nft.domain.detail;
 
 import com.nft.domain.nft.model.vo.DetailInfoVo;
 /**

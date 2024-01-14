@@ -1,5 +1,6 @@
 package com.nft.trigger.controller;
 
+import com.nft.app.collection.CollectionCommandService;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 @AllArgsConstructor
 public class UpdataConllection {
     private final INftOrderService iNftOrderService;
+    private final CollectionCommandService collectionCommandService;
 
 
     /**
@@ -34,6 +36,7 @@ public class UpdataConllection {
     public Result updataConllection(@Valid @RequestBody UpdataCollectionReq updataCollectionReq) {
         //1.验证调用者权限
         //2.进行更新藏品信息
-        return iNftOrderService.updataConllectionInfo(updataCollectionReq);
+        // TODO: 2024/1/14 这个方法暂时待优化，等有具体修改藏品信息等具体需求的时候进行相应修改
+        return collectionCommandService.updataConllectionInfo(updataCollectionReq);
     }
 }

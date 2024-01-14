@@ -16,7 +16,6 @@ import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
-import com.nft.infrastructure.po.UserInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +44,7 @@ public class UserQueryService {
         List<UserVo> userVos = BeanCopyUtils.convertListTo(userEntities, UserVo::new);
         return userVos;
     }
-    public UserInfoVo selectUserAllInfo(UserVo userOne) {
+    public UserInfoVo selectUserInfo(UserVo userOne) {
         //查询用户个人信息。由于个人信息基本是不变的所以可以直接存入redis中
         String key = Constants.RedisKey.USER_INFO(userOne.getId());
         UserInfoVo userDetailByRedis = getUserDetailByRedis(key);

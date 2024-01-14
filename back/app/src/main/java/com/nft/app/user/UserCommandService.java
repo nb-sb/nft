@@ -1,10 +1,9 @@
 package com.nft.app.user;
 
+import com.nft.app.user.dto.CreatCmd;
 import com.nft.common.Constants;
-import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.domain.user.model.entity.UserEntity;
-import com.nft.app.user.dto.CreatCmd;
 import com.nft.domain.user.model.req.ChanagePwCmd;
 import com.nft.domain.user.model.req.RealNameAuthCmd;
 import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
@@ -20,6 +19,7 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -28,10 +28,9 @@ import java.math.BigDecimal;
 public class UserCommandService {
     private final IUserInfoRepository iUserInfoRepository;
     private final IUserDetalRepository iUserDetalRepository;
-    private final RedisUtil redisUtil;
     private final  UserEntityFatory userEntityFatory;
     private final VerifyFactory verifyFactory;;
-
+    @Transactional
     public UserResult creat(CreatCmd cmd) {
         cmd.setRole(0);//设置普通用户权限
         //判断用户名是否存在
@@ -55,6 +54,16 @@ public class UserCommandService {
         }
         return new UserResult("0", "注册失败");
     }
+
+
+//    public void test() {
+//        UserEntity userEntity = userEntityFatory.newInstance("cmd.getUsername()", "cryptoKeyPair.getAddress()",
+//                "cmd.getPassword()", "cryptoKeyPair.getHexPrivateKey()", BigDecimal.valueOf(0),0);
+//        //添加数据库存贮
+//        boolean res = iUserInfoRepository.creat(userEntity);
+//        System.out.println(res);
+//        iUserInfoRepository.test();
+//    }
     /**
      * @Des 修改密码逻辑
      * {

@@ -4,6 +4,7 @@ package com.nft.infrastructure.repository;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.common.APIException;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.vo.UserInfoVo;
@@ -19,6 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +63,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean creat(UserEntity userEntity) {
         UserInfo userInfo = new UserInfo();
         userInfo.setUsername(userEntity.getUsername());
@@ -71,8 +75,11 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         int res = userInfoMapper.insert(userInfo);
         return res > 0;
     }
-
-
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void test() {
+        throw new RuntimeException("发生异常");   //手动模拟抛出异常
+    }
 
     @Override
     public boolean addUserByFisco(String id, String address) {
