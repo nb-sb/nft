@@ -1,4 +1,4 @@
-package com.nft.trigger.mq.consumer;
+package com.nft.app.mq.consumer;
 
 import cn.hutool.json.JSONUtil;
 import com.nft.common.APIException;
@@ -36,7 +36,7 @@ import java.util.Date;
 @Component
 @Log4j2
 @AllArgsConstructor
-public class SpringRabbitListener {
+public class OrderListener {
     private final IOrderInfoRespository iOrderInfoRespository;
     private final ISellInfoRespository iSellInfoRespository;
     private final ElasticSearchUtils elasticSearchUtils;

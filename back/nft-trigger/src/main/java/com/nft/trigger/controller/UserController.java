@@ -1,16 +1,19 @@
 package com.nft.trigger.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.app.user.UserService;
+import com.nft.app.user.UserCommandService;
+import com.nft.app.user.UserQueryService;
 import com.nft.app.user.dto.CreatCmd;
+import com.nft.app.user.dto.LoginCmd;
 import com.nft.common.Constants;
+import com.nft.common.PageRequest;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
-import com.nft.domain.email.SendEmailService;
-import com.nft.domain.support.Search;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.req.*;
+import com.nft.domain.user.model.req.AuthCodeReq;
+import com.nft.domain.user.model.req.ChanagePwCmd;
+import com.nft.domain.user.model.req.RealNameAuthCmd;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -33,7 +36,8 @@ public class UserController {
 
 
     private final IUserAccountService iUserAccountService;
-    private final UserService userService;
+    private final UserCommandService userCommandService;
+    private final UserQueryService userQueryService;
     private final RedisUtil redisUtil;
     private final HttpServletRequest httpServletRequest;
     private final Token2User token2User;
@@ -42,11 +46,11 @@ public class UserController {
 
     @GetMapping("/login")
     @ResponseBody
-    public Result test(@Valid @RequestBody LoginReq loginReq) {
+    public Result test(@Valid @RequestBody LoginCmd loginCmd) {
 //        登录也需要判断验证码，否则防止被刷登录
 //        UserResult res = getVerification(loginReq.getCodeId());
 //        if (res != null) return res;
-        return iUserAccountService.login(loginReq);
+        return userQueryService.login(loginCmd);
     }
 
     @GetMapping("/register")
@@ -55,7 +59,7 @@ public class UserController {
         //注册之前判断 验证码的id 如果不为true说明验证码验证过期或者没有验证成功
 //        UserResult res = getVerification(signReq.getCodeId());
 //        if (res != null) return res;
-        return userService.creat(cmd);
+        return userCommandService.creat(cmd);
     }
 
     //申请验证码--判断是手机验证还是邮箱验证生成相应的60秒验证码
@@ -82,19 +86,21 @@ public class UserController {
     //修改密码
     @PostMapping("/chanagePassword")
     @ResponseBody
-    public Result chanagePassword(@Valid @RequestBody ChanagePwReq chanagePwReq) {
+    public Result chanagePassword(@Valid @RequestBody ChanagePwCmd cmd) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
-        return iUserAccountService.changePassword(userOne, chanagePwReq);
+        cmd.setPassword(userOne.getUsername());
+        return userCommandService.changePassword(cmd);
     }
 
     //    使用分页查询查询所有用户
     @GetMapping("/selectUserPage")
     @ResponseBody
     @AuthPermisson(Constants.permiss.admin)
-    public Result selectUserPage(@Valid Search search) {
+    public Result selectUserPage(@Valid PageRequest pageRequest) {
         //查询当前页码，查询条数
-        List<UserVo> userVos = iUserAccountService.selectUserPage(
-                new Page<>(search.getCurrent(), search.getPageSize()));
+//        List<UserVo> userVos = iUserAccountService.selectUserPage(
+//                new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize()));
+        List<UserVo> userVos = userQueryService.pageList(pageRequest);
         return SelectRes.success(userVos);
     }
 
@@ -104,23 +110,25 @@ public class UserController {
     public Result getOwnerInfo() {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        UserInfoVo userInfoVo = userService.selectUserAllInfo(userOne);
+        UserInfoVo userInfoVo = userQueryService.selectUserAllInfo(userOne);
         return SelectRes.success(userInfoVo);
     }
 
     //提交实名认证信息
     @PostMapping("/submitRealNameAuth")
     @ResponseBody
-    public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthReq realNameAuthReq) {
+    public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthCmd cmd) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iUserAccountService.submitRealNameAuth(userOne, realNameAuthReq);
+        cmd.setAddress(userOne.getAddress());
+        cmd.setForId(userOne.getId());
+        return userCommandService.RealNameAuth(cmd);
     }
     //todo 用户修改被驳回的认证信息并提交
 
     // TODO: 2023/12/29 管理员 审核实名认证信息
-    public Result AuditRealNameAuth(@Valid @RequestBody UpdateRealNameAuthStatusReq req) {
-        return iUserAccountService.AuditRealNameAuth(req);
+    public Result AuditRealNameAuth(@Valid @RequestBody UpdateRealNameAuthStatusCmd cmd) {
+        return userCommandService.AuditRealNameAuth(cmd);
     }
     //todo 修改用户信息
 

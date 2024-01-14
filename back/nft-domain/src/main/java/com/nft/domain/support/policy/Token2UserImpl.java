@@ -21,6 +21,6 @@ public class Token2UserImpl implements Token2User {
         if (userMap==null) return null;
         LoginReq loginReq = new LoginReq();
         loginReq.setUsername(userMap.get("username")).setPassword(userMap.get("password"));
-        return iUserInfoRepository.selectOne(loginReq);
+        return iUserInfoRepository.selectOne(loginReq.getUsername(),loginReq.getPassword());
     }
 }

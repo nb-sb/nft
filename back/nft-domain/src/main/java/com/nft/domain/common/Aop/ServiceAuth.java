@@ -85,7 +85,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(new LoginReq().setUsername(username).setPassword(password));
+        UserVo userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo.getRole() != 1) {
             map.put("code", "401");
@@ -112,7 +112,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(new LoginReq().setUsername(username).setPassword(password));
+        UserVo userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo.getRole() != 0) {
             map.put("code", "401");
@@ -139,7 +139,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(new LoginReq().setUsername(username).setPassword(password));
+        UserVo userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo== null) {
             map.put("code", "401");

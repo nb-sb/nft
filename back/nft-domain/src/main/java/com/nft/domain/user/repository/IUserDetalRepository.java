@@ -1,7 +1,7 @@
 package com.nft.domain.user.repository;
 
-import com.nft.domain.user.model.req.RealNameAuthReq;
-import com.nft.domain.user.model.req.UpdateRealNameAuthStatusReq;
+import com.nft.domain.user.model.req.RealNameAuthCmd;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.vo.RealNameAuthVo;
 
 /**
@@ -14,11 +14,11 @@ import com.nft.domain.user.model.vo.RealNameAuthVo;
  */
 public interface IUserDetalRepository {
 
-    boolean submitRealNameAuth(RealNameAuthReq realNameAuthReq);
+    boolean submitRealNameAuth(RealNameAuthCmd realNameAuthCmd);
 
     RealNameAuthVo selectByForId(Integer id);
 
-    boolean updataStatusById(UpdateRealNameAuthStatusReq req);
+    boolean updataStatusById(UpdateRealNameAuthStatusCmd req);
 
     RealNameAuthVo selectById(Integer id);
 

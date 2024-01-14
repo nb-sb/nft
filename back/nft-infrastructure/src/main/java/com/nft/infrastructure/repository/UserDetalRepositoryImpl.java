@@ -2,20 +2,17 @@ package com.nft.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.domain.user.model.req.RealNameAuthReq;
-import com.nft.domain.user.model.req.UpdateRealNameAuthStatusReq;
+import com.nft.domain.user.model.req.RealNameAuthCmd;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.vo.RealNameAuthVo;
-import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.infrastructure.dao.UserDetalMapper;
 import com.nft.infrastructure.po.UserDetal;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 /**
  * <p>
@@ -32,14 +29,14 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
     private final UserDetalMapper userDetalMapper;
 
     @Override
-    public boolean submitRealNameAuth(RealNameAuthReq realNameAuthReq) {
+    public boolean submitRealNameAuth(RealNameAuthCmd realNameAuthCmd) {
         UserDetal userDetal = new UserDetal();
-        userDetal.setName(realNameAuthReq.getName())
-                .setCardid(realNameAuthReq.getCardId())
-                .setPhoneNumber(realNameAuthReq.getPhoneNumber())
+        userDetal.setName(realNameAuthCmd.getName())
+                .setCardid(realNameAuthCmd.getCardId())
+                .setPhoneNumber(realNameAuthCmd.getPhoneNumber())
                 .setStatus(Constants.realNameAuthStatus.AWAIT_AUDIT)
-                .setAddress(realNameAuthReq.getAddress())
-                .setForId(realNameAuthReq.getForId());
+                .setAddress(realNameAuthCmd.getAddress())
+                .setForId(realNameAuthCmd.getForId());
         int insert = userDetalMapper.insert(userDetal);
         return insert > 0;
     }
@@ -55,7 +52,7 @@ public class UserDetalRepositoryImpl implements IUserDetalRepository {
     }
 
     @Override
-    public boolean updataStatusById(UpdateRealNameAuthStatusReq req) {
+    public boolean updataStatusById(UpdateRealNameAuthStatusCmd req) {
         UserDetal userDetal = new UserDetal();
         userDetal.setId(req.getId());
         userDetal.setStatus(req.getStatus());

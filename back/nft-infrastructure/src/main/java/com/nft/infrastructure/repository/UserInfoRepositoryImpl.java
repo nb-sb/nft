@@ -6,8 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.user.model.entity.UserEntity;
-import com.nft.domain.user.model.req.ChanagePwReq;
-import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -22,7 +20,6 @@ import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,17 +39,9 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     private final UserInfoMapper userInfoMapper;
     private final UserStorageService userStorageService;
     private final UserDetalMapper userDetalMapper;
+
     @Override
-    public UserVo selectOne(LoginReq loginReq) {
-        UserVo userInfo = selectOne2(loginReq.getUsername(), loginReq.getPassword());
-        if (userInfo == null) {
-            return null;
-        }
-        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
-        return userVo;
-    }
-    @Override
-    public UserVo selectOne2(String username, String password) {
+    public UserVo selectOne(String username, String password) {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username).eq("password", password);
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
@@ -82,6 +71,9 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         int res = userInfoMapper.insert(userInfo);
         return res > 0;
     }
+
+
+
     @Override
     public boolean addUserByFisco(String id, String address) {
         UserStorageAddUserInputBO userInputBO = new UserStorageAddUserInputBO();
@@ -99,7 +91,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public List<UserVo> selectUserPage(Page page1) {
+    public List<UserEntity> selectUserPage(Page page1) {
         Page<UserInfo> page = new Page<>(page1.getCurrent(), page1.getSize());
         page.setOptimizeCountSql(true);
         Page<UserInfo> userInfoPage = userInfoMapper.selectPage(page, null);
@@ -111,7 +103,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
 //        System.out.println(userInfoPage.getCurrent());
 //        System.out.println(userInfoPage.getTotal());
         if (records.size() ==0) return null;
-        List<UserVo> userVos = BeanCopyUtils.convertListTo(records, UserVo::new);
+        List<UserEntity> userVos = BeanCopyUtils.convertListTo(records, UserEntity::new);
         return userVos;
     }
 
@@ -126,30 +118,26 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public UserVo selectUserByid(Integer id) {
+    public UserEntity selectOneById(Integer id) {
         UserInfo userInfo = userInfoMapper.selectById(id);
         if (userInfo == null) return null;
         UserVo userVo = new UserVo();
         userVo.setId(userInfo.getId());
-        userVo.setAddress(userInfo.getAddress());
         userVo.setUsername(userInfo.getUsername());
+        userVo.setAddress(userInfo.getAddress());
         userVo.setPassword(userInfo.getPassword());
+        userVo.setPrivatekey(userInfo.getPrivatekey());
+        userVo.setBalance(userInfo.getBalance());
         userVo.setRole(userInfo.getRole());
+        userVo.setId(userInfo.getId());
         return userVo;
     }
 
     @Override
-    public boolean decrementUserBalance(Integer id, BigDecimal balance) {
-        UserInfo userInfo = userInfoMapper.selectById(id);
-        if (userInfo == null) return false;
-        BigDecimal balance1 = userInfo.getBalance(); //当前余额
-        BigDecimal balance2 = balance1.subtract(balance);//减少后的余额
-        //必须减少后的余额大于等于0
-        if(balance2.compareTo(BigDecimal.valueOf(0)) == -1){
-            log.info("余额不足");
-            return false;
-        }
-        userInfo.setBalance(balance2);
+    public boolean saveBalance(UserEntity userEntity) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(userEntity.getId());
+        userInfo.setBalance(userEntity.getBalance());
         int i = userInfoMapper.updateById(userInfo);
         return i>0;
     }

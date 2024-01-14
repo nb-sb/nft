@@ -9,7 +9,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 
 @Data
-public class ChanagePwReq {
+public class ChanagePwCmd {
     @Null
     String username;
     @NotNull

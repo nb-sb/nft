@@ -5,7 +5,6 @@ import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +17,7 @@ public class OldPasswordMode implements IVerifyMode {
     @Override
     public Result verify(String username, String oldPassword) {
         UserVo userVo;
-        userVo = iUserInfoRepository.selectOne2(username, oldPassword);
+        userVo = iUserInfoRepository.selectOne(username, oldPassword);
         if (userVo != null) {
             return Result.success("验证成功");
         }

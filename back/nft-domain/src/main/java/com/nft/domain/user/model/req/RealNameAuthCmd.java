@@ -5,11 +5,12 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 
 @Data
 @Accessors(chain = true)
-public class RealNameAuthReq {
+public class RealNameAuthCmd {
     @NotNull
     String name;//姓名
     @NotNull
@@ -18,7 +19,8 @@ public class RealNameAuthReq {
     @NotNull
     @Pattern(regexp = "^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57]|19[189])[0-9]{8}$")
     String phoneNumber;//手机号
-
+    @Null
     String address;
+    @Null
     Integer forId;
 }

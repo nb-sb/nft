@@ -1,4 +1,4 @@
-package com.nft.infrastructure.event.mq.producer.domain;
+package com.nft.app.mq.producer;
 
 import cn.hutool.json.JSONUtil;
 import com.nft.common.Rabbitmq.RabbitMqConstant;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class OrderPublisher implements MqOperations {
+public class OrderPublisher  {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -29,13 +29,11 @@ public class OrderPublisher implements MqOperations {
         log.info("消息发送成功 orderId: "+orderId);
     }
 
-    @Override
     public void SendAddEsMessage(String jsonStr) {
         rabbitTemplate.convertAndSend(RabbitMqConstant.ADDES_DERECT, RabbitMqConstant.ADDES_KEY, jsonStr);
         log.info("消息发送成功 addes jsonStr: "+jsonStr);
     }
 
-    @Override
     public void SendAddOrderMessage(AddOrderMqMessage addOrderMqMessage) {
         String jsonStr = JSONUtil.toJsonStr(addOrderMqMessage);
         rabbitTemplate.convertAndSend(RabbitMqConstant.ADD_ORDER_DERECT, RabbitMqConstant.ADD_ORDER_KEY, jsonStr);

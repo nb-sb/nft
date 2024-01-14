@@ -9,7 +9,6 @@ import javax.mail.MessagingException;
 
 
 @Log4j2
-@SpringBootTest(classes = AppApplication.class)
 public class Test123 {
     @Test
     public void ee() {
@@ -21,8 +20,6 @@ public class Test123 {
         log.fatal("this is fatal log");
     }
 
-    @Resource
-    SendEmail sendEmail;
 
     @Test
     public void email() throws MessagingException {

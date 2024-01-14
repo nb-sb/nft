@@ -9,7 +9,7 @@ public interface RabbitMqConstant {
     String ORDER_CHECK_STATUS = "orderCheckStatus";
     //add es
     String ADDES_DERECT = "addes.derect";
-    String ADDES_QUEUE = "derect.queue";
+    String ADDES_QUEUE = "addorder.queue";
     String ADDES_KEY = "addes";
     //添加订单数据
     String ADD_ORDER_DERECT = "addorder.derect";

@@ -3,12 +3,9 @@ package com.nft.domain.user.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.user.model.entity.UserEntity;
-import com.nft.domain.user.model.req.ChanagePwReq;
-import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -21,22 +18,21 @@ import java.util.List;
  */
 public interface IUserInfoRepository {
 
-    UserVo selectOne(LoginReq loginReq);
 
-    UserVo selectOne2(String username, String password);
+    UserVo selectOne(String username, String password);
 
     boolean creat(UserEntity userEntity);
 
     boolean addUserByFisco(String id, String address);
 
-    List<UserVo> selectUserPage(Page page);
+    List<UserEntity> selectUserPage(Page page);
 
     boolean saveUserPassword(String username,String password);
 
-    UserVo selectUserByid(Integer id);
+    UserEntity selectOneById(Integer id);
 
     //修改用户余额
-    boolean decrementUserBalance(Integer id, BigDecimal balance);
+    boolean saveBalance(UserEntity userEntity);
 
     UserInfoVo selectUserDetail(Integer forid);
 

@@ -1,7 +1,7 @@
 package com.nft.domain.user.service.Factory.VerifyCode;
 
 import com.nft.common.Result;
-import com.nft.domain.user.model.req.ChanagePwReq;
+import com.nft.domain.user.model.req.ChanagePwCmd;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.service.Factory.VerifyCode.mode.EmailCodeMode;
 import com.nft.domain.user.service.Factory.VerifyCode.mode.OldPasswordMode;
@@ -25,20 +25,20 @@ public class VerifyFactory {
     private final PhoneCodeMode phoneCodeMode;
 
     //1 是使用旧密码修改 2 是使用 使用邮箱验证码修改 , 3是使用手机验证码
-    public Result getVerifyService(ChanagePwReq chanagePwReq) {
-        if (chanagePwReq.getType().equals(1)) {
+    public Result getVerifyService(ChanagePwCmd chanagePwCmd) {
+        if (chanagePwCmd.getType().equals(1)) {
             //使用旧密码修改
-            if (chanagePwReq.getPassword().equals(chanagePwReq.getOldpassword())) {
+            if (chanagePwCmd.getPassword().equals(chanagePwCmd.getOldpassword())) {
                 return UserResult.error("修改前后密码相同!");
             }
             OldPassWordVerify oldPassWordVerify = new OldPassWordVerify(oldPasswordMode);
-            return oldPassWordVerify.verifyCode(chanagePwReq.getUsername(), chanagePwReq.getOldpassword());
-        } else if (chanagePwReq.getType().equals(2)) {
+            return oldPassWordVerify.verifyCode(chanagePwCmd.getUsername(), chanagePwCmd.getOldpassword());
+        } else if (chanagePwCmd.getType().equals(2)) {
             EmailCodeVerify emailCodeVerify = new EmailCodeVerify(emailCodeMode);
-            return emailCodeVerify.verifyCode(chanagePwReq.getCode(), chanagePwReq.getEmail());
-        } else if (chanagePwReq.getType().equals(3)) {
+            return emailCodeVerify.verifyCode(chanagePwCmd.getCode(), chanagePwCmd.getEmail());
+        } else if (chanagePwCmd.getType().equals(3)) {
             PhoneCodeVerify phoneCodeVerify = new PhoneCodeVerify(phoneCodeMode);
-            return phoneCodeVerify.verifyCode(chanagePwReq.getPhone(), chanagePwReq.getPhone());
+            return phoneCodeVerify.verifyCode(chanagePwCmd.getPhone(), chanagePwCmd.getPhone());
         }
         return null;
     }

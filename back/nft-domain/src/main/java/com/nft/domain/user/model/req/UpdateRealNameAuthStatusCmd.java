@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class UpdateRealNameAuthStatusReq {
+public class UpdateRealNameAuthStatusCmd {
     @NotNull
     @Min(1)
     Integer id;

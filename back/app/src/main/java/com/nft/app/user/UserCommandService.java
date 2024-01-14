@@ -1,17 +1,20 @@
 package com.nft.app.user;
 
-import cn.hutool.json.JSONUtil;
 import com.nft.common.Constants;
-import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
+import com.nft.common.Result;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.app.user.dto.CreatCmd;
-import com.nft.domain.user.model.req.LoginReq;
+import com.nft.domain.user.model.req.ChanagePwCmd;
+import com.nft.domain.user.model.req.RealNameAuthCmd;
+import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.res.UserResult;
-import com.nft.domain.user.model.vo.UserInfoVo;
+import com.nft.domain.user.model.vo.RealNameAuthVo;
 import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
+import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -22,10 +25,12 @@ import java.math.BigDecimal;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class UserCommandService {
     private final IUserInfoRepository iUserInfoRepository;
+    private final IUserDetalRepository iUserDetalRepository;
     private final RedisUtil redisUtil;
     private final  UserEntityFatory userEntityFatory;
+    private final VerifyFactory verifyFactory;;
 
     public UserResult creat(CreatCmd cmd) {
         cmd.setRole(0);//设置普通用户权限
@@ -42,7 +47,7 @@ public class UserService {
                 cmd.getPassword(), cryptoKeyPair.getHexPrivateKey(), BigDecimal.valueOf(0), cmd.getRole());
         //添加数据库存贮
         boolean res = iUserInfoRepository.creat(userEntity);
-        UserVo userVo = iUserInfoRepository.selectOne2(cmd.getUsername(), cmd.getPassword());
+        UserVo userVo = iUserInfoRepository.selectOne(cmd.getUsername(), cmd.getPassword());
         //添加至fisco中存贮
         iUserInfoRepository.addUserByFisco(String.valueOf(userVo.getId()), userVo.getAddress());
         if (res) {
@@ -50,30 +55,74 @@ public class UserService {
         }
         return new UserResult("0", "注册失败");
     }
-    UserResult login(LoginReq loginReq) {
+    /**
+     * @Des 修改密码逻辑
+     * {
+     *     //使用旧密码修改密码
+     *     String username;
+     *     String password;
+     *     String oldpassword;
+     *     String type; // 验证类型 2 是使用 使用验证码修改 , 1 是使用旧密码修改
+     * }
+     * {
+     *     //使用邮箱或手机号密码验证需要传入的参数
+     *     String username;
+     *     String password;
+     *     String phone;  OR  String email;
+     *     String code; //验证码
+     *     String type; // 验证类型 2 是使用 使用验证码修改 , 1 是使用旧密码修改
+     * }
+     */
+    public Result changePassword(ChanagePwCmd cmd) {
+        //判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
+        Integer type = cmd.getType();
+        if (Constants.USE_OLDPW.equals(type)) {
+            //判断旧密码是否正确
+            if (cmd.getUsername() == null) return UserResult.error("需要登录后才能使用旧密码修改");
+        }
+        Result verifyService = verifyFactory.getVerifyService(cmd);
+        if (verifyService.getCode().equals("0")) {
+            return verifyService;
+        }
+        if (!Constants.USE_OLDPW.equals(type)){
+            //1.判断验证类型
+            //使用邮箱/手机号反查到这人,然后在使用这个用户名 进行修改这个用户的密码
+            RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByPhoneOrEmail(cmd.getEmail(), cmd.getPhone());
+            if (realNameAuthVo == null) return Result.error("输入错误，请检查邮箱或手机号是否正确");
+            UserEntity userEntity = iUserInfoRepository.selectOneById(realNameAuthVo.getForId());
+            cmd.setUsername(userEntity.getUsername());
+        }
+        // 修改密码操作
+        boolean b = iUserInfoRepository.saveUserPassword(cmd.getUsername(),
+                cmd.getPassword());
+        if (!b) return UserResult.error("修改失败");
+        return Result.success("修改成功!");
+    }
+    public Result RealNameAuth(RealNameAuthCmd realNameAuthCmd) {
+        realNameAuthCmd.setAddress(realNameAuthCmd.getAddress());
+        realNameAuthCmd.setForId(realNameAuthCmd.getForId());
+        //判断自己是否已经存在了认证信息，存在则无需提交
+        RealNameAuthVo realNameAuthVo = iUserDetalRepository.selectByForId(realNameAuthCmd.getForId());
+        if (realNameAuthVo != null) {
+            return Result.error("有待审核的认证，请等待审核！");
+        }
+        if (iUserDetalRepository.submitRealNameAuth(realNameAuthCmd))return new Result("1","提交成功");
+        return Result.error("提交失败");
+    }
 
-    }
-    public UserInfoVo selectUserAllInfo(UserVo userOne) {
-        //查询用户个人信息。由于个人信息基本是不变的所以可以直接存入redis中
-        String key = Constants.RedisKey.USER_INFO(userOne.getId());
-        UserInfoVo userDetailByRedis = getUserDetailByRedis(key);
-        if (userDetailByRedis != null) {
-            return userDetailByRedis;
+    public Result AuditRealNameAuth(UpdateRealNameAuthStatusCmd cmd) {
+        RealNameAuthVo realNameAuthReq = iUserDetalRepository.selectById(cmd.getId());
+        if (realNameAuthReq == null) {
+            //返回 审核的id不存在
+            return Result.error("审核的id不存在");
         }
-        UserInfoVo userInfoVo = iUserInfoRepository.selectUserDetail(userOne.getId());
-        if (userInfoVo == null) {
-            return null;
+        //判断状态需要为待审核才能进行修改
+        if (!Constants.realNameAuthStatus.AWAIT_AUDIT.equals(realNameAuthReq.getStatus())) {
+            //返回 该内容已经被审核
+            return Result.error("该信息已经被审核");
         }
-        userInfoVo.setUsername(userOne.getUsername());
-        userInfoVo.setPassword("******************");
-        userInfoVo.setRole(userOne.getRole());
-        userInfoVo.setBalance(userOne.getBalance());
-        redisUtil.set(key, JSONUtil.toJsonStr(userInfoVo), RedisConstant.DAY_ONE);
-        return userInfoVo;
+        boolean b = iUserDetalRepository.updataStatusById(cmd);
+        return Result.success("成功");
     }
-    private UserInfoVo getUserDetailByRedis(String key) {
-        String userInfoStr = redisUtil.getStr(key);
-        UserInfoVo bean = JSONUtil.toBean(userInfoStr, UserInfoVo.class);
-        return bean;
-    }
+
 }
