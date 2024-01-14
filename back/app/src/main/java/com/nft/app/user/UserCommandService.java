@@ -6,6 +6,7 @@ import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.app.user.dto.CreatCmd;
+import com.nft.domain.user.model.req.LoginReq;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
@@ -48,6 +49,9 @@ public class UserService {
             return new UserResult("1", "注册成功");
         }
         return new UserResult("0", "注册失败");
+    }
+    UserResult login(LoginReq loginReq) {
+
     }
     public UserInfoVo selectUserAllInfo(UserVo userOne) {
         //查询用户个人信息。由于个人信息基本是不变的所以可以直接存入redis中

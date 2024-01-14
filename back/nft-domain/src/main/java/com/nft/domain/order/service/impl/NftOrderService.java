@@ -27,6 +27,7 @@ import com.nft.domain.order.respository.INftOrderRespository;
 import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.order.service.INftOrderService;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import lombok.AllArgsConstructor;
@@ -80,17 +81,6 @@ public class NftOrderService implements INftOrderService {
         //添加一把用户锁防止重复提交
         distributedRedisLock.acquire(Constants.RedisKey.ADD_ORDER_BYUSER(userid));
         try {
-            //判断是否有同一个商品未支付的，如果有则无法提交
-            List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
-            if (userNoPayOrder.size() > 0) {
-                return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
-            }
-            //已拥有的hash不能再次购买
-            SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
-            OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
-            if (ownerShipVo != null) {
-                return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
-            }
             //1.添加写锁 -- 因为这个会改变出售的商品信息，所以要和查询商品id用同一把锁--这里添加写锁后就可以和查询商品信息的读锁连用
             distributedRedisLock.acquireWriteLock(Constants.RedisKey.READ_WRITE_LOCK(conllectionId));
             try {
@@ -109,6 +99,17 @@ public class NftOrderService implements INftOrderService {
                     }
                     stock = conllectionInfoVo.getRemain();
                     if (stock <= 0) return new Result("0", "商品库存不足");
+                }
+                //判断是否有同一个商品未支付的，如果有则无法提交
+                List<OrderInfoVo> userNoPayOrder = getUserNoPayOrder(fromUser.getId(), conllectionId);
+                if (userNoPayOrder.size() > 0) {
+                    return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
+                }
+                //已拥有的hash不能再次购买
+                SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(conllectionId);
+                OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(fromUser.getAddress(), sellInfoVo.getIpfsHash());
+                if (ownerShipVo != null) {
+                    return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
                 }
                 //3.减少库存操作
                 if (!iSellInfoRespository.setSellStocks(conllectionId, stock - 1)) {
@@ -156,10 +157,23 @@ public class NftOrderService implements INftOrderService {
             if (Constants.payType.WEB_BALANCE_PAY.equals(paytype)) {
                 //1)decrement balance
                 BigDecimal productPrice = orderInfoVo.getProductPrice();//查询商品价格
-                //减少用于余额
-                if (!iUserInfoRepository.decrementUserBalance(userid, productPrice)) {
-                    //return 余额不足
+                // TODO: 2024/1/13 查询用于余额，减少余额，设置余额
+                UserEntity userEntity = iUserInfoRepository.selectOneById(fromUser.getId());
+                if (userEntity == null) {
+                    return Result.error("error");
+                }
+                BigDecimal balance1 = userEntity.getBalance(); //当前余额
+                BigDecimal balance2 = balance1.subtract(userEntity.getBalance());//减少后的余额
+                //必须减少后的余额大于等于0
+                if(balance2.compareTo(BigDecimal.valueOf(0)) == -1){
                     return Result.error("余额不足");
+                }
+                userEntity.setBalance(balance2);
+                //减少用于余额
+                boolean b2 = iUserInfoRepository.saveBalance(userEntity);
+                if (!b2) {
+                    //return 余额不足
+                    return Result.error("设置余额失败");
                 }
                 //如果余额减少成功了的话则会：
                 //2)set pay_status 设置支付状态
