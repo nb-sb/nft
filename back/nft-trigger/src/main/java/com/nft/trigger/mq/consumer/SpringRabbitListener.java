@@ -7,7 +7,9 @@ import com.nft.common.Constants.*;
 import com.nft.common.ElasticSearch.ElasticSearchUtils;
 import com.nft.common.ElasticSearch.UserOrderSimpleES;
 import com.nft.common.Rabbitmq.RabbitMqConstant;
+import com.nft.common.Redis.RedisConstant;
 import com.nft.common.Redis.RedisUtil;
+import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.OrderInfoVo;
@@ -18,6 +20,7 @@ import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.domain.support.mq.MqOperations;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -39,6 +42,7 @@ public class SpringRabbitListener {
     private final ElasticSearchUtils elasticSearchUtils;
     private final RedisUtil redisUtil;
     private final MqOperations mqOperations;
+    private final DistributedRedisLock distributedRedisLock;
 
     /**
      * @Des 订单状态检查
@@ -62,7 +66,8 @@ public class SpringRabbitListener {
         boolean b = iOrderInfoRespository.setOrderStatus(orderId, payOrderStatus.CANCEL);
         // 退回订单剩余的数量
         SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(order.getProductId());
-        boolean b1 = iSellInfoRespository.setSellStocks(sellInfoVo.getId(), sellInfoVo.getRemain() + 1);
+        sellInfoVo.setRemain(sellInfoVo.getRemain() + 1);
+        boolean b1 = iSellInfoRespository.setSellStocks(sellInfoVo.getId(), sellInfoVo.getRemain());
 
         if (!b) {
             log.error("修改订单状态为已取消 失败");
@@ -71,6 +76,29 @@ public class SpringRabbitListener {
         if (!b1) {
             log.error("退回订单剩余的数量 失败");
             throw new APIException(ResponseCode.NO_UPDATE, "退回订单剩余的数量 失败");
+        } else {
+            String key = RedisKey.REDIS_COLLECTION(order.getProductId());
+            distributedRedisLock.acquireReadLock(key);
+            try {
+                //2）更新redis中的商品信息
+                String conllectionCacheKey = redisUtil.getStr(key);
+                if (!StringUtils.isEmpty(conllectionCacheKey)) {
+                    //如果是空缓存的话 //这种原因一般是藏品已经删除
+                    distributedRedisLock.acquireWriteLock(key);
+                    try {
+                        //更新藏品库存
+                        if (!Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
+                            ConllectionInfoVo bean = JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
+                            redisUtil.set(key, bean.getRemain(), RedisConstant.MINUTE_30);
+                        }
+                    }finally {
+                        distributedRedisLock.releaseWriteLock(key);
+                    }
+                }
+            }finally {
+                distributedRedisLock.releaseReadLock(key);
+            }
+
         }
     }
     //接受mq请求，添加订单数据
@@ -93,8 +121,8 @@ public class SpringRabbitListener {
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "藏品添加至订单失败");
         }
         //1)decrRemain
-        //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
-        redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(conllectionId));
+//        //2）更新redis中的商品信息 // 这里实际上可以直接将缓存给删掉，等下次查询的时候自动更新最新的，无需修改
+//        redisUtil.del(Constants.RedisKey.REDIS_COLLECTION(conllectionId));
         // 5.发送mq请求，半小时后检查订单状态
         mqOperations.SendCheckMessage(orderNo);
         //添加订单信息至es中
