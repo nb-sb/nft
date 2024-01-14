@@ -95,9 +95,13 @@ public class NftOrderService implements INftOrderService {
                     //查询mysql
                     conllectionInfoVo = iSellInfoRespository.selectConllectionById(conllectionId);
                     if (conllectionInfoVo == null) {
+                        ConllectionInfoVo redisValue = new ConllectionInfoVo();
+                        redisValue.setRemain(0);
+                        redisUtil.set(reidsKey, JSONUtil.toJsonStr(redisValue), RedisConstant.MINUTE_30);
                         return new Result("0", "商品不存在");
                     }
                     stock = conllectionInfoVo.getRemain();
+                    redisUtil.set(reidsKey, JSONUtil.toJsonStr(conllectionInfoVo), RedisConstant.MINUTE_30);
                     if (stock <= 0) return new Result("0", "商品库存不足");
                 }
                 //判断是否有同一个商品未支付的，如果有则无法提交
