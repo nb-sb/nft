@@ -3,6 +3,7 @@ package com.nft.domain.user.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.user.model.entity.UserEntity;
+import com.nft.domain.user.model.vo.UserDetalVo;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 
@@ -35,7 +36,7 @@ public interface IUserInfoRepository {
     //修改用户余额
     boolean saveBalance(UserEntity userEntity);
 
-    UserInfoVo selectUserDetail(Integer forid);
+    UserDetalVo selectOneByForId(Integer forid);
 
 
     boolean isUserNameExist(String username);

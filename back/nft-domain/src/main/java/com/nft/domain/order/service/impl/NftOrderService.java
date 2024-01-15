@@ -24,13 +24,6 @@ public class NftOrderService implements INftOrderService {
     private final IOrderInfoRespository iOrderInfoRespository;
 
 
-    @Override
-    public Result getOrderByStatus(Integer userId, Integer payOrderStatus) {
-        List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrderByStatus(userId,payOrderStatus);
-        return OrderRes.success(orderInfoVos);
-    }
-
-
     //查询用户订单状态
     private Integer getUserOrderStatus(Integer userId, String orderNumber) {
         return iOrderInfoRespository.selectOrderStatusByUser(userId, orderNumber);

@@ -1,8 +1,8 @@
 package com.nft.trigger.controller;
 
 
-import com.nft.app.order.OrderCommandService;
-import com.nft.app.order.dto.PayOrderCmd;
+import com.nft.app.process.order.OrderCommandService;
+import com.nft.app.process.order.dto.PayOrderCmd;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;

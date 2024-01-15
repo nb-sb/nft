@@ -1,9 +1,9 @@
 package com.nft.trigger.controller;
 
-import com.nft.app.user.UserCommandService;
-import com.nft.app.user.UserQueryService;
-import com.nft.app.user.dto.CreatCmd;
-import com.nft.app.user.dto.LoginCmd;
+import com.nft.app.process.user.UserCommandService;
+import com.nft.app.process.user.UserQueryService;
+import com.nft.app.process.user.dto.CreatCmd;
+import com.nft.app.process.user.dto.LoginCmd;
 import com.nft.common.Constants;
 import com.nft.common.PageRequest;
 import com.nft.common.Redis.RedisUtil;

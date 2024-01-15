@@ -1,14 +1,13 @@
-package com.nft.app.user.dto;
+package com.nft.app.process.user.dto;
 
 import com.nft.domain.user.model.req.LoginReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-/**
- * 创建用户请求
- */
+/*
+ * 登录请求cmd
+ * */
 @Data
 @Accessors(chain = true)
-public class CreatCmd extends LoginReq {
-    Integer role;
+public class LoginCmd extends LoginReq {
+
 }

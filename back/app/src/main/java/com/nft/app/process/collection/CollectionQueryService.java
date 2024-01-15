@@ -1,4 +1,4 @@
-package com.nft.app.collection;
+package com.nft.app.process.collection;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;

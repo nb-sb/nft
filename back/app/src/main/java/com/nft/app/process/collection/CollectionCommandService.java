@@ -1,24 +1,19 @@
-package com.nft.app.collection;
+package com.nft.app.process.collection;
 
-import com.nft.app.collection.dto.TransferCmd;
+import com.nft.app.process.collection.dto.TransferCmd;
 import com.nft.app.mq.producer.OrderPublisher;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
-import com.nft.common.ElasticSearch.ElasticSearchUtils;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
 import com.nft.common.Utils.TimeUtils;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
-import com.nft.domain.detail.IDetailInfoRespository;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
-import com.nft.domain.order.respository.INftOrderRespository;
-import com.nft.domain.order.respository.IOrderInfoRespository;
-import com.nft.domain.user.repository.IUserInfoRepository;
 import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;

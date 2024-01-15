@@ -1,6 +1,6 @@
 package com.nft.trigger.controller;
 
-import com.nft.app.collection.CollectionCommandService;
+import com.nft.app.process.collection.CollectionCommandService;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;

@@ -1,6 +1,6 @@
-package com.nft.app.user;
+package com.nft.app.process.user;
 
-import com.nft.app.user.dto.CreatCmd;
+import com.nft.app.process.user.dto.CreatCmd;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.user.model.entity.UserEntity;

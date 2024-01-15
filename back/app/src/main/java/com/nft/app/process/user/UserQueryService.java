@@ -1,8 +1,8 @@
-package com.nft.app.user;
+package com.nft.app.process.user;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.app.user.dto.LoginCmd;
+import com.nft.app.process.user.dto.LoginCmd;
 import com.nft.common.Constants;
 import com.nft.common.PageRequest;
 import com.nft.common.Redis.RedisConstant;
@@ -12,6 +12,7 @@ import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.common.Utils.TokenUtils;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.res.UserResult;
+import com.nft.domain.user.model.vo.UserDetalVo;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -51,19 +52,26 @@ public class UserQueryService {
         if (userDetailByRedis != null) {
             return userDetailByRedis;
         }
-        UserInfoVo userInfoVo = iUserInfoRepository.selectUserDetail(userOne.getId());
-        if (userInfoVo == null) {
+        UserDetalVo userDetalVo = iUserInfoRepository.selectOneByForId(userOne.getId());
+        if (userDetalVo == null) {
             return null;
         }
+        UserInfoVo userInfoVo = new UserInfoVo();
+        userInfoVo.setAddress(userDetalVo.getAddress());
+        userInfoVo.setPrivatekey(userOne.getPrivatekey());
+        userInfoVo.setCardId(userDetalVo.getCardid());
+        userInfoVo.setPhoneNumber(userDetalVo.getPhoneNumber());
         userInfoVo.setUsername(userOne.getUsername());
-        userInfoVo.setPassword("******************");
-        userInfoVo.setRole(userOne.getRole());
+        userInfoVo.desensitisationPassword();
         userInfoVo.setBalance(userOne.getBalance());
         redisUtil.set(key, JSONUtil.toJsonStr(userInfoVo), RedisConstant.DAY_ONE);
         return userInfoVo;
     }
     private UserInfoVo getUserDetailByRedis(String key) {
         String userInfoStr = redisUtil.getStr(key);
+        if (userInfoStr == null) {
+            return null;
+        }
         UserInfoVo bean = JSONUtil.toBean(userInfoStr, UserInfoVo.class);
         return bean;
     }

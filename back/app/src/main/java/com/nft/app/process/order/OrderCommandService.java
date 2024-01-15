@@ -1,9 +1,8 @@
-package com.nft.app.order;
+package com.nft.app.process.order;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.app.mq.producer.OrderPublisher;
-import com.nft.app.order.dto.PayOrderCmd;
+import com.nft.app.process.order.dto.PayOrderCmd;
 import com.nft.common.APIException;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisConstant;
@@ -19,11 +18,11 @@ import com.nft.domain.detail.IDetailInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
-import com.nft.domain.order.model.res.OrderRes;
 import com.nft.domain.order.respository.INftOrderRespository;
 import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.repository.IUserInfoRepository;
+import com.nft.domain.user.service.Factory.UserEntityFatory;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -37,16 +36,25 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class OrderCommandService {
-    private final INftOrderRespository iNftOrderRespository;
-    private final ISubmitCacheRespository iSubmitCacheRespository;
     private final RedisUtil redisUtil;
     private final IUserInfoRepository iUserInfoRepository;
     private final IOwnerShipRespository iOwnerShipRespository;
     private final IOrderInfoRespository iOrderInfoRespository;
-    private final IDetailInfoRespository iDetailInfoRespository;
     private final OrderPublisher orderPublisher;
     private final ISellInfoRespository iSellInfoRespository;
     private final DistributedRedisLock distributedRedisLock;
+    private final UserEntityFatory userEntityFatory;
+
+    // 增加用户的应用服务方法
+    public void addUser(String username, String address, String password, String privatekey, BigDecimal balance, Integer role) {
+
+//        UserAggregate userAggregate = new UserAggregate();
+//        userAggregate.addUser(username, address, password, privatekey, balance, role);
+        UserEntity userEntity = userEntityFatory.newInstance("username", "address", "pw", "pv", null, 0);
+
+        // 保存用户实体到仓储
+        iUserInfoRepository.creat(userEntity);
+    }
     public Result creat(AddOrderCmd cmd) {
         //获取使用token用户id
         Integer userId = cmd.getUserId();
@@ -140,15 +148,9 @@ public class OrderCommandService {
                 //查询用于余额，减少余额，设置余额
                 UserEntity userEntity = iUserInfoRepository.selectOneById(userid);
                 if (userEntity == null) {
-                    return Result.error("error");
+                    return Result.error("支付用户不存在！");
                 }
-                BigDecimal balance1 = userEntity.getBalance(); //当前余额
-                BigDecimal balance2 = balance1.subtract(productPrice);//减少后的余额
-                //必须减少后的余额大于等于0
-                if(balance2.compareTo(BigDecimal.valueOf(0)) == -1){
-                    return Result.error("余额不足");
-                }
-                userEntity.setBalance(balance2);
+                userEntity.decreaseBalance(productPrice);
                 //减少用于余额
                 boolean b2 = iUserInfoRepository.saveBalance(userEntity);
                 if (!b2) {

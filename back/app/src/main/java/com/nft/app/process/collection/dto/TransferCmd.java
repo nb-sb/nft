@@ -1,4 +1,4 @@
-package com.nft.app.collection.dto;
+package com.nft.app.process.collection.dto;
 
 import lombok.Data;
 

@@ -1,16 +1,14 @@
 package com.nft.trigger.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.app.collection.CollectionQueryService;
-import com.nft.app.collection.SellCollectionQueryService;
-import com.nft.app.order.OrderQueryService;
+import com.nft.app.process.collection.CollectionQueryService;
+import com.nft.app.process.collection.SellCollectionQueryService;
+import com.nft.app.process.order.OrderQueryService;
+import com.nft.app.process.order.dto.OrderByStatusQuery;
 import com.nft.common.Constants;
 import com.nft.common.PageRequest;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.InfoKindReq;
-import com.nft.domain.nft.model.res.GetNftRes;
-import com.nft.domain.nft.service.INftInfoService;
 import com.nft.domain.order.model.req.OrderStateReq;
 import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
@@ -99,7 +97,8 @@ public class SelectConllection {
         }
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iNftOrderService.getOrderByStatus(userOne.getId(), orderStateReq.getStatus());
+        OrderByStatusQuery orderByStatusQuery = new OrderByStatusQuery(userOne.getId(),orderStateReq.getStatus());
+        return orderQueryService.getOrderByStatus(orderByStatusQuery);
     }
 
 }

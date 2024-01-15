@@ -1,7 +1,7 @@
 package com.nft.trigger.controller;
 
-import com.nft.app.collection.CollectionCommandService;
-import com.nft.app.collection.dto.TransferCmd;
+import com.nft.app.process.collection.CollectionCommandService;
+import com.nft.app.process.collection.dto.TransferCmd;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.support.Token2User;

@@ -1,12 +1,14 @@
 package com.nft.infrastructure.repository;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.APIException;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.user.model.entity.UserEntity;
+import com.nft.domain.user.model.vo.UserDetalVo;
 import com.nft.domain.user.model.vo.UserInfoVo;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -150,20 +152,21 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     }
 
     @Override
-    public UserInfoVo selectUserDetail(Integer forid) {
+    public UserDetalVo selectOneByForId(Integer forid) {
         QueryWrapper<UserDetal> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("for_id", forid);
         UserDetal userDetal = userDetalMapper.selectOne(queryWrapper);
         if (userDetal == null) return null;
-        UserInfoVo userInfoVo = new UserInfoVo();
-        userInfoVo.setId(userDetal.getId());
-        userInfoVo.setAddress(userDetal.getAddress());
-        userInfoVo.setCardId(userDetal.getCardid());
-        userInfoVo.setPhoneNumber(userDetal.getPhoneNumber());
-        return userInfoVo;
+        UserDetalVo userDetalVo = new UserDetalVo();
+        userDetalVo.setForId(userDetal.getForId());
+        userDetalVo.setName(userDetal.getName());
+        userDetalVo.setAddress(userDetal.getAddress());
+        userDetalVo.setEmail(userDetal.getEmail());
+        userDetalVo.setCardid(userDetal.getCardid());
+        userDetalVo.setPhoneNumber(userDetal.getPhoneNumber());
+        userDetalVo.setStatus(userDetal.getStatus());
+        return userDetalVo;
     }
-
-
 
 
     //修改密码逻辑，可以用于忘记密码修改和普通的输入原始密码进行修改

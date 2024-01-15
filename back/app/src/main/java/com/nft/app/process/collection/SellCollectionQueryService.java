@@ -1,4 +1,4 @@
-package com.nft.app.collection;
+package com.nft.app.process.collection;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

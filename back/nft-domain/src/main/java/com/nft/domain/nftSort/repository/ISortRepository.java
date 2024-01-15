@@ -1,24 +1,23 @@
 package com.nft.domain.nftSort.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.domain.nftSort.model.req.SortReq;
-import com.nft.domain.nftSort.model.req.UpdateSortReq;
-import com.nft.domain.nftSort.model.vo.SortVo;
-import com.nft.domain.support.Search;
+import com.nft.domain.nftSort.model.entity.MetaEntity;
 
 import java.util.List;
 
 public interface ISortRepository {
     //添加分类
-    boolean addSort(SortReq sortReq);
+    boolean creat(MetaEntity metaEntity);
     //修改分类
-    boolean updateSort(UpdateSortReq updateSortReq);
+    boolean updateSort(MetaEntity entity);
 
     boolean delSortById(Integer id);
 
-    List<SortVo> selectSortByPage(Page page);
+    List<MetaEntity> selectSortByPage(Page page);
 
-    SortVo selectSortByName(SortReq sortReq);
+    MetaEntity selectSortByName(String name,String slug);
+
+    MetaEntity selectSortByMid(Integer mid);
     //查询分类
     //删除分类
 

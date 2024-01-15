@@ -1,4 +1,4 @@
-package com.nft.app.order.dto;
+package com.nft.app.process.order.dto;
 
 import lombok.Data;
 

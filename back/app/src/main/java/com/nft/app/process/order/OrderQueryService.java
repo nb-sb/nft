@@ -1,6 +1,7 @@
-package com.nft.app.order;
+package com.nft.app.process.order;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nft.app.process.order.dto.OrderByStatusQuery;
 import com.nft.common.ElasticSearch.ElasticSearchUtils;
 import com.nft.common.ElasticSearch.UserOrderSimpleES;
 import com.nft.common.PageRequest;
@@ -56,6 +57,10 @@ public class OrderQueryService {
     //查询用户给指定订单信息
     public Result getOrder(Integer userId, String orderId) {
         List<OrderInfoVo> orderInfoVos =  iNftOrderRespository.getOrder(userId,orderId);
+        return OrderRes.success(orderInfoVos);
+    }
+    public Result getOrderByStatus(OrderByStatusQuery  query) {
+        List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrderByStatus(query.getUserId(),query.getPayOrderStatus());
         return OrderRes.success(orderInfoVos);
     }
 }

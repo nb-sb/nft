@@ -26,10 +26,10 @@ public class NftMetas implements Serializable {
     private Integer mid;
 
 //    @ApiModelProperty(value = "藏品分类名称")
-    private String conllectionName;
+    private String name;
 
 //    @ApiModelProperty(value = "藏品分类代号")
-    private String conllectionSlug;
+    private String slug;
 
 //    @ApiModelProperty(value = "该分类下藏品总数")
     private Integer count;
