@@ -23,7 +23,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Validated
 public class MetaController {
-    private final ISortService iSortService;
     private final SortCommandService sortCommandService;
     private final SortQueryService sortQueryService;
 

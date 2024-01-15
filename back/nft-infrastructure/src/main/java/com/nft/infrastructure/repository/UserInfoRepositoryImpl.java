@@ -77,11 +77,7 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         int res = userInfoMapper.insert(userInfo);
         return res > 0;
     }
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void test() {
-        throw new RuntimeException("发生异常");   //手动模拟抛出异常
-    }
+
 
     @Override
     public boolean addUserByFisco(String id, String address) {
@@ -180,13 +176,5 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
         if (Optional.ofNullable(userInfo).isPresent()) return true;
         return false;
-    }
-    @Override
-    public UserVo selectUserName(String username) {
-        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-        userInfoQueryWrapper.eq("username", username);
-        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
-        UserVo userVo = BeanCopyUtils.convertTo(userInfo, UserVo ::new);
-        return userVo;
     }
 }

@@ -26,7 +26,7 @@ public class UserEntity {
             this.balance = this.balance.subtract(amount);
         } else {
             // 处理余额不足的情况，可以抛出异常或采取其他适当的处理方式
-            throw new APIException("Insufficient balance.");
+            throw new APIException("余额不足");
         }
     }
 

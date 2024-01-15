@@ -18,8 +18,8 @@ public class ApplyReq {
     private String name; //藏品名称
     @NotNull
     private BigDecimal price; //价格
-
-    private String hash; //hash
+    @NotNull
+    private String hash; //hash 上传文件获得的文件hash
     @NotNull
     private Integer mid ; //分类id
 

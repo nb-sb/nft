@@ -59,6 +59,7 @@ public class OrderQueryService {
         List<OrderInfoVo> orderInfoVos =  iNftOrderRespository.getOrder(userId,orderId);
         return OrderRes.success(orderInfoVos);
     }
+    //查询用户指定状态订单
     public Result getOrderByStatus(OrderByStatusQuery  query) {
         List<UserOrderSimpleVo> orderInfoVos =  iNftOrderRespository.getOrderByStatus(query.getUserId(),query.getPayOrderStatus());
         return OrderRes.success(orderInfoVos);

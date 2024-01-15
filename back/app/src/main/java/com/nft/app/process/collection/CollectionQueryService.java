@@ -14,6 +14,7 @@ import com.nft.domain.nft.model.req.InfoKindReq;
 import com.nft.domain.nft.model.res.GetNftRes;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.nft.service.INftInfoService;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -27,19 +28,8 @@ public class CollectionQueryService {
     private final RedisUtil redisUtil;
     private final ISellInfoRespository iSellInfoRespository;
     private final DistributedRedisLock distributedRedisLock;
-    private final ISubmitCacheRespository iSubmitCacheRespository;
-    public ConllectionInfoVo getConllectionCache(String reidKey) {
-        String conllectionCacheKey = redisUtil.getStr(reidKey);
-        if (!StringUtils.isEmpty(conllectionCacheKey)) {
-            //如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了
-            if (Constants.RedisKey.REDIS_EMPTY_CACHE().equals(conllectionCacheKey)) {
-                System.out.println("如果是空缓存的话 //这种原因一般是藏品已经删除，但是还有大量数据查询的情况,直接返回一个空对象就可以了");
-                return new ConllectionInfoVo();
-            }
-            return JSONUtil.toBean(conllectionCacheKey, ConllectionInfoVo.class);
-        }
-        return null;
-    }
+    private final INftInfoService iNftInfoService;
+
     //查询藏品信息
     public GetNftRes selectConllectionById(Integer id) {
         String reidsKey = Constants.RedisKey.REDIS_COLLECTION(id);
@@ -61,7 +51,7 @@ public class CollectionQueryService {
             //1.这里设置读锁,在查询mysql之前设置读锁,然后在updata方法里设置更新锁，这个方法比延时双删要好
             distributedRedisLock.acquireReadLock(Constants.RedisKey.READ_WRITE_LOCK(id));
             try {
-                conllectionInfoVo = iSellInfoRespository.selectByCollectId(id);
+                conllectionInfoVo = iNftInfoService.selectByCollectId(id);
                 if (conllectionInfoVo != null) {
                     //一、设置缓存并解决 缓存击穿问题
                     //查询到的mysql中数据添加到redis时 添加24h + random s的redis缓存，随机增加几百秒缓存

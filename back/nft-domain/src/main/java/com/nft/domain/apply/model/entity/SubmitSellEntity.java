@@ -1,9 +1,11 @@
-package com.nft.domain.nft.model.entity;
+package com.nft.domain.apply.model.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 @Data
+@Accessors(chain = true)
 public class SubmitSellEntity {
     private Integer id;
 
@@ -32,5 +34,8 @@ public class SubmitSellEntity {
     private Integer status;
 
     private String hash;
+    public void init() {
+        this.status = 0;
+    }
 
 }

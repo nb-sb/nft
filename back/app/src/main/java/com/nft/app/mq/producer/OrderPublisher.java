@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.nft.common.Rabbitmq.RabbitMqConstant;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
+import com.nft.domain.order.service.OrderEntityFatory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class OrderPublisher  {
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
 
     /**
      * @Des 发送检查消息订单抢购完成后进行发送的消息，用于30分钟后进行检查订单

@@ -1,11 +1,12 @@
 package com.nft.infrastructure.repository;
 
-import com.nft.domain.nft.repository.INftRelationshipRespository;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nft.domain.nftSort.model.entity.MetaRelationShipEntity;
+import com.nft.domain.nftSort.repository.INftRelationshipRespository;
 import com.nft.infrastructure.dao.NftRelationshipsMapper;
 import com.nft.infrastructure.po.NftRelationships;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 @Repository
 public class INftRelationshipImpl implements INftRelationshipRespository {
@@ -14,11 +15,20 @@ public class INftRelationshipImpl implements INftRelationshipRespository {
     NftRelationshipsMapper nftRelationshipsMapper;
 
     @Override
-    public boolean addMetas(Integer cid , Integer mid) {
+    public boolean creat(MetaRelationShipEntity metaRelationShipEntity) {
         NftRelationships nftRelationships = new NftRelationships();
-        nftRelationships.setCid(cid).setMid(mid);
+        nftRelationships.setCid(metaRelationShipEntity.getCid());
+        nftRelationships.setMid(metaRelationShipEntity.getMid());
         int insert = nftRelationshipsMapper.insert(nftRelationships);
         if (insert>0) return true;
         return false;
+    }
+
+    @Override
+    public Integer loadMid(Integer cid) {
+        LambdaQueryWrapper<NftRelationships> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(NftRelationships::getCid, cid).select(NftRelationships::getMid);
+        NftRelationships nftRelationships = nftRelationshipsMapper.selectOne(queryWrapper);
+        return nftRelationships.getMid();
     }
 }

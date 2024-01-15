@@ -10,15 +10,16 @@ import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
 import com.nft.common.Utils.TimeUtils;
-import com.nft.domain.apply.repository.ISubmitCacheRespository;
+import com.nft.domain.nft.model.entity.OwnerShipEntity;
+import com.nft.domain.nft.model.entity.SellInfoEntity;
 import com.nft.domain.nft.model.req.AddOrderCmd;
-import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
 import com.nft.domain.nft.model.vo.*;
-import com.nft.domain.detail.IDetailInfoRespository;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.nft.service.INftInfoService;
+import com.nft.domain.nft.service.OwnerShipFactory.OwnerShipEntityFatory;
+import com.nft.domain.order.model.entity.OrderEntity;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
-import com.nft.domain.order.respository.INftOrderRespository;
 import com.nft.domain.order.respository.IOrderInfoRespository;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.repository.IUserInfoRepository;
@@ -44,6 +45,8 @@ public class OrderCommandService {
     private final ISellInfoRespository iSellInfoRespository;
     private final DistributedRedisLock distributedRedisLock;
     private final UserEntityFatory userEntityFatory;
+    private final OwnerShipEntityFatory ownerShipEntityFatory;
+    private final INftInfoService iNftInfoService;
 
     // 增加用户的应用服务方法
     public void addUser(String username, String address, String password, String privatekey, BigDecimal balance, Integer role) {
@@ -70,17 +73,16 @@ public class OrderCommandService {
                 Integer stock;
                 //2.查询剩余库存
                 String reidsKey = Constants.RedisKey.REDIS_COLLECTION(collectionId);
-                ConllectionInfoVo conllectionInfoVo  = iSellInfoRespository.selectCacheByCollectId(collectionId);
+                ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectCacheByCollectId(collectionId);
+
                 if (conllectionInfoVo != null) {
                     stock = conllectionInfoVo.getRemain();
                     if (stock <= 0) return new Result("0", "商品库存不足");
                 } else {
                     //查询mysql
-                    conllectionInfoVo = iSellInfoRespository.selectByCollectId(collectionId);
+                    conllectionInfoVo = iNftInfoService.selectByCollectId(collectionId);
                     if (conllectionInfoVo == null) {
-                        ConllectionInfoVo redisValue = new ConllectionInfoVo();
-                        redisValue.setRemain(0);
-                        redisUtil.set(reidsKey, JSONUtil.toJsonStr(redisValue), RedisConstant.MINUTE_30);
+                        redisUtil.set(reidsKey, Constants.RedisKey.REDIS_EMPTY_CACHE(), RedisConstant.MINUTE_30);
                         return new Result("0", "商品不存在");
                     }
                     stock = conllectionInfoVo.getRemain();
@@ -93,8 +95,8 @@ public class OrderCommandService {
                     return new Result("0", "您的订单列表中此商品未支付！不能重复添加订单");
                 }
                 //已拥有的hash不能再次购买
-                SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(collectionId);
-                OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(userAddress, sellInfoVo.getIpfsHash());
+                SellInfoEntity sellInfoEntity =  iSellInfoRespository.selectSellInfoById(collectionId);
+                OwnerShipVo ownerShipVo = iOwnerShipRespository.selectOWnerShipInfo(userAddress, sellInfoEntity.getIpfsHash());
                 if (ownerShipVo != null) {
                     return new Result("0", "同一藏品仅能存在一个，让给其他小伙伴吧！");
                 }
@@ -134,17 +136,17 @@ public class OrderCommandService {
         distributedRedisLock.acquire(Constants.RedisKey.PAY_LOCK(orderNumber));
         try {
             //使用订单号查询订单信息
-            OrderInfoVo orderInfoVo = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
+            OrderEntity orderEntity = iOrderInfoRespository.selectOrderInfoByNumber(orderNumber);
             // 返回 订单号不存在
-            if (orderInfoVo == null) return Result.error("订单号不存在");
-            if (!Constants.payOrderStatus.NO_PAY.equals(orderInfoVo.getStatus())) {
+            if (orderEntity == null) return Result.error("订单号不存在");
+            if (!Constants.payOrderStatus.NO_PAY.equals(orderEntity.getStatus())) {
                 return Result.error("订单支付状态已经被修改，无法支付");
             }
             // 一.查询订单支付方式
             //A.如果是网站余额支付
             if (Constants.payType.WEB_BALANCE_PAY.equals(paytype)) {
                 //1)decrement balance
-                BigDecimal productPrice = orderInfoVo.getProductPrice();//查询商品价格
+                BigDecimal productPrice = orderEntity.getProductPrice();//查询商品价格
                 //查询用于余额，减少余额，设置余额
                 UserEntity userEntity = iUserInfoRepository.selectOneById(userid);
                 if (userEntity == null) {
@@ -159,15 +161,16 @@ public class OrderCommandService {
                 }
                 //如果余额减少成功了的话则会：
                 //2)set pay_status 设置支付状态
-                boolean b = iOrderInfoRespository.setPayOrderStatus(orderNumber, Constants.payOrderStatus.PAID);
+                orderEntity.setStatus(Constants.payOrderStatus.PAID);
+                boolean b = iOrderInfoRespository.save(orderEntity);
                 if (!b) {
                     //设置支付状态失败。返回用于余额
                     log.error("支付状态修改失败");
                     throw new APIException(Constants.ResponseCode.NO_UPDATE, "支付状态修改失败");
                 }
+                //todo 发送mq消息异步
                 //如果支付成功则添加用户藏品
-                DetailInfoVo detailInfoVo1 = addUserCollection(orderInfoVo.getProductId(), orderInfoVo.getOrderNo(), payOrderCmd.getUserAddress());
-                //发送mq消息异步 记录流水表
+                DetailInfoVo detailInfoVo1 = addUserCollection(orderEntity, payOrderCmd.getUserAddress());
                 // 加入mysql流水表中 || 加入区块链流水表中
                 orderPublisher.SendDetailInfo(detailInfoVo1);
                 return Result.success("购买成功！");
@@ -186,20 +189,20 @@ public class OrderCommandService {
 
     //添加新藏品所有者
     @Transactional
-    public DetailInfoVo addUserCollection( Integer productId,String orderNo, String userAddress) {
+    public DetailInfoVo addUserCollection( OrderEntity orderEntity, String userAddress) {
+        Integer productId = orderEntity.getProductId();
         //购买成功后更新藏品所有者
-        ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectByCollectId(productId);
+        SellInfoEntity sellInfoEntity = iSellInfoRespository.selectSellInfoById(productId);
         //1）更新区块链上数据 => transCollectionByFisco(用户地址，藏品hash)
-        boolean b = iOwnerShipRespository.addUserConllectionByFisco(userAddress, conllectionInfoVo.getIpfsHash());
+        boolean b = iOwnerShipRespository.addUserConllectionByFisco(userAddress, sellInfoEntity.getIpfsHash());
         if (!b) {
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "用户绑定藏品失败");
         }
         //如果更新区块链上数据成功的话，进行更新数据库内容
         //2）更新mysql上数据//更新数据库中用户拥有的藏品
         //查询fisco中存储的数据赋值到mysql中
-        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(productId);
         //a.从fisco中获取所属信息 [1,"1703683065626","1","1#80"]
-        List list = iOwnerShipRespository.selectOWnerShipInfoByFisco(userAddress, sellInfoVo.getIpfsHash());
+        List list = iOwnerShipRespository.selectOWnerShipInfoByFisco(userAddress, sellInfoEntity.getIpfsHash());
         System.out.println(list);
         if (!"1".equals(String.valueOf(list.get(0)))){
             //如果状态不等于一说明没有查到fisco中的数据
@@ -207,28 +210,25 @@ public class OrderCommandService {
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "fisco中属于查询失败");
         }
         //b.添加至mysql中
-        AddUserConllection2MysqlReq req = new AddUserConllection2MysqlReq();
-        Date time = AddUserConllection2MysqlReq.timestamp2Date(String.valueOf(list.get(1)));
-        req.setTime(time);
         Integer type = Integer.valueOf(String.valueOf(list.get(2)));
-        req.setType(type);
         String digitalCollectionId = String.valueOf(list.get(3));
-        req.setDigital_collection_id(digitalCollectionId);
-        req.setHash(sellInfoVo.getIpfsHash());
-        boolean b1 = iOwnerShipRespository.addUserConllection(req, userAddress);
+        OwnerShipEntity ownerShipEntity = ownerShipEntityFatory.newInstance(userAddress, type, digitalCollectionId, sellInfoEntity.getIpfsHash());
+        ownerShipEntity.timestamp2Date(String.valueOf(list.get(1)));
+        boolean b1 = iOwnerShipRespository.creat(ownerShipEntity);
         if (b1) {
             //c.更新订单状态为完成
-            boolean b2 = iOrderInfoRespository.setOrderStatus(orderNo, Constants.payOrderStatus.FINISH);
+            orderEntity.setStatus(Constants.payOrderStatus.FINISH);
+            boolean b2 = iOrderInfoRespository.save(orderEntity);
             if (!b2) {
                 log.error("更新订单状态为完成 失败");
                 throw new APIException(Constants.ResponseCode.NO_UPDATE, "更新订单状态为完成执行失败");
             }
             DetailInfoVo detailInfoVo = new DetailInfoVo();
             detailInfoVo.setType(type);
-            detailInfoVo.setTransferAddress(sellInfoVo.getAuther());
+            detailInfoVo.setTransferAddress(sellInfoEntity.getAuther());
             detailInfoVo.setTargetAddress(userAddress);
-            detailInfoVo.setTime(time);
-            detailInfoVo.setHash(sellInfoVo.getIpfsHash());
+            detailInfoVo.setTime(ownerShipEntity.getTime());
+            detailInfoVo.setHash(ownerShipEntity.getHash());
             detailInfoVo.setDigitalCollectionId(digitalCollectionId);
             return detailInfoVo;
         } else {

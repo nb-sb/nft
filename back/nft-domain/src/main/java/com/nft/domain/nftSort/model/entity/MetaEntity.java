@@ -16,4 +16,7 @@ public class MetaEntity {
     public void initCount() {
         this.count = 0;
     }
+    public void increaseCount() {
+        this.count += 1;
+    }
 }

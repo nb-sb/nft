@@ -19,11 +19,9 @@ import java.util.List;
  */
 public interface IUserInfoRepository {
 
-
     UserVo selectOne(String username, String password);
 
     boolean creat(UserEntity userEntity);
-    void test();
 
     boolean addUserByFisco(String id, String address);
 
@@ -41,5 +39,4 @@ public interface IUserInfoRepository {
 
     boolean isUserNameExist(String username);
 
-    UserVo selectUserName(String username);
 }

@@ -12,10 +12,11 @@ import java.util.Date;
 @Accessors(chain = true)
 @TableName(value = "nft_order_info")
 public class OrderInfo {
+    @TableId
+    private Integer id;
     /**
      * 订单id
      */
-    @TableId
     private String orderNo;
     /**
      * 用户id

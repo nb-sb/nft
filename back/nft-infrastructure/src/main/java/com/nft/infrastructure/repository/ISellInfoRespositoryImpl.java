@@ -7,12 +7,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.Constants;
 import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.domain.apply.model.vo.SubCacheVo;
+import com.nft.domain.nft.model.entity.SellInfoEntity;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
-import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.repository.ISellInfoRespository;
-import com.nft.infrastructure.dao.OrderInfoMapper;
 import com.nft.infrastructure.dao.SellInfoMapper;
 import com.nft.infrastructure.dao.SubmitCacheMapper;
 import com.nft.infrastructure.fisco.model.bo.SellStroageCreateSellInputBO;
@@ -36,29 +34,12 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     private final SellStroageService sellStroageService;
     private final RedisUtil redisUtil;
     @Override
-    public SellInfoVo selectSellInfoById(Integer id) {
+    public SellInfoEntity selectSellInfoById(Integer id) {
         SellInfo sellInfo = sellInfoMapper.selectById(id);
-        return BeanCopyUtils.convertTo(sellInfo, SellInfoVo::new);
+        return BeanCopyUtils.convertTo(sellInfo, SellInfoEntity::new);
     }
 
-    @Override
-    public ConllectionInfoVo selectByCollectId(Integer id) {
-        SellInfo sellInfo = sellInfoMapper.selectById(id);
-        ConllectionInfoVo conllectionInfoVo;
-        if (sellInfo == null) {
-            return null;
-        }
-        SubmitCache submitCache = submitCacheMapper.selectById(sellInfo.getUniqueId());
-        if (submitCache != null) {
-            conllectionInfoVo = BeanCopyUtils.convertTo(sellInfo, ConllectionInfoVo::new);
-            conllectionInfoVo.setPath(submitCache.getPath())
-                    .setPresent(submitCache.getPresent())
-                    .setName(submitCache.getName())
-                    .setPrice(submitCache.getPrice());
-            return conllectionInfoVo;
-        }
-        return null;
-    }
+
 
     @Override
     public ConllectionInfoVo selectCacheByCollectId(Integer id) {
@@ -138,16 +119,15 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
         return update > 0;
     }
     @Override
-    public boolean insertSellInfo(SubCacheVo subCacheVo, String hash) {
-        if (subCacheVo == null) return false;
+    public boolean creat(SellInfoEntity sellInfoEntity) {
         SellInfo sellInfo = new SellInfo();
-        sellInfo.setUniqueId(subCacheVo.getId())
-                .setHash(subCacheVo.getHash())
-                .setAmount(subCacheVo.getTotal())
-                .setRemain(subCacheVo.getTotal())
-                .setAuther(subCacheVo.getAuthorAddress())
-                .setStatus(1)
-                .setIpfsHash(hash);
+        sellInfo.setUniqueId(sellInfoEntity.getUniqueId());
+        sellInfo.setHash(sellInfoEntity.getHash());
+        sellInfo.setAmount(sellInfoEntity.getAmount());
+        sellInfo.setRemain(sellInfoEntity.getRemain());
+        sellInfo.setAuther(sellInfoEntity.getAuther());
+        sellInfo.setStatus(sellInfoEntity.getStatus());
+        sellInfo.setIpfsHash(sellInfoEntity.getIpfsHash());
         int insert = sellInfoMapper.insert(sellInfo);
         return insert > 0;
     }

@@ -1,6 +1,6 @@
 package com.nft.domain.nft.repository;
 
-import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
+import com.nft.domain.nft.model.entity.OwnerShipEntity;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 */
 public interface IOwnerShipRespository {
     //添加用户所属藏品
-    boolean addUserConllection(AddUserConllection2MysqlReq sellInfoVo, String UserAddress);
+    boolean creat(OwnerShipEntity ownerShipEntity);
     //添加用户所属藏品到区块链中
     boolean addUserConllectionByFisco(String address,String hash) ;
 

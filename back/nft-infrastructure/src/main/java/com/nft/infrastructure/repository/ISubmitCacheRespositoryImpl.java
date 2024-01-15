@@ -3,12 +3,10 @@ package com.nft.infrastructure.repository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.nft.common.APIException;
-import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.domain.apply.model.vo.SubCacheVo;
-import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.apply.model.req.ApplyReq;
+import com.nft.domain.apply.repository.ISubmitCacheRespository;
+import com.nft.domain.apply.model.entity.SubmitSellEntity;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
 import com.nft.domain.user.model.vo.UserVo;
 import com.nft.infrastructure.dao.SellInfoMapper;
@@ -26,17 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     private final SubmitCacheMapper submitCacheMapper;
     private final SellInfoMapper sellInfoMapper;
-    private final INftRelationshipImpl nftRelationship;
-    private final INftMetasImpl nftMetas;
 
     @Override
-    public SubCacheVo selectOneByHash(String hash) {
+    public SubmitSellEntity selectOneByHash(String hash) {
         QueryWrapper<SubmitCache> submitWrapper = new QueryWrapper<>();
         submitWrapper.eq("hash",hash);
         SubmitCache submitCache1 = submitCacheMapper.selectOne(submitWrapper);
-        SubCacheVo subCacheVo = BeanCopyUtils.convertTo(submitCache1, SubCacheVo::new);
+        SubmitSellEntity subCacheVo = BeanCopyUtils.convertTo(submitCache1, SubmitSellEntity::new);
         return subCacheVo;
     }
+    @Override
     public Integer selectIdByHash(String hash) {
         LambdaQueryWrapper<SubmitCache> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SubmitCache::getHash, hash)
@@ -46,38 +43,28 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     }
     @Override
     @Transactional
-    public boolean addSellCheck(ApplyReq applyReq, UserVo userVo) {
-        SubmitCache submitCache = BeanCopyUtils.convertTo(applyReq, SubmitCache::new);
-        submitCache.setStatus(0)
-                .setAuthorId(String.valueOf(userVo.getId()))
-                .setAuthorAddress(userVo.getAddress());
+    public boolean creat(SubmitSellEntity submitSellEntity) {
+        SubmitCache submitCache = new SubmitCache();
+        submitCache.setId(submitSellEntity.getId());
+        submitCache.setPath(submitSellEntity.getPath());
+        submitCache.setTotal(submitSellEntity.getTotal());
+        submitCache.setPresent(submitSellEntity.getPresent());
+        submitCache.setName(submitSellEntity.getName());
+        submitCache.setAuthorId(submitSellEntity.getAuthorId());
+        submitCache.setAuthorAddress(submitSellEntity.getAuthorAddress());
+        submitCache.setPrice(submitSellEntity.getPrice());
+        submitCache.setStatus(submitSellEntity.getStatus());
+        submitCache.setHash(submitSellEntity.getHash());
         int insert = submitCacheMapper.insert(submitCache);
-        Integer id = selectIdByHash(submitCache.getHash());
-        if (insert > 0) {
-            //添加分类表
-            boolean b = nftRelationship.addMetas(id, applyReq.getMid());
-            if (!b) {
-                log.error("添加至分类表错误!: "+ false);
-                throw new APIException(Constants.ResponseCode.NO_UPDATE, "添加至分类表错误");
-            }
-            //修改分类表中分类记录数
-            boolean incr = nftMetas.incr(applyReq.getMid(), 1);
-            if (!incr) {
-                log.error("修改分类表中分类记录数 错误 ！："+ false);
-                throw new APIException(Constants.ResponseCode.NO_UPDATE, "修改分类表中分类记录数错误");
-            }
-            return true;
-        }
-        return false;
+        return insert > 0;
     }
 
     @Override
-    public boolean upDateSubStatus(Integer id,Integer status) {
-        UpdateWrapper<SubmitCache> submitWrapper = new UpdateWrapper<>();
-        submitWrapper.eq("id", id);
+    public boolean upDateSubStatus(SubmitSellEntity submitSellEntity) {
         SubmitCache submitCache = new SubmitCache();
-        submitCache.setStatus(status);
-        int update = submitCacheMapper.update(submitCache,submitWrapper);
+        submitCache.setId(submitSellEntity.getId());
+        submitCache.setStatus(submitSellEntity.getStatus());
+        int update = submitCacheMapper.updateById(submitCache);
         return update > 0;
     }
 
@@ -91,10 +78,10 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     }
 
     @Override
-    public SubCacheVo selectById(Integer id) {
+    public SubmitSellEntity selectById(Integer id) {
         SubmitCache submitCache = submitCacheMapper.selectById(id);
         if (submitCache != null) {
-            return BeanCopyUtils.convertTo(submitCache, SubCacheVo::new);
+            return BeanCopyUtils.convertTo(submitCache, SubmitSellEntity::new);
         }
         return null;
     }

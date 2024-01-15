@@ -10,6 +10,7 @@ import com.nft.infrastructure.dao.NftMetasMapper;
 import com.nft.infrastructure.po.NftMetas;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,11 +35,12 @@ public class ISortRepositoryImpl implements ISortRepository {
     @Override
     public boolean updateSort(MetaEntity entity) {
         NftMetas nftMetas = new NftMetas();
-        nftMetas.setMid(entity.getMid());
         nftMetas.setName(entity.getName());
         nftMetas.setSlug(entity.getSlug());
         nftMetas.setCount(entity.getCount());
-        int update = nftMetasMapper.updateById(nftMetas);
+        QueryWrapper<NftMetas> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("mid", entity.getMid());
+        int update = nftMetasMapper.update(nftMetas,queryWrapper);
         return update>0;
     }
 
@@ -83,5 +85,21 @@ public class ISortRepositoryImpl implements ISortRepository {
         meta.setSlug(nftMetas.getSlug());
         meta.setCount(nftMetas.getCount());
         return meta;
+    }
+
+    @Override
+    public boolean isExist(Integer mid) {
+        NftMetas nftMetas = getNftMetas(mid);
+        if (nftMetas != null) {
+            return true;
+        }
+        return false;
+    }
+
+    private NftMetas getNftMetas(Integer mid) {
+        QueryWrapper<NftMetas> nftMetasWrapper = new QueryWrapper<>();
+        nftMetasWrapper.eq("mid", mid);
+        NftMetas nftMetas = nftMetasMapper.selectOne(nftMetasWrapper);
+        return nftMetas;
     }
 }

@@ -34,7 +34,6 @@ import java.util.List;
 public class SellController {
 
     private final HttpServletRequest httpServletRequest;
-    private final INftOrderService iNftOrderService;
     private final INftSubmitService iNftSubmitService;
     private final Token2User token2User;
     private final OrderCommandService orderCommandService;
@@ -48,7 +47,7 @@ public class SellController {
     public Result addsellcheck(@Valid @RequestBody ApplyReq applyReq) {
         UserVo userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
-        return iNftSubmitService.addApply(userOne, applyReq);
+        return iNftSubmitService.creat(userOne, applyReq);
     }
 
     //上传图片接口

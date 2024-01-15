@@ -15,13 +15,15 @@ import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Utils.OrderNumberUtil;
 import com.nft.domain.detail.IDetailInfoRespository;
+import com.nft.domain.nft.model.entity.SellInfoEntity;
 import com.nft.domain.nft.model.vo.ConllectionInfoVo;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
-import com.nft.domain.nft.model.vo.OrderInfoVo;
-import com.nft.domain.nft.model.vo.SellInfoVo;
 import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.nft.service.INftInfoService;
+import com.nft.domain.order.model.entity.OrderEntity;
 import com.nft.domain.order.model.req.AddOrderMqMessage;
 import com.nft.domain.order.respository.IOrderInfoRespository;
+import com.nft.domain.order.service.OrderEntityFatory;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.utils.StringUtils;
@@ -48,6 +50,9 @@ public class OrderListener {
     private final OrderPublisher orderPublisher;
     private final DistributedRedisLock distributedRedisLock;
     private final IDetailInfoRespository iDetailInfoRespository;
+    private final OrderEntityFatory orderEntityFatory;
+    private final INftInfoService iNftInfoService;
+
 
     /**
      * @Des 订单状态检查
@@ -60,19 +65,20 @@ public class OrderListener {
     public void ORDER_CHECK_STATUS(String orderId) {
         log.info("消息接受成功 orderId : "+orderId);
         //检查订单状态 如果未支付则取消，其他状态如取消订单等状态则不修改
-        OrderInfoVo order = iOrderInfoRespository.getOrder(orderId);
-        Integer orderStatus = order.getStatus();
+        OrderEntity orderEntity = iOrderInfoRespository.selectOrderInfoByNumber(orderId);
+        Integer orderStatus = orderEntity.getStatus();
         if (!payOrderStatus.NO_PAY.equals(orderStatus)) {
             //订单状态只能是未支付的，但是此时订单状态未：已支付/已取消
             log.info("订单状态无需修改 orderId : "+orderId +" status ： " + orderStatus);
             return;
         }
         //修改订单状态为已取消
-        boolean b = iOrderInfoRespository.setOrderStatus(orderId, payOrderStatus.CANCEL);
+        orderEntity.setStatus(payOrderStatus.CANCEL);
+        boolean b = iOrderInfoRespository.save(orderEntity);
         // 退回订单剩余的数量
-        SellInfoVo sellInfoVo = iSellInfoRespository.selectSellInfoById(order.getProductId());
-        sellInfoVo.setRemain(sellInfoVo.getRemain() + 1);
-        boolean b1 = iSellInfoRespository.setSellStocks(sellInfoVo.getId(), sellInfoVo.getRemain());
+        SellInfoEntity sellInfoEntity = iSellInfoRespository.selectSellInfoById(orderEntity.getProductId());
+        sellInfoEntity.setRemain(sellInfoEntity.getRemain() + 1);
+        boolean b1 = iSellInfoRespository.setSellStocks(sellInfoEntity.getId(), sellInfoEntity.getRemain());
 
         if (!b) {
             log.error("修改订单状态为已取消 失败");
@@ -82,7 +88,7 @@ public class OrderListener {
             log.error("退回订单剩余的数量 失败");
             throw new APIException(ResponseCode.NO_UPDATE, "退回订单剩余的数量 失败");
         } else {
-            String key = RedisKey.REDIS_COLLECTION(order.getProductId());
+            String key = RedisKey.REDIS_COLLECTION(orderEntity.getProductId());
             distributedRedisLock.acquireReadLock(key);
             try {
                 //2）更新redis中的商品信息
@@ -118,10 +124,13 @@ public class OrderListener {
         Integer userid = bean.getUserId();
         Date time = bean.getTime();
         Integer conllectionId = bean.getConllectionId();
-        ConllectionInfoVo conllectionInfoVo = iSellInfoRespository.selectByCollectId(conllectionId);
+        ConllectionInfoVo conllectionInfoVo = iNftInfoService.selectByCollectId(conllectionId);
         // 4.将藏品添加至订单中
-        String orderNo = OrderNumberUtil.generateOrderNumber(userid, conllectionInfoVo.getId());
-        boolean b = iOrderInfoRespository.addOrderInfo(conllectionInfoVo, userid, orderNo, time);
+        String orderNo = OrderNumberUtil.generateOrderNumber(userid, conllectionId);
+        OrderEntity orderEntity = orderEntityFatory.newInstance(conllectionId,conllectionInfoVo.getPath(), conllectionInfoVo.getName(),
+                conllectionInfoVo.getPrice(),conllectionInfoVo.getPrice());
+        orderEntity.initOrder(userid,time);
+        boolean b = iOrderInfoRespository.creat(orderEntity);
         if (!b) {
             throw new APIException(Constants.ResponseCode.NO_UPDATE, "藏品添加至订单失败");
         }

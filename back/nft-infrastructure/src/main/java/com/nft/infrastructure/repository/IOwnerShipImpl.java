@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nft.common.Constants;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.common.Utils.TimeUtils;
-import com.nft.domain.nft.model.req.AddUserConllection2MysqlReq;
+import com.nft.domain.nft.model.entity.OwnerShipEntity;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.infrastructure.dao.OwnerShipMapper;
@@ -32,15 +32,13 @@ public class IOwnerShipImpl implements IOwnerShipRespository {
     private final OwnerShipMapper ownerShipMapper;
 
     @Override
-    public boolean addUserConllection(AddUserConllection2MysqlReq req, String userAddress) {
+    public boolean creat(OwnerShipEntity ownerShipEntity) {
         OwnerShip ownerShip = new OwnerShip();
-
-
-        ownerShip.setAddress(userAddress)
-                .setTime(req.getTime())
-                .setType(req.getType())
-                .setHash(req.getHash())
-                .setDigitalCollectionId(req.getDigital_collection_id());
+        ownerShip.setAddress(ownerShipEntity.getAddress());
+        ownerShip.setTime(ownerShipEntity.getTime());
+        ownerShip.setHash(ownerShipEntity.getHash());
+        ownerShip.setType(ownerShipEntity.getType());
+        ownerShip.setDigitalCollectionId(ownerShipEntity.getDigital_collection_id());
         int insert = ownerShipMapper.insert(ownerShip);
         return insert > 0;
     }

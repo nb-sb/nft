@@ -21,4 +21,5 @@ public interface ISortRepository {
     //查询分类
     //删除分类
 
+    boolean isExist(Integer mid);
 }

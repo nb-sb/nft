@@ -1,8 +1,11 @@
 package com.nft.domain.nft.model.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
+import sun.reflect.generics.tree.VoidDescriptor;
 
 @Data
+@Accessors(chain = true)
 public class SellInfoEntity {
     private Integer id;
 
@@ -22,7 +25,11 @@ public class SellInfoEntity {
 
     // @ApiModelProperty(value = "# 1 为正常 ，  0 为闭售")
     private Integer status;
-    private String ipfsHash;
 
+    private String ipfsHash;
+    public void init() {
+        this.status = 1;
+        this.remain = this.amount;
+    }
 
 }
