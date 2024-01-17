@@ -10,14 +10,14 @@ public class SubmitSellEntityFactoryImpl implements SubmitSellEntityFatory {
 
     @Override
     public SubmitSellEntity newInstance(String path, Integer total, String present, String name, BigDecimal price, String hash, String authorId, String authorAddress) {
-        return new SubmitSellEntity()
-                .setPath(path)
-                .setTotal(total)
-                .setPresent(present)
-                .setName(name)
-                .setPrice(price)
-                .setAuthorId(authorId)
-                .setAuthorAddress(authorAddress)
-                .setHash(hash);
+        return SubmitSellEntity.builder()
+                .path(path)
+                .total(total)
+                .present(present)
+                .name(name)
+                .price(price)
+                .authorId(authorId)
+                .authorAddress(authorAddress)
+                .hash(hash).build();
     }
 }

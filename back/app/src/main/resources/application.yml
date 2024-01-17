@@ -2,13 +2,17 @@ logging:
   pattern:
     dateformat: MM-dd HH:mm:ss:SSS
   level:
-    cn.itcast : debug
+    root: info
+  config: classpath:log4j2.xml
 server:
   port: 8081
   tomcat:
     threads:
 #      最少线程数
       min-spare: 10
+      #tomcat虚拟内存为2G，建议设置最大线程为500~600
+      #tomcat虚拟内存为4G，建议设置最大线程为600~700
+      #tomcat虚拟内存JVM 建议最大设置为4G
       #最大线程数
       max: 200
     max-connections: 8192

@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nft.infrastructure.dao.OrderInfoMapper">
 
-    <resultMap id="BaseResultMap" type="generator.domain.OrderInfo">
+    <resultMap id="BaseResultMap" type="com.nft.infrastructure.po.OrderInfo">
             <id property="orderNo" column="order_no" jdbcType="VARCHAR"/>
             <result property="productId" column="product_id" jdbcType="INTEGER"/>
             <result property="productImg" column="product_img" jdbcType="VARCHAR"/>

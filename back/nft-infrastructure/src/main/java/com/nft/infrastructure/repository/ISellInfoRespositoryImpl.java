@@ -94,16 +94,8 @@ public class ISellInfoRespositoryImpl implements ISellInfoRespository {
     @Override
     public boolean updataConllectionInfo(UpdataCollectionReq updataCollectionReq) {
         SubmitCache submitCache = new SubmitCache();
-        if (updataCollectionReq.getName() != null) {
-            submitCache.setName(updataCollectionReq.getName());
-        }
-        if (updataCollectionReq.getPresent() != null) {
-            submitCache.setPresent(updataCollectionReq.getPresent());
-        }
-        if (updataCollectionReq.getPresent() ==null && updataCollectionReq.getName() == null) {
-            log.error("传入的参数都为空值!");
-            return false;
-        }
+        submitCache.setName(updataCollectionReq.getName());
+        submitCache.setPresent(updataCollectionReq.getPresent());
         SellInfo sellInfo = sellInfoMapper.selectById(updataCollectionReq.getId());
         submitCache.setId(sellInfo.getUniqueId());
         int update = submitCacheMapper.updateById(submitCache);

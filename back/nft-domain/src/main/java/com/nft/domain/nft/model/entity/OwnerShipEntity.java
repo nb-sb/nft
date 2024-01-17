@@ -1,10 +1,16 @@
 package com.nft.domain.nft.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Accessors(chain = true)
 public class OwnerShipEntity {
     private String address;

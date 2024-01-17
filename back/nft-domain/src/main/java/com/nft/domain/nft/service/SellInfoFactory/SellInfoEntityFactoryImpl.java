@@ -8,10 +8,11 @@ public class SellInfoEntityFactoryImpl implements SellInfoEntityFatory {
 
     @Override
     public SellInfoEntity newInstance(Integer uniqueId, String hash, Integer amount, String auther, String ipfsHash) {
-        return new SellInfoEntity().setUniqueId(uniqueId)
-                .setHash(hash)
-                .setAmount(amount)
-                .setAuther(auther)
-                .setIpfsHash(ipfsHash);
+        return SellInfoEntity.builder().
+                uniqueId(uniqueId)
+                .hash(hash)
+                .amount(amount)
+                .auther(auther)
+                .ipfsHash(ipfsHash).build();
     }
 }

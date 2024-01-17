@@ -1,4 +1,4 @@
-package com.nft.domain.nft.model.req;
+package com.nft.app.process.collection.dto;
 
 import com.nft.domain.common.anno.Status;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class ReviewReq {
+public class ReviewCmd {
     @NotNull
     private Integer id; //将要修改的 提交表中的 id
     @NotNull

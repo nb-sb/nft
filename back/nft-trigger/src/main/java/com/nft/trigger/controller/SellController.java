@@ -1,6 +1,7 @@
 package com.nft.trigger.controller;
 
 
+import com.nft.app.process.collection.CollectionCommandService;
 import com.nft.app.process.order.OrderCommandService;
 import com.nft.app.process.order.dto.PayOrderCmd;
 import com.nft.common.Constants;
@@ -9,9 +10,8 @@ import com.nft.common.Utils.FileUtils;
 import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.AddOrderCmd;
-import com.nft.domain.nft.model.req.ReviewReq;
+import com.nft.app.process.collection.dto.ReviewCmd;
 import com.nft.domain.apply.model.req.ApplyReq;
-import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
 import com.nft.domain.user.model.vo.UserVo;
 import lombok.AllArgsConstructor;
@@ -37,6 +37,7 @@ public class SellController {
     private final INftSubmitService iNftSubmitService;
     private final Token2User token2User;
     private final OrderCommandService orderCommandService;
+    private final CollectionCommandService collectionCommandService;
 
 
 
@@ -78,8 +79,8 @@ public class SellController {
     @PostMapping("auditSell")
     @ResponseBody
     @AuthPermisson(Constants.permiss.admin)
-    public Result reviewCollection(@Valid @RequestBody ReviewReq req) {
-        return iNftSubmitService.ReviewCollection(req);
+    public Result reviewCollection(@Valid @RequestBody ReviewCmd cmd) {
+        return collectionCommandService.ReviewCollection(cmd);
     }
 
     //抢购藏品

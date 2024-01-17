@@ -1,5 +1,6 @@
 package com.nft.app.process.collection;
 
+import com.nft.app.process.collection.dto.ReviewCmd;
 import com.nft.app.process.collection.dto.TransferCmd;
 import com.nft.app.mq.producer.OrderPublisher;
 import com.nft.common.APIException;
@@ -8,17 +9,24 @@ import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Redission.DistributedRedisLock;
 import com.nft.common.Result;
 import com.nft.common.Utils.TimeUtils;
+import com.nft.domain.apply.model.entity.SubmitSellEntity;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
+import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
+import com.nft.domain.nft.model.res.AuditRes;
 import com.nft.domain.nft.model.vo.DetailInfoVo;
 import com.nft.domain.nft.model.vo.OwnerShipVo;
 import com.nft.domain.nft.repository.IOwnerShipRespository;
 import com.nft.domain.nft.repository.ISellInfoRespository;
+import com.nft.domain.support.ipfs.IpfsService;
 import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.swing.plaf.metal.MetalBorders;
+import java.math.BigInteger;
 
 @Log4j2
 @Service
@@ -30,6 +38,8 @@ public class CollectionCommandService {
     private final IOwnerShipRespository iOwnerShipRespository;
     private final ISellInfoRespository iSellInfoRespository;
     private final DistributedRedisLock distributedRedisLock;
+    private final INftSubmitService iNftSubmitService;
+    private final IpfsService ipfsService;
 
     @Transactional
     public Result transferCollection(TransferCmd cmd) {
@@ -94,6 +104,54 @@ public class CollectionCommandService {
             redisUtil.del(reidsKey);
             //释放写锁
             distributedRedisLock.releaseWriteLock(Constants.RedisKey.READ_WRITE_LOCK(updataCollectionReq.getId()));
+        }
+    }
+    @Transactional
+    public Result ReviewCollection(ReviewCmd cmd) {
+        // 需要先修改区块链状@态在修改mysql状态！！
+        //这里因为是在审核中，所以不需要使用读写锁，普通的redisson锁即可防止多个管理员同时审核，造成数据库、区块链或ipfs多次上传等情况
+        distributedRedisLock.release(Constants.RedisKey.ADMIN_UPDATE_LOCK(cmd.getId()));
+        try {
+            //2.操作审核状态 （1 为不通过 2 为通过）
+            //获取提交数据
+            SubmitSellEntity submitSellEntity = iSubmitCacheRespository.selectById(cmd.getId());
+            if (submitSellEntity == null) {
+                return AuditRes.error("需要审核的id不存在");
+            }
+            //必须是没有被审核过的才可以进行审核操作
+            if (!Constants.SellState.DOING.getCode().equals(submitSellEntity.getStatus())) {
+                return new AuditRes(Constants.SellState.NOTDOING.getCode(), Constants.SellState.NOTDOING.getInfo());
+            }
+            //判断修改前后变量结果是否一致，如果修改前后都是同一状态则不修改
+            if (submitSellEntity.getStatus().equals(cmd.getStatus())) {
+                return Result.error("修改前后状态一致");
+            }
+            if (Constants.SellState.REFUSE.getCode().equals(cmd.getStatus())) {
+                //如果是不通过则这里直接返回参数，无需进行下面操作
+                submitSellEntity.setStatus(cmd.getStatus());
+                iSubmitCacheRespository.upDateSubStatus(submitSellEntity);
+                return new AuditRes(Constants.SellState.REFUSE.getCode(), Constants.SellState.REFUSE.getInfo());
+            }
+            // -- 通过：通过才会加入到出售表，ipfs,区块链数据--
+            //3.添加至ipfs 获得hash
+            String ipfshash = ipfsService.addIpfsById(submitSellEntity.getPath());
+            log.info("添加至ipfs 获得hash : " + ipfshash);
+            //4.添加至区块链
+            boolean addFISCO = iSellInfoRespository.addSellByFISCO(ipfshash, BigInteger.valueOf(submitSellEntity.getTotal()));
+            if (!addFISCO) {
+                return new AuditRes(Constants.SellState.ERRORFISCO.getCode(), Constants.SellState.ERRORFISCO.getInfo());
+            }
+            //5.保存审核内容至mysql 出售表中 - 1.修改提交表结果 2.修改出售表结果 上架出售
+            submitSellEntity.setStatus(cmd.getStatus());
+            iSubmitCacheRespository.upDateSubStatus(submitSellEntity); //修改提交表状态
+
+            if (!iNftSubmitService.insertSellInfo(submitSellEntity, ipfshash)) {
+                return new AuditRes(Constants.SellState.ERROR.getCode(), Constants.SellState.ERROR.getInfo());
+            }
+            // TODO: 2024/1/10 使用异步添加24h redis缓存
+            return new AuditRes(Constants.SellState.PASS.getCode(), Constants.SellState.PASS.getInfo());
+        } finally {
+            distributedRedisLock.acquire(Constants.RedisKey.ADMIN_UPDATE_LOCK(cmd.getId()));
         }
     }
 }

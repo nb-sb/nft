@@ -5,7 +5,6 @@ import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
-import com.nft.domain.order.service.INftOrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +16,6 @@ import javax.validation.Valid;
 @RestController
 @AllArgsConstructor
 public class UpdataConllection {
-    private final INftOrderService iNftOrderService;
     private final CollectionCommandService collectionCommandService;
 
 

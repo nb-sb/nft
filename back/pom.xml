@@ -221,7 +221,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
 
                 <configuration>
-                    <mainClass>com.nft.app.AppApplication</mainClass>
+                    <mainClass>com.nft.nftlauncher.AppApplication</mainClass>
                     <image>
                         <builder>paketobuildpacks/builder-jammy-base:latest</builder>
                     </image>

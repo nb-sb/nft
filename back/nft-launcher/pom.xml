@@ -12,6 +12,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>nft-launcher</name>
     <description>nft-launcher</description>
+
     <properties>
         <java.version>17</java.version>
     </properties>

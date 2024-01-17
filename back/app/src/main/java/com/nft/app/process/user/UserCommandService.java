@@ -32,7 +32,6 @@ public class UserCommandService {
     private final VerifyFactory verifyFactory;;
     @Transactional
     public UserResult creat(CreatCmd cmd) {
-        cmd.setRole(0);//设置普通用户权限
         //判断用户名是否存在
         boolean userNameExist = iUserInfoRepository.isUserNameExist(cmd.getUsername());
         if (userNameExist) {
@@ -45,6 +44,7 @@ public class UserCommandService {
         UserEntity userEntity = userEntityFatory.newInstance(cmd.getUsername(), cryptoKeyPair.getAddress(),
                 cmd.getPassword(), cryptoKeyPair.getHexPrivateKey(), BigDecimal.valueOf(0), cmd.getRole());
         //添加数据库存贮
+        userEntity.userRole();//设置普通用户权限
         boolean res = iUserInfoRepository.creat(userEntity);
         UserVo userVo = iUserInfoRepository.selectOne(cmd.getUsername(), cmd.getPassword());
         //添加至fisco中存贮

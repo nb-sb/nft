@@ -1,30 +1,30 @@
 package com.nft.domain.nft.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import sun.reflect.generics.tree.VoidDescriptor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Accessors(chain = true)
 public class SellInfoEntity {
     private Integer id;
 
     private Integer uniqueId;
 
-    // @ApiModelProperty(value = "藏品hash")
-    private String hash;
+    private String hash;//藏品hash
 
-    // @ApiModelProperty(value = "发行量")
-    private Integer amount;
+    private Integer amount;//发行量
 
-    // @ApiModelProperty(value = "剩余数量")
-    private Integer remain;
+    private Integer remain;//剩余数量
 
-    // @ApiModelProperty(value = "数字藏品作者地址")
-    private String auther;
+    private String auther;//数字藏品作者地址
 
-    // @ApiModelProperty(value = "# 1 为正常 ，  0 为闭售")
-    private Integer status;
+    private Integer status;//# 1 为正常 ，  0 为闭售
 
     private String ipfsHash;
     public void init() {

@@ -1,12 +1,18 @@
 package com.nft.domain.user.model.entity;
 
 import com.nft.common.APIException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 @Data
 @Accessors(chain = true)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserEntity {
     private Integer id;
     private String username;

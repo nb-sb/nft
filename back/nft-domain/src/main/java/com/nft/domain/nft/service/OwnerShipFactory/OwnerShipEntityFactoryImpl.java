@@ -9,10 +9,10 @@ public class OwnerShipEntityFactoryImpl implements OwnerShipEntityFatory {
 
     @Override
     public OwnerShipEntity newInstance(String address, Integer type, String digital_collection_id, String hash) {
-        return new OwnerShipEntity()
-                .setType(type)
-                .setDigital_collection_id(digital_collection_id)
-                .setHash(hash)
-                .setAddress(address);
+        return OwnerShipEntity.builder()
+                .type(type)
+                .digital_collection_id(digital_collection_id)
+                .hash(hash)
+                .address(address).build();
     }
 }

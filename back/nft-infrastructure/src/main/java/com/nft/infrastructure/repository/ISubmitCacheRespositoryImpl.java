@@ -3,6 +3,7 @@ package com.nft.infrastructure.repository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.nft.common.APIException;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
@@ -60,12 +61,16 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
     }
 
     @Override
+    @Transactional
     public boolean upDateSubStatus(SubmitSellEntity submitSellEntity) {
         SubmitCache submitCache = new SubmitCache();
         submitCache.setId(submitSellEntity.getId());
         submitCache.setStatus(submitSellEntity.getStatus());
         int update = submitCacheMapper.updateById(submitCache);
-        return update > 0;
+        if (!(update > 0)) {
+            throw new APIException("修改提交表状态 失败");
+        }
+        return true;
     }
 
     @Override
