@@ -12,8 +12,6 @@ public interface INftSubmitService {
 
     boolean insertSellInfo(SubmitSellEntity submitSellEntity, String ipfshash);
 
-    //管理员 查询全部藏品申请by page
-    Result selectAllApplyPage();
     //查询自己的所属提交
 
 }

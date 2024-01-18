@@ -9,7 +9,6 @@ import com.nft.domain.nft.service.INftInfoService;
 import com.nft.domain.nftSort.repository.INftRelationshipRespository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.elasticsearch.search.aggregations.metrics.InternalSum;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

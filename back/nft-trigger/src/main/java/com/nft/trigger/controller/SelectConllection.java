@@ -40,7 +40,7 @@ public class SelectConllection {
     public Result SelectById(@NotNull(message = "id 不能为空")
                              @Min(value = 1)
                              @RequestParam Integer id) {
-        return collectionQueryService.selectConllectionById(id);
+        return sellCollectionQueryService.selectConllectionById(id);
     }
     //查询所有出售的藏品
     @GetMapping("selectConllectionPage")
@@ -57,7 +57,7 @@ public class SelectConllection {
     @ResponseBody
     public Result selectConllectionKindPage(@Valid InfoKindReq infoKindReq) {
         //查询当前页码，查询条数
-        return collectionQueryService.selectSellConllectionKindPage(infoKindReq);
+        return sellCollectionQueryService.selectSellConllectionKindPage(infoKindReq);
     }
 
     //管理员查询所有订单信息
@@ -67,6 +67,13 @@ public class SelectConllection {
     public Result selectOrderByPage(@Valid PageRequest pageRequest) {
          //查询当前页码，查询条数
         return orderQueryService.pageList(pageRequest);
+    }
+    //管理员查询提交表信息
+    @GetMapping("selectSubmitCache")
+    @ResponseBody
+    @AuthPermisson(Constants.permiss.admin)
+    public Result selectSubmitCache(@Valid PageRequest pageRequest) {
+        return collectionQueryService.applyPageList(pageRequest);
     }
     //查询自己订单信息
     @GetMapping("/user/orders/listall")

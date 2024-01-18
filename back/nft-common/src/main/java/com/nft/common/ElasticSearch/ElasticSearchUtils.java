@@ -34,11 +34,10 @@ public class ElasticSearchUtils {
                 .build();
         SearchHits<T> search = elasticTemplate.search(query, clazz);
         ArrayList<T> ts = new ArrayList<>();
-        for (SearchHit<T> searchHit : search.getSearchHits()) {
-            System.out.println("searchHit : "+searchHit.getContent());
-            //查询到对应的类信息后加入到列表中
+        //查询到对应的类信息后加入到列表中
+        search.getSearchHits().forEach(searchHit -> {
             ts.add(searchHit.getContent());
-        }
+        });
         return ts;
     }
 

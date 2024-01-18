@@ -81,8 +81,4 @@ public class INftSubmitServiceImpl implements INftSubmitService {
         return iSellInfoRespository.creat(sellInfoEntity);
     }
 
-    @Override
-    public Result selectAllApplyPage() {
-        return null;
-    }
 }

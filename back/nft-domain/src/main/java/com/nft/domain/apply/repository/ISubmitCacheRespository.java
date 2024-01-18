@@ -1,7 +1,10 @@
 package com.nft.domain.apply.repository;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.apply.model.entity.SubmitSellEntity;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
+
+import java.util.List;
 
 public interface ISubmitCacheRespository {
     boolean creat(SubmitSellEntity submitSellEntity);
@@ -19,4 +22,8 @@ public interface ISubmitCacheRespository {
     boolean upDateSubStatus(SubmitSellEntity submitSellEntity);//更新提交状态
     boolean updataSellStatus(UpdataCollectionReq updataCollectionReq);//更新出售状态
     SubmitSellEntity selectById(Integer id);
+
+
+
+    List<SubmitSellEntity> selectApplyByPage(Page page);
 }

@@ -3,9 +3,9 @@ package com.nft.infrastructure.repository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.common.APIException;
 import com.nft.common.Utils.BeanCopyUtils;
-import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.apply.repository.ISubmitCacheRespository;
 import com.nft.domain.apply.model.entity.SubmitSellEntity;
 import com.nft.domain.nft.model.req.UpdataCollectionReq;
@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Repository
 @Log4j2
@@ -89,5 +91,14 @@ public class ISubmitCacheRespositoryImpl implements ISubmitCacheRespository {
             return BeanCopyUtils.convertTo(submitCache, SubmitSellEntity::new);
         }
         return null;
+    }
+
+    @Override
+    public List<SubmitSellEntity> selectApplyByPage(Page page) {
+        Page<SubmitCache> selectPage = new Page<>(page.getCurrent(),page.getSize());
+        page.setOptimizeCountSql(true);
+        Page<SubmitCache> submitCachePage = submitCacheMapper.selectPage(selectPage, null);
+        List<SubmitSellEntity> submitCaches = BeanCopyUtils.convertListTo(submitCachePage.getRecords(), SubmitSellEntity::new);
+        return submitCaches;
     }
 }

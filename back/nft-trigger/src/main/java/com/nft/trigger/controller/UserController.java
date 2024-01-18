@@ -35,7 +35,6 @@ import java.util.Optional;
 public class UserController {
 
 
-    private final IUserAccountService iUserAccountService;
     private final UserCommandService userCommandService;
     private final UserQueryService userQueryService;
     private final RedisUtil redisUtil;
