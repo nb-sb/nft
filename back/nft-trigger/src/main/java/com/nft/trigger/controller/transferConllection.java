@@ -5,7 +5,7 @@ import com.nft.app.process.collection.dto.TransferCmd;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.model.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +28,7 @@ public class transferConllection {
     @ResponseBody
     @AuthPermisson
     public Result transfer(@Valid @RequestBody TransferCmd cmd) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         cmd.setUserAddress(userOne.getAddress());
         cmd.setUserPrivatekey(userOne.getPrivatekey());

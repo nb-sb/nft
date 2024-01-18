@@ -1,6 +1,6 @@
 package com.nft.domain.user.service.annotation;
 
-import com.nft.domain.user.service.Factory.authCode.DefaultAuthCodeFactory;
+import com.nft.domain.user.service.authCode.factory.DefaultAuthCodeFactory;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

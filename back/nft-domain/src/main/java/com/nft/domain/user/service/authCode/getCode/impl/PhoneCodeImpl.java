@@ -1,9 +1,9 @@
-package com.nft.domain.user.service.Factory.authCode.getCode.impl;
+package com.nft.domain.user.service.authCode.getCode.impl;
 
 import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.user.model.entity.AuthCodeActionEntity;
-import com.nft.domain.user.service.Factory.authCode.DefaultAuthCodeFactory;
-import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
+import com.nft.domain.user.service.authCode.factory.DefaultAuthCodeFactory;
+import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
 import com.nft.domain.user.service.annotation.LogicStrategy;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;

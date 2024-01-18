@@ -16,7 +16,7 @@ import com.nft.domain.nftSort.model.entity.MetaEntity;
 import com.nft.domain.nftSort.model.entity.MetaRelationShipEntity;
 import com.nft.domain.nftSort.repository.INftRelationshipRespository;
 import com.nft.domain.nftSort.repository.ISortRepository;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.model.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class INftSubmitServiceImpl implements INftSubmitService {
 
 
     @Override
-    public Result creat(UserVo fromUser, ApplyReq applyReq) {
+    public Result creat(UserEntity fromUser, ApplyReq applyReq) {
 
         SubmitSellEntity subCache = iSubmitCacheRespository.selectOneByHash(applyReq.getHash());
         if (subCache != null) {

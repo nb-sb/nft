@@ -1,8 +1,8 @@
-package com.nft.domain.user.service.Factory.authCode;
+package com.nft.domain.user.service.authCode.factory;
 
 
 import com.nft.domain.user.model.entity.AuthCodeActionEntity;
-import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
+import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
 import com.nft.domain.user.service.annotation.LogicStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -4,8 +4,7 @@ package com.nft.domain.common.Aop;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.TokenUtils;
-import com.nft.domain.user.model.req.LoginReq;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +84,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(username,password);
+        UserEntity userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo.getRole() != 1) {
             map.put("code", "401");
@@ -112,7 +111,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(username,password);
+        UserEntity userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo.getRole() != 0) {
             map.put("code", "401");
@@ -139,7 +138,7 @@ public class ServiceAuth {
         Map<String, String> stringStringMap = TokenUtils.decodeToken(token);
         String username = stringStringMap.get("username");
         String password = stringStringMap.get("password");
-        UserVo userVo = iUserInfoRepository.selectOne(username,password);
+        UserEntity userVo = iUserInfoRepository.selectOne(username,password);
         // System.out.println(userPo1.getRole());
         if (userVo== null) {
             map.put("code", "401");

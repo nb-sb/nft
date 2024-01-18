@@ -2,18 +2,18 @@ package com.nft.trigger.controller;
 
 
 import com.nft.app.process.collection.CollectionCommandService;
+import com.nft.app.process.collection.dto.ReviewCmd;
 import com.nft.app.process.order.OrderCommandService;
 import com.nft.app.process.order.dto.PayOrderCmd;
 import com.nft.common.Constants;
 import com.nft.common.Result;
 import com.nft.common.Utils.FileUtils;
+import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.apply.service.INftSubmitService;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.nft.model.req.AddOrderCmd;
-import com.nft.app.process.collection.dto.ReviewCmd;
-import com.nft.domain.apply.model.req.ApplyReq;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.model.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.validation.annotation.Validated;
@@ -46,7 +46,7 @@ public class SellController {
     @AuthPermisson()
     //添加藏品到待审核数据库
     public Result addsellcheck(@Valid @RequestBody ApplyReq applyReq) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         return iNftSubmitService.creat(userOne, applyReq);
     }
@@ -90,7 +90,7 @@ public class SellController {
     public Result purchaseConllection(
             @Valid
             @RequestBody AddOrderCmd cmd) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         cmd.setUserId(userOne.getId());
         cmd.setUserAddress(userOne.getAddress());
@@ -122,7 +122,7 @@ public class SellController {
             Integer paytype
     ) {
         //传入订单id，传入支付类型，传入http用于校验用户信息等
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         PayOrderCmd payOrderCmd = new PayOrderCmd(userOne.getId(), userOne.getAddress(), OrderNumber,paytype);
         return orderCommandService.payOrder(payOrderCmd);

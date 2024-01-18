@@ -1,12 +1,12 @@
-package com.nft.domain.user.service.Factory.authCode.getCode.impl;
+package com.nft.domain.user.service.authCode.getCode.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import com.nft.common.Utils.CheckUtils;
 import com.nft.domain.email.SendEmailService;
 import com.nft.domain.user.model.entity.AuthCodeActionEntity;
 import com.nft.domain.user.model.vo.AuthCodeCheckTypeVO;
-import com.nft.domain.user.service.Factory.authCode.DefaultAuthCodeFactory;
-import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
+import com.nft.domain.user.service.authCode.factory.DefaultAuthCodeFactory;
+import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
 import com.nft.domain.user.service.annotation.LogicStrategy;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +18,9 @@ import javax.mail.MessagingException;
 @Component
 @LogicStrategy(logicMode = DefaultAuthCodeFactory.AuthCodeModel.EMAIL) //用于转map对象时获取的内容
 public class EmailCodeImpl implements IGetCodeService<AuthCodeActionEntity.AuthEmailEntity> {
-//    private SendEmailService sendEmailService;
+
     @Autowired
     private SendEmailService sendEmailService;
-//
-//    public EmailCodeImpl(SendEmailService sendEmailService) {
-//        this.sendEmailService = sendEmailService;
-//    }
 
     @Override
     public AuthCodeActionEntity<AuthCodeActionEntity.AuthEmailEntity> getCode(String target) throws MessagingException {

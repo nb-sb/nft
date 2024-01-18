@@ -1,9 +1,8 @@
-package com.nft.domain.user.service.Factory.authCode;
+package com.nft.domain.user.service.authCode;
 
 import com.nft.domain.user.model.entity.AuthCodeActionEntity;
-import com.nft.domain.user.service.Factory.authCode.getCode.IGetCodeService;
-import com.nft.domain.user.service.Factory.authCode.getCode.impl.EmailCodeImpl;
-import com.nft.domain.user.service.Factory.authCode.getCode.impl.PhoneCodeImpl;
+import com.nft.domain.user.service.authCode.factory.DefaultAuthCodeFactory;
+import com.nft.domain.user.service.authCode.getCode.IGetCodeService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -40,8 +39,6 @@ public class AuthCodeService {
         if (getCodeService == null) {
             return null;
         }
-//        EmailCodeImpl emailCode = new EmailCodeImpl();
-//        AuthCodeActionEntity<AuthCodeActionEntity.AuthEmailEntity> code = emailCode.getCode(target);
         AuthCodeActionEntity<AuthCodeActionEntity.AuthEmailEntity> code1 = getCodeService.getCode(target);
         return code1.getData().getRes();
     }

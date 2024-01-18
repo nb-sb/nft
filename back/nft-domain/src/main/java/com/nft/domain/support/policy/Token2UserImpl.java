@@ -2,8 +2,8 @@ package com.nft.domain.support.policy;
 
 import com.nft.common.Utils.TokenUtils;
 import com.nft.domain.support.Token2User;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.req.LoginReq;
-import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class Token2UserImpl implements Token2User {
     @Autowired
     IUserInfoRepository iUserInfoRepository;
     @Override
-    public UserVo getUserOne(HttpServletRequest httpServletRequest) {
+    public UserEntity getUserOne(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader("token");
         Map<String, String> userMap = TokenUtils.decodeToken(token);
         if (userMap==null) return null;

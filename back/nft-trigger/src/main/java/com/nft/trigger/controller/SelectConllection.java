@@ -12,7 +12,7 @@ import com.nft.domain.nft.model.req.InfoKindReq;
 import com.nft.domain.order.model.req.OrderStateReq;
 import com.nft.domain.order.service.INftOrderService;
 import com.nft.domain.support.Token2User;
-import com.nft.domain.user.model.vo.UserVo;
+import com.nft.domain.user.model.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -80,7 +80,7 @@ public class SelectConllection {
     @ResponseBody
     @AuthPermisson()
     public Result selectMyOrderAll() {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         //注意：只返回 藏品名称，商品图片，藏品价格，订单号，创建时间
         //详细信息用下面接口查询，此接口用于展示用户自己拥有订单列表
         return orderQueryService.getOrder(userOne.getId());
@@ -90,7 +90,7 @@ public class SelectConllection {
     @ResponseBody
     @AuthPermisson()
     public Result getUserOrderDetails(@PathVariable String orderId) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         return orderQueryService.getOrder(userOne.getId(),orderId);
     }
@@ -102,7 +102,7 @@ public class SelectConllection {
         if (orderStateReq == null) {
             return selectMyOrderAll();
         }
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         OrderByStatusQuery orderByStatusQuery = new OrderByStatusQuery(userOne.getId(),orderStateReq.getStatus());
         return orderQueryService.getOrderByStatus(orderByStatusQuery);

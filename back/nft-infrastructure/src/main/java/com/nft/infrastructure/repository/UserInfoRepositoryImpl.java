@@ -1,16 +1,12 @@
 package com.nft.infrastructure.repository;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nft.common.APIException;
 import com.nft.common.Utils.BeanCopyUtils;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.vo.UserDetalVo;
-import com.nft.domain.user.model.vo.UserInfoVo;
-import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.infrastructure.dao.UserDetalMapper;
 import com.nft.infrastructure.dao.UserInfoMapper;
@@ -22,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -46,22 +41,22 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     private final UserDetalMapper userDetalMapper;
 
     @Override
-    public UserVo selectOne(String username, String password) {
+    public UserEntity selectOne(String username, String password) {
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
         userInfoQueryWrapper.eq("username", username).eq("password", password);
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
         if (userInfo == null) {
             return null;
         }
-        UserVo userVo1 = new UserVo();
-        userVo1.setUsername(userInfo.getUsername());
-        userVo1.setAddress(userInfo.getAddress());
-        userVo1.setPassword(userInfo.getPassword());
-        userVo1.setPrivatekey(userInfo.getPrivatekey());
-        userVo1.setBalance(userInfo.getBalance());
-        userVo1.setRole(userInfo.getRole());
-        userVo1.setId(userInfo.getId());
-        return userVo1;
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(userInfo.getUsername());
+        userEntity.setAddress(userInfo.getAddress());
+        userEntity.setPassword(userInfo.getPassword());
+        userEntity.setPrivatekey(userInfo.getPrivatekey());
+        userEntity.setBalance(userInfo.getBalance());
+        userEntity.setRole(userInfo.getRole());
+        userEntity.setId(userInfo.getId());
+        return userEntity;
     }
 
     @Override
@@ -126,16 +121,16 @@ public class UserInfoRepositoryImpl implements IUserInfoRepository {
     public UserEntity selectOneById(Integer id) {
         UserInfo userInfo = userInfoMapper.selectById(id);
         if (userInfo == null) return null;
-        UserVo userVo = new UserVo();
-        userVo.setId(userInfo.getId());
-        userVo.setUsername(userInfo.getUsername());
-        userVo.setAddress(userInfo.getAddress());
-        userVo.setPassword(userInfo.getPassword());
-        userVo.setPrivatekey(userInfo.getPrivatekey());
-        userVo.setBalance(userInfo.getBalance());
-        userVo.setRole(userInfo.getRole());
-        userVo.setId(userInfo.getId());
-        return userVo;
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userInfo.getId());
+        userEntity.setUsername(userInfo.getUsername());
+        userEntity.setAddress(userInfo.getAddress());
+        userEntity.setPassword(userInfo.getPassword());
+        userEntity.setPrivatekey(userInfo.getPrivatekey());
+        userEntity.setBalance(userInfo.getBalance());
+        userEntity.setRole(userInfo.getRole());
+        userEntity.setId(userInfo.getId());
+        return userEntity;
     }
 
     @Override

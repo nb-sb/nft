@@ -1,4 +1,4 @@
-package com.nft.domain.user.service.Factory.authCode.getCode;
+package com.nft.domain.user.service.authCode.getCode;
 
 import com.nft.domain.user.model.entity.AuthCodeActionEntity;
 

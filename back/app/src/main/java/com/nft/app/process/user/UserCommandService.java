@@ -9,7 +9,6 @@ import com.nft.domain.user.model.req.RealNameAuthCmd;
 import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.res.UserResult;
 import com.nft.domain.user.model.vo.RealNameAuthVo;
-import com.nft.domain.user.model.vo.UserVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
@@ -46,7 +45,7 @@ public class UserCommandService {
         //添加数据库存贮
         userEntity.userRole();//设置普通用户权限
         boolean res = iUserInfoRepository.creat(userEntity);
-        UserVo userVo = iUserInfoRepository.selectOne(cmd.getUsername(), cmd.getPassword());
+        UserEntity userVo = iUserInfoRepository.selectOne(cmd.getUsername(), cmd.getPassword());
         //添加至fisco中存贮
         iUserInfoRepository.addUserByFisco(String.valueOf(userVo.getId()), userVo.getAddress());
         if (res) {

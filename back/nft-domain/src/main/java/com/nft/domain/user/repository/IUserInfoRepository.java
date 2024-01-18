@@ -4,8 +4,6 @@ package com.nft.domain.user.repository;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.vo.UserDetalVo;
-import com.nft.domain.user.model.vo.UserInfoVo;
-import com.nft.domain.user.model.vo.UserVo;
 
 import java.util.List;
 
@@ -19,7 +17,7 @@ import java.util.List;
  */
 public interface IUserInfoRepository {
 
-    UserVo selectOne(String username, String password);
+    UserEntity selectOne(String username, String password);
 
     boolean creat(UserEntity userEntity);
 

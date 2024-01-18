@@ -1,9 +1,10 @@
 package com.nft.domain.support;
 
-import com.nft.domain.user.model.vo.UserVo;
+
+import com.nft.domain.user.model.entity.UserEntity;
 
 import javax.servlet.http.HttpServletRequest;
 
 public interface Token2User {
-    UserVo getUserOne(HttpServletRequest http);
+    UserEntity getUserOne(HttpServletRequest http);
 }

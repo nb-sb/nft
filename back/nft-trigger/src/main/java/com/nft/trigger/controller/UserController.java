@@ -10,15 +10,14 @@ import com.nft.common.Redis.RedisUtil;
 import com.nft.common.Result;
 import com.nft.domain.common.Aop.AuthPermisson;
 import com.nft.domain.support.Token2User;
+import com.nft.domain.user.model.entity.UserEntity;
 import com.nft.domain.user.model.req.AuthCodeReq;
 import com.nft.domain.user.model.req.ChanagePwCmd;
 import com.nft.domain.user.model.req.RealNameAuthCmd;
 import com.nft.domain.user.model.req.UpdateRealNameAuthStatusCmd;
 import com.nft.domain.user.model.res.SelectRes;
 import com.nft.domain.user.model.vo.UserInfoVo;
-import com.nft.domain.user.model.vo.UserVo;
-import com.nft.domain.user.service.Factory.authCode.AuthCodeService;
-import com.nft.domain.user.service.Info.IUserAccountService;
+import com.nft.domain.user.service.authCode.AuthCodeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -87,7 +86,7 @@ public class UserController {
     @PostMapping("/chanagePassword")
     @ResponseBody
     public Result chanagePassword(@Valid @RequestBody ChanagePwCmd cmd) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         cmd.setPassword(userOne.getUsername());
         return userCommandService.changePassword(cmd);
     }
@@ -100,7 +99,7 @@ public class UserController {
         //查询当前页码，查询条数
 //        List<UserVo> userVos = iUserAccountService.selectUserPage(
 //                new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize()));
-        List<UserVo> userVos = userQueryService.pageList(pageRequest);
+        List<UserEntity> userVos = userQueryService.pageList(pageRequest);
         return SelectRes.success(userVos);
     }
 
@@ -108,7 +107,7 @@ public class UserController {
     @PostMapping("/getOwnerInfo")
     @ResponseBody
     public Result getOwnerInfo() {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         UserInfoVo userInfoVo = userQueryService.selectUserInfo(userOne);
         return SelectRes.success(userInfoVo);
@@ -118,7 +117,7 @@ public class UserController {
     @PostMapping("/submitRealNameAuth")
     @ResponseBody
     public Result submitRealNameAuth(@Valid @RequestBody RealNameAuthCmd cmd) {
-        UserVo userOne = token2User.getUserOne(httpServletRequest);
+        UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne == null) return Result.userNotFinded();
         cmd.setAddress(userOne.getAddress());
         cmd.setForId(userOne.getId());
