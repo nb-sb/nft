@@ -1,8 +1,8 @@
-package com.nft.domain.user.service.Factory.VerifyCode.verify;
+package com.nft.domain.user.service.VerifyCode.verify;
 
 import com.nft.common.Result;
 import com.nft.domain.user.repository.IUserInfoRepository;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.IVerifyMode;
+import com.nft.domain.user.service.VerifyCode.mode.IVerifyMode;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

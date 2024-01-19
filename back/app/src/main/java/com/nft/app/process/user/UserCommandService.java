@@ -12,7 +12,7 @@ import com.nft.domain.user.model.vo.RealNameAuthVo;
 import com.nft.domain.user.repository.IUserDetalRepository;
 import com.nft.domain.user.repository.IUserInfoRepository;
 import com.nft.domain.user.service.Factory.UserEntityFatory;
-import com.nft.domain.user.service.Factory.VerifyCode.VerifyFactory;
+import com.nft.domain.user.service.VerifyCode.VerifyFactory;
 import lombok.AllArgsConstructor;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;

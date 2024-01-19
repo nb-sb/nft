@@ -1,4 +1,4 @@
-package com.nft.domain.user.service.Factory.VerifyCode.mode;
+package com.nft.domain.user.service.VerifyCode.mode;
 
 import com.nft.common.Result;
 import com.nft.domain.user.model.entity.UserEntity;

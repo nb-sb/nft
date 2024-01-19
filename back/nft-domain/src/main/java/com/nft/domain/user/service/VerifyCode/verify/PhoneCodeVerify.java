@@ -1,8 +1,7 @@
-package com.nft.domain.user.service.Factory.VerifyCode.verify;
+package com.nft.domain.user.service.VerifyCode.verify;
 
 import com.nft.common.Result;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.IVerifyMode;
-import org.springframework.stereotype.Service;
+import com.nft.domain.user.service.VerifyCode.mode.IVerifyMode;
 
 public class PhoneCodeVerify extends Verify {
 

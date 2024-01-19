@@ -3,7 +3,6 @@ package com.nft.common.Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.UUID;
 
 public class FileUtils {

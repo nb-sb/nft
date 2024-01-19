@@ -1,9 +1,7 @@
-package com.nft.domain.user.service.Factory.VerifyCode.verify;
+package com.nft.domain.user.service.VerifyCode.verify;
 
 import com.nft.common.Result;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.IVerifyMode;
-
-import java.math.BigDecimal;
+import com.nft.domain.user.service.VerifyCode.mode.IVerifyMode;
 
 public abstract class Verify {
     protected IVerifyMode mode;

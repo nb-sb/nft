@@ -15,9 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@code null} 或 空字符串，是有效的（能够通过校验）。
  * <p>
  * 支持的类型：字符串
- *
- * @author songguanxun
- * @since 1.0
+
  */
 @Target({FIELD})
 @Retention(RUNTIME)

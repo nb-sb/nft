@@ -1,14 +1,14 @@
-package com.nft.domain.user.service.Factory.VerifyCode;
+package com.nft.domain.user.service.VerifyCode;
 
 import com.nft.common.Result;
 import com.nft.domain.user.model.req.ChanagePwCmd;
 import com.nft.domain.user.model.res.UserResult;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.EmailCodeMode;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.OldPasswordMode;
-import com.nft.domain.user.service.Factory.VerifyCode.mode.PhoneCodeMode;
-import com.nft.domain.user.service.Factory.VerifyCode.verify.EmailCodeVerify;
-import com.nft.domain.user.service.Factory.VerifyCode.verify.OldPassWordVerify;
-import com.nft.domain.user.service.Factory.VerifyCode.verify.PhoneCodeVerify;
+import com.nft.domain.user.service.VerifyCode.mode.EmailCodeMode;
+import com.nft.domain.user.service.VerifyCode.mode.OldPasswordMode;
+import com.nft.domain.user.service.VerifyCode.mode.PhoneCodeMode;
+import com.nft.domain.user.service.VerifyCode.verify.EmailCodeVerify;
+import com.nft.domain.user.service.VerifyCode.verify.OldPassWordVerify;
+import com.nft.domain.user.service.VerifyCode.verify.PhoneCodeVerify;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
