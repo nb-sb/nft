@@ -88,7 +88,6 @@ public class UserController {
     public Result changePassword(@Valid @RequestBody ChanagePwCmd cmd) {
         UserEntity userOne = token2User.getUserOne(httpServletRequest);
         if (userOne != null) cmd.setUsername(userOne.getUsername());
-        cmd.loadTarget();
         return userCommandService.changePassword(cmd);
     }
 

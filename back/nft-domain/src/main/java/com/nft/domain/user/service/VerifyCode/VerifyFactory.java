@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author: 戏人看戏
  * @Date: 2024/1/12 14:35
- * @Description: 使用策略模式用于不同验证类型
+ * @Description: 使用桥接方式用于不同验证类型
  */
 @Service
 public class VerifyFactory {
@@ -28,10 +28,10 @@ public class VerifyFactory {
         strategies.put(3, phoneCodeMode);
     }
 
-    public Result getVerifyService(ChanagePwCmd chanagePwCmd) {
-        IVerifyMode strategy = strategies.get(chanagePwCmd.getType());
+    public Result getVerifyService(Integer type,String input_key,String target) {
+        IVerifyMode strategy = strategies.get(type);
         if (strategy != null) {
-            return strategy.verify(chanagePwCmd.getInput_key(), chanagePwCmd.getTarget());
+            return strategy.verify(input_key,target);
         }
         return null;
     }

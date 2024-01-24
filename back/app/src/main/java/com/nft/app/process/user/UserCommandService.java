@@ -88,7 +88,8 @@ public class UserCommandService {
         if (Constants.USE_OLDPW.equals(type)) {
             if (cmd.getUsername() == null) return UserResult.error("需要登录后才能使用旧密码修改");
         }
-        Result verifyService = verifyFactory.getVerifyService(cmd);
+        cmd.loadTarget();
+        Result verifyService = verifyFactory.getVerifyService(cmd.getType(),cmd.getInput_key(),cmd.getTarget());
         //如果验证失败则返回失败信息
         if (verifyService.getCode().equals("0")) {
             return verifyService;
