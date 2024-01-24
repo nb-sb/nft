@@ -103,6 +103,7 @@ public class Constants {
         //空值，用于空缓存用
         private static final String REDIS_EMPTY_CACHE = "{}";
         public static final Integer MINUTE_5 = 60*5;
+        public static String SortPage = "SortPage";
 
         public static String REDIS_COLLECTION(Integer id) {
             return REDIS_COLLECTION + id;
