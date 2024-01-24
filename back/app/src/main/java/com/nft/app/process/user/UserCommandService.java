@@ -84,11 +84,12 @@ public class UserCommandService {
     public Result changePassword(ChanagePwCmd cmd) {
         //判断逻辑 - 1.判断验证码是否正确 2.判断验证码是否合规
         Integer type = cmd.getType();
+        //需要登录后才能使用旧密码修改
         if (Constants.USE_OLDPW.equals(type)) {
-            //判断旧密码是否正确
             if (cmd.getUsername() == null) return UserResult.error("需要登录后才能使用旧密码修改");
         }
         Result verifyService = verifyFactory.getVerifyService(cmd);
+        //如果验证失败则返回失败信息
         if (verifyService.getCode().equals("0")) {
             return verifyService;
         }

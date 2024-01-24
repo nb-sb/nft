@@ -12,11 +12,11 @@ public class PhoneCodeMode implements IVerifyMode {
 
 
     @Override
-    public Result verify(String inputCode, String target) {
-        if (!inputCode.equals(redisUtil.get(target))) {
+    public Result verify(String inputCode, String MobileNumber) {
+        if (!inputCode.equals(redisUtil.get(MobileNumber))) {
             return Result.error("验证码验证失败");
         }
-        redisUtil.del(target);
+        redisUtil.del(MobileNumber);
         return Result.success("验证成功");
     }
 }

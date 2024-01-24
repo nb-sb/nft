@@ -22,9 +22,31 @@ public class ChanagePwCmd {
     String phone;
     @Email
     String email;
-    String code;
+    String code; //email 或者手机验证码
     @NotNull
-    @Status(statusType = {"1","2","3"})
+    @Status(statusType = {"1", "2", "3"})
     Integer type; // 验证类型  1 是使用旧密码修改 2 是使用 使用邮箱验证码修改 , 3是使用手机验证码
+    @Null
+    String target;
+    @Null
+    String input_key;
+    //获取target值
+    public void loadTarget(){
+        switch (type) {
+            case 1:
+                target = oldpassword;
+                input_key = username;
+                break;
+            case 2:
+                target = email;
+                input_key = code;
+                break;
+            case 3:
+                target = phone;
+                input_key = code;
+                break;
+        }
+
+    }
 
 }

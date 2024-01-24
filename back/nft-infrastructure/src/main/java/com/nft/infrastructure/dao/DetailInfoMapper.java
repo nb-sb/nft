@@ -1,6 +1,5 @@
 package com.nft.infrastructure.dao;
 
-import com.nft.infrastructure.dao.*;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nft.infrastructure.po.DetailInfo;
 

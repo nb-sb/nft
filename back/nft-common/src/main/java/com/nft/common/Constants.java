@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
  * @Copyright：网站：https://nb.sb || git开源地址：https://gitee.com/nb-sb/nft/tree/master
  */
 public class Constants {
-    public static Integer USE_OLDPW = 1;
+    public static Integer USE_OLDPW = 0;
 
     //使用验证码修改
     public static Integer Get_Code_email = 2;

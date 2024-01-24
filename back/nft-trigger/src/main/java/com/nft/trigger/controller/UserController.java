@@ -85,9 +85,10 @@ public class UserController {
     //修改密码
     @PostMapping("/chanagePassword")
     @ResponseBody
-    public Result chanagePassword(@Valid @RequestBody ChanagePwCmd cmd) {
+    public Result changePassword(@Valid @RequestBody ChanagePwCmd cmd) {
         UserEntity userOne = token2User.getUserOne(httpServletRequest);
-        cmd.setPassword(userOne.getUsername());
+        if (userOne != null) cmd.setUsername(userOne.getUsername());
+        cmd.loadTarget();
         return userCommandService.changePassword(cmd);
     }
 
