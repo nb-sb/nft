@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author: 戏人看戏
  * @Date: 2024/1/12 14:35
- * @Description: 使用桥接方式用于不同验证类型
+ * @Description: 使用策略模式用于不同验证类型
  */
 @Service
 public class VerifyFactory {
